@@ -1,3 +1,7 @@
+.DS_Store
+scratch.js
+tmp/*
+!tmp/.gitkeep
 # Logs
 logs
 *.log
