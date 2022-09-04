@@ -28,7 +28,7 @@ exports.removeFile = function (fileNameOrPath) {
 exports.deepClone = function (thing, opts) {
     var newObject = {};
     if (thing instanceof Array) {
-        return thing.map(function (i) { return clone(i, opts); });
+        return thing.map(function (i) { return exports.deepClone(i, opts); });
     } else if (thing instanceof Date) {
         return new Date(thing);
     } else if (thing instanceof RegExp) {
@@ -39,7 +39,7 @@ exports.deepClone = function (thing, opts) {
             thing;
     } else if (thing instanceof Object) {
         Object.keys(thing).forEach(function (key) {
-            newObject[key] = clone(thing[key], opts);
+            newObject[key] = exports.deepClone(thing[key], opts);
         });
         return newObject;
     } else if ([undefined, null].indexOf(thing) > -1) {
@@ -60,26 +60,6 @@ exports.smartComma = function (x) {
 }
 
 
-exports.currencyFormat = function (num) {
-    if (!isNaN(num)) {
-        let removeDecimal = Math.floor(num)
-        let addDollars;
-        //deal with netatives
-        if (removeDecimal.toString()[0] === '-') {
-            addDollars = `-$${Math.abs(removeDecimal).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
-        }
-        //no negatives
-        else {
-            addDollars = `$${removeDecimal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
-        }
-
-
-
-        return addDollars;
-    } else {
-        return `no $$$ amount specified!`;
-    }
-}
 exports.smartTruncate = function (text, n = 500, useWordBoundary = true) {
     if (!text) {
         return ""
@@ -122,7 +102,7 @@ exports.replaceAll = function(str, newStr){
 
 };
 
-exports.randNum = function (min = 1, max = 300) {
+exports.randNum = function (min = 1, max = 100) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -168,7 +148,8 @@ exports.chunkArray = function (sourceArray, chunkSize) {
 
 //where objects have falsy values, delete those keys
 exports.cleanObject = function (obj) {
-    let target = JSON.parse(JSON.stringify(obj))
+    //dirtyClone
+	let target = JSON.parse(JSON.stringify(obj))
 
     function isObject(val) {
         if (val === null) { return false; }

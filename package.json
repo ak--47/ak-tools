@@ -4,7 +4,7 @@
   "description": "AK's collections of useful things...",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --watch",
     "post": "npm publish",
 	"dev" : "nodemon scratch.js"
   },
