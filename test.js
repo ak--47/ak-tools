@@ -33,10 +33,23 @@ test('smart commas', ()=>{
 	let numOne = 1000
 	let numTwo = "1000"
 
-	let resultOne = u.smartComma(numOne)
-	let resultTwo = u.smartComma(numTwo)
+	let resultOne = u.commas(numOne)
+	let resultTwo = u.commas(numTwo)
 
 	expect(resultOne).toBe('1,000')
 	expect(resultTwo).toBe('1,000')
 
+})
+
+
+test('truncate', ()=>{
+	let foo = u.truncate(`a four word string`, 10)
+
+	expect(foo).toBe(`a four...`)
+})
+
+test('dupeValues', ()=>{
+	let me = u.dupeValues(['he', 'she', 'they'], 2)
+
+	expect(me.length).toBe(9)
 })

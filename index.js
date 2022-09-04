@@ -4,9 +4,8 @@
 //only vanilla deps
 const path = require('path')
 const fs = require('fs').promises
-const { createReadStream } = require('fs')
 const { execSync } = require("child_process")
-const makeDir = require('fs').mkdirSync
+const readline = require('readline');
 
 
 exports.listFiles = async function (dir = "./") {
@@ -55,23 +54,34 @@ exports.deepClone = function (thing, opts) {
     }
 }
 
-exports.smartComma = function (x) {
+exports.commas = function (x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-
-exports.smartTruncate = function (text, n = 500, useWordBoundary = true) {
+exports.truncate = function (text, chars = 500, useWordBoundary = true) {
     if (!text) {
         return ""
     }
-    if (text.length <= n) {
+    if (text.length <= chars) {
         return text;
     }
-    var subString = text.substr(0, n - 1);
+    var subString = text.substr(0, chars - 1);
     return (useWordBoundary ?
         subString.substr(0, subString.lastIndexOf(' ')) :
         subString) + "...";
 };
+
+
+exports.dupeValues = function (array, times = 1) {
+    let dupeArray = [];
+
+    for (let i = 0; i < times + 1; i++) {
+        array.forEach(item => dupeArray.push(item));
+    }
+
+    return dupeArray;
+}
+
 
 exports.stripHTML = function (str) {
     return str.replace(/<br\s*[\/]?>/gi, "\n").replace(/<[^>]*>?/gm, '')
@@ -90,15 +100,15 @@ exports.multiReplace = function (str, replacePairs = [
     return text.split(" ").filter(x => x).join(" ")
 }
 
-exports.replaceAll = function(str, newStr){
+exports.replaceAll = function (str, newStr) {
 
-	// If a regex pattern
-	if (Object.prototype.toString.call(str).toLowerCase() === '[object regexp]') {
-		return this.replace(str, newStr);
-	}
+    // If a regex pattern
+    if (Object.prototype.toString.call(str).toLowerCase() === '[object regexp]') {
+        return this.replace(str, newStr);
+    }
 
-	// If a string
-	return this.replace(new RegExp(str, 'g'), newStr);
+    // If a string
+    return this.replace(new RegExp(str, 'g'), newStr);
 
 };
 
@@ -149,7 +159,7 @@ exports.chunkArray = function (sourceArray, chunkSize) {
 //where objects have falsy values, delete those keys
 exports.cleanObject = function (obj) {
     //dirtyClone
-	let target = JSON.parse(JSON.stringify(obj))
+    let target = JSON.parse(JSON.stringify(obj))
 
     function isObject(val) {
         if (val === null) { return false; }
@@ -229,6 +239,123 @@ exports.calcSize = function (event) {
     return Buffer.byteLength(JSON.stringify(event))
 }
 //https://gist.github.com/djD-REK/068cba3d430cf7abfddfd32a5d7903c3
-exports.roundAccurately = function (number, decimalPlaces = 0) {
+exports.round = function (number, decimalPlaces = 0) {
     return Number(Math.round(number + "e" + decimalPlaces) + "e-" + decimalPlaces)
+}
+
+
+//utility function for visiting every single key on an object
+exports.ensureIntegers = function (obj, isClone = false) {
+    let target;
+    if (isClone) {
+        target = obj
+    } else {
+        target = exports.deepClone(obj)
+    }
+
+    Object.keys(target).forEach(key => {
+
+        //recursion :(
+        if (typeof target[key] === 'object') {
+            exports.ensureIntegers(target[key], true);
+        }
+
+        //ewww ... mutating the input
+        else if (typeof target[key] === 'string') {
+            //check if it can be parsed
+            const parsed = makeInteger(target[key]);
+            //if it's NaN, don't changed it
+            target[key] = isNaN(parsed) ? target[key] : parsed;
+        }
+    });
+
+    return target;
+}
+
+//the best way to find strings that are integers in disguise
+//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseInt#a_stricter_parse_function
+function makeInteger(value) {
+    if (/^[-+]?(\d+|Infinity)$/.test(value)) {
+        return Number(value);
+    } else {
+        return NaN;
+    }
+}
+
+
+//the best logging function ever
+//https://stackoverflow.com/a/27610197/4808195
+exports.log = function (item, maxDepth = 100, depth = 0) {
+    if (depth > maxDepth) {
+        console.log(item);
+        return;
+    }
+    if (typeof item === 'object' && item !== null) {
+        Object.entries(item).forEach(([key, value]) => {
+            console.group(key + ' : ' + (typeof value));
+            exports.log(value, maxDepth, depth + 1);
+            console.groupEnd();
+        });
+    } else {
+        console.log(item);
+    }
+};
+
+
+exports.deepDeDupe = function (arrayOfThings) {
+    return Array.from(new Set(arrayOfThings.map(JSON.stringify))).map(JSON.parse)
+    //another way: https://stackoverflow.com/a/56757215/4808195
+    //[].filter((v, i, a) => a.findIndex(t => (t.funnelName === v.funnelName)) === i);
+}
+
+exports.capitalize = function(s) {
+    return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+//array shuffling
+//https://stackoverflow.com/a/12646864/4808195
+exports.shuffle = function(array, mutate = false) {
+	let target;
+	if (mutate) {
+		target = array
+	}
+	else {
+		target = exports.deepClone(array)
+	}
+    for (let i = target.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [target[i], target[j]] = [target[j], target[i]];
+    }
+
+    return target;
+};
+
+//random string makin'
+//https://stackoverflow.com/a/1349426/4808195
+exports.makeId = function(length = 64) {
+    var result = [];
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for (var i = 0; i < length; i++) {
+        result.push(characters.charAt(Math.floor(Math.random() *
+            charactersLength)));
+    }
+    return result.join('');
+};
+
+
+exports.range = function (min, max, step = 1) {
+	const result = [];
+	step = !step ? 1 : step;
+    max = max / step;
+    for (var i = min; i <= max; i++) {
+        result.push(i * step);
+    }
+    return result;
+};
+
+exports.showProgress = function(thing, p) {
+    //readline.clearLine(process.stdout);
+    readline.cursorTo(process.stdout, 0);
+    process.stdout.write(`${thing} processed ... ${p}`);
 }
