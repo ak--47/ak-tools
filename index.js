@@ -3,6 +3,7 @@
 
 const path = require('path')
 const fs = require('fs').promises
+const { existsSync, mkdirSync } = require('fs')
 const readline = require('readline');
 
 
@@ -68,7 +69,13 @@ exports.load = async function loadFile(fileNameOrPath, isJson = false) {
     return fileLoaded
 }
 
-//VALIDATION + DISPLAY
+exports.mkdir = function (dirPath = `./`) {
+    let fullPath = path.resolve(dirPath);
+    !existsSync(fullPath) ? mkdirSync(fullPath) : undefined;
+    return fullPath
+}
+
+//VALIDATION, FORMAT, & DISPLAY
 
 exports.isJSON = function hasJsonStructure(string) {
     if (typeof string !== 'string') return false;
@@ -98,7 +105,6 @@ exports.truncate = function intelligentlyTruncate(text, chars = 500, useWordBoun
         subString.substr(0, subString.lastIndexOf(' ')) :
         subString) + "...";
 };
-
 
 exports.bytesHuman = function (bytes, si = false, dp = 2) {
     //https://stackoverflow.com/a/14919494
@@ -154,6 +160,19 @@ exports.replaceAll = function (str, newStr) {
     return this.replace(new RegExp(str, 'g'), newStr);
 
 };
+
+exports.toCSV = function arrayToCSV(arr, delimiter = ',', headers = []) {
+    if (!delimiter) {
+        delimiter = `,`
+    }
+    let body = arr.map(v => v.map(x => `"${x}"`).join(delimiter)).join('\n');
+    if (headers) {
+        const topRow = headers.map(x => `"${x}"`).join(delimiter);
+        body = `${topRow}\n${body}`
+    }
+
+    return body;
+}
 
 
 // GENERATORS + CALCULATIONS

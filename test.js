@@ -6,7 +6,26 @@ test('do tests work?', () => {
 
 
 //FILE MANAGEMENT
+test('ls, rm, touch, mkdir, and load', async ()=>{
+	await u.mkdir(`./testStuff/`)
+	await u.touch(`./testStuff/foo.txt`, `foo`)
+	await u.touch(`./testStuff/bar.json`, {foo: "bar"}, true)
+	let files = await u.ls(`./testStuff`)
+	let loaded = await u.load(`./testStuff/bar.json`, true)
 
+	expect(files.length).toBe(2)
+	expect(loaded.foo).toBe(`bar`)
+
+	await u.rm(`./testStuff/foo.txt`)
+	await u.rm(`./testStuff/bar.json`)
+	let newFiles = await u.ls(`./testStuff/`)
+
+	expect(newFiles.length).toBe(0)
+
+	await u.rm(`./testStuff/`)
+	expect(true).toBe(true)
+
+})
 
 //VALIDATION + DISPLAY
 test('smart commas', ()=>{
