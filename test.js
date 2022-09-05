@@ -5,6 +5,35 @@ test('do tests work?', () => {
 })
 
 
+//FILE MANAGEMENT
+
+
+//VALIDATION + DISPLAY
+test('smart commas', ()=>{
+	let numOne = 1000
+	let numTwo = "1000"
+
+	let resultOne = u.comma(numOne)
+	let resultTwo = u.comma(numTwo)
+
+	expect(resultOne).toBe('1,000')
+	expect(resultTwo).toBe('1,000')
+
+})
+
+
+test('truncate', ()=>{
+	let foo = u.truncate(`a four word string`, 10)
+
+	expect(foo).toBe(`a four...`)
+})
+
+
+// GENERATORS + CALCULATIONS
+
+
+// OBJECT UTILITES
+
 test('deep clone', ()=>{
 	const source = {
 		foo : {
@@ -19,7 +48,7 @@ test('deep clone', ()=>{
 		bro : "hey guys!"
 	}
 
-	const target = u.deepClone(source)
+	const target = u.clone(source)
 
 	const compareByEqual = JSON.stringify(source) === JSON.stringify(target)
 	const compareByReference = source === target
@@ -28,28 +57,17 @@ test('deep clone', ()=>{
 	expect(compareByReference).toBe(false);
 })
 
-
-test('smart commas', ()=>{
-	let numOne = 1000
-	let numTwo = "1000"
-
-	let resultOne = u.commas(numOne)
-	let resultTwo = u.commas(numTwo)
-
-	expect(resultOne).toBe('1,000')
-	expect(resultTwo).toBe('1,000')
-
-})
-
-
-test('truncate', ()=>{
-	let foo = u.truncate(`a four word string`, 10)
-
-	expect(foo).toBe(`a four...`)
-})
+// ARRAY UTILITES
 
 test('dupeValues', ()=>{
-	let me = u.dupeValues(['he', 'she', 'they'], 2)
+	let me = u.dupeVals(['he', 'she', 'they'], 2)
 
 	expect(me.length).toBe(9)
 })
+
+// LOGGING
+
+
+
+
+

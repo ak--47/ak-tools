@@ -1,64 +1,92 @@
 // AK's utils
 // things to make things ... easier
 
-//only vanilla deps
 const path = require('path')
 const fs = require('fs').promises
-const { execSync } = require("child_process")
 const readline = require('readline');
 
 
-exports.listFiles = async function (dir = "./") {
+//FILE MANAGEMENT
+exports.ls = async function listFiles(dir = "./", objectMode = false) {
     let fileList = await fs.readdir(dir);
+    if (!objectMode) {
+        return fileList.map(fileName => path.resolve(`${dir}/${fileName}`))
+    }
     let results = {};
     for (fileName of fileList) {
-        results[fileName.split('.')[0]] = path.resolve(`${dir}/${fileName}`);
+        // let keyName = fileName.split('.')
+        results[fileName] = path.resolve(`${dir}/${fileName}`);
     }
     return results
 }
 
+exports.rm = async function removeFileOrFolder(fileNameOrPath) {
+    let fileRemoved;
+    try {
+        fileRemoved = await fs.unlink(path.resolve(fileNameOrPath))
+    } catch (e) {
+        try {
+            fileRemoved = await fs.rm(path.resolve(fileNameOrPath), { recursive: true, force: true })
+        } catch (e) {
+            console.error(`${fileNameOrPath} not removed!`)
+            console.error(e)
+        }
+    }
 
-exports.removeFile = function (fileNameOrPath) {
-    const removed = execSync(`rm -rf ${fileNameOrPath}`)
-    return true;
+    return fileRemoved;
 }
 
+exports.touch = async function addFile(fileNameOrPath, data, isJson = false) {
+    let fileCreated;
+    let dataToWrite = isJson ? exports.json(data) : data
 
-exports.deepClone = function (thing, opts) {
-    var newObject = {};
-    if (thing instanceof Array) {
-        return thing.map(function (i) { return exports.deepClone(i, opts); });
-    } else if (thing instanceof Date) {
-        return new Date(thing);
-    } else if (thing instanceof RegExp) {
-        return new RegExp(thing);
-    } else if (thing instanceof Function) {
-        return opts && opts.newFns ?
-            new Function('return ' + thing.toString())() :
-            thing;
-    } else if (thing instanceof Object) {
-        Object.keys(thing).forEach(function (key) {
-            newObject[key] = exports.deepClone(thing[key], opts);
-        });
-        return newObject;
-    } else if ([undefined, null].indexOf(thing) > -1) {
-        return thing;
-    } else {
-        if (thing.constructor.name === 'Symbol') {
-            return Symbol(thing.toString()
-                .replace(/^Symbol\(/, '')
-                .slice(0, -1));
-        }
-        // return _.clone(thing);  // If you must use _ ;)
-        return thing.__proto__.constructor(thing);
+    try {
+        fileCreated = await fs.writeFile(path.resolve(fileNameOrPath), dataToWrite, 'utf-8')
+    } catch (e) {
+        console.error(`${fileNameOrPath} not created!`)
+        console.error(e)
+    }
+
+    return true;
+
+}
+
+exports.load = async function loadFile(fileNameOrPath, isJson = false) {
+    let fileLoaded;
+
+    try {
+        fileLoaded = await fs.readFile(path.resolve(fileNameOrPath), 'utf-8')
+    } catch (e) {
+        console.error(`${fileNameOrPath} not loaded!`)
+        console.error(e)
+    }
+
+    if (isJson) {
+        fileLoaded = JSON.parse(fileLoaded)
+    }
+
+    return fileLoaded
+}
+
+//VALIDATION + DISPLAY
+
+exports.isJSON = function hasJsonStructure(string) {
+    if (typeof string !== 'string') return false;
+    try {
+        const result = JSON.parse(string);
+        const type = Object.prototype.toString.call(result);
+        return type === '[object Object]' ||
+            type === '[object Array]';
+    } catch (err) {
+        return false;
     }
 }
 
-exports.commas = function (x) {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+exports.comma = function addCommas(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-exports.truncate = function (text, chars = 500, useWordBoundary = true) {
+exports.truncate = function intelligentlyTruncate(text, chars = 500, useWordBoundary = true) {
     if (!text) {
         return ""
     }
@@ -72,20 +100,35 @@ exports.truncate = function (text, chars = 500, useWordBoundary = true) {
 };
 
 
-exports.dupeValues = function (array, times = 1) {
-    let dupeArray = [];
+exports.bytesHuman = function (bytes, si = false, dp = 2) {
+    //https://stackoverflow.com/a/14919494
+    const thresh = si ? 1000 : 1024;
 
-    for (let i = 0; i < times + 1; i++) {
-        array.forEach(item => dupeArray.push(item));
+    if (Math.abs(bytes) < thresh) {
+        return bytes + ' B';
     }
 
-    return dupeArray;
+    const units = si ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'] : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+    let u = -1;
+    const r = 10 ** dp;
+
+    do {
+        bytes /= thresh;
+        ++u;
+    } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
+
+
+    return bytes.toFixed(dp) + ' ' + units[u];
 }
 
+exports.json = function stringifyJSON(data, padding = 2) {
+    return JSON.stringify(data, null, padding)
+}
 
 exports.stripHTML = function (str) {
     return str.replace(/<br\s*[\/]?>/gi, "\n").replace(/<[^>]*>?/gm, '')
 }
+
 exports.multiReplace = function (str, replacePairs = [
     ["|"],
     ["<"],
@@ -112,14 +155,61 @@ exports.replaceAll = function (str, newStr) {
 
 };
 
-exports.randNum = function (min = 1, max = 100) {
+
+// GENERATORS + CALCULATIONS
+
+exports.dupeVals = function duplicateArrayValues(array, times = 1) {
+    let dupeArray = [];
+
+    for (let i = 0; i < times + 1; i++) {
+        array.forEach(item => dupeArray.push(item));
+    }
+
+    return dupeArray;
+}
+
+exports.rand = function generateRandomNumber(min = 1, max = 100) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-//https://stackoverflow.com/a/45287523
-exports.renameKeys = function (obj, newKeys) {
+
+exports.calcSize = function (event) {
+    //caculates size in bytes; assumes utf-8 encoding: https://stackoverflow.com/a/63805778 
+    return Buffer.byteLength(JSON.stringify(event))
+}
+
+exports.round = function roundsNumbers(number, decimalPlaces = 0) {
+    //https://gist.github.com/djD-REK/068cba3d430cf7abfddfd32a5d7903c3
+    return Number(Math.round(number + "e" + decimalPlaces) + "e-" + decimalPlaces)
+}
+
+exports.uid = function makeUid(length = 64) {
+    //https://stackoverflow.com/a/1349426/4808195
+    var result = [];
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for (var i = 0; i < length; i++) {
+        result.push(characters.charAt(Math.floor(Math.random() *
+            charactersLength)));
+    }
+    return result.join('');
+};
+
+exports.uuid = function uuidv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0,
+            v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
+
+// OBJECT UTILITES
+
+exports.rnKeys = function renameObjectKeys(obj, newKeys) {
+    //https://stackoverflow.com/a/45287523
     const keyValues = Object.keys(obj).map(key => {
         const newKey = newKeys[key] || key
         return {
@@ -129,7 +219,7 @@ exports.renameKeys = function (obj, newKeys) {
     return Object.assign({}, ...keyValues)
 }
 
-exports.objectFilter = function (hash, test_function) {
+exports.objFilter = function filterObjectKeys(hash, test_function) {
     var filtered, key, keys, i;
     keys = Object.keys(hash);
     filtered = {};
@@ -142,23 +232,8 @@ exports.objectFilter = function (hash, test_function) {
     return filtered;
 }
 
-exports.chunkArray = function (sourceArray, chunkSize) {
-    return sourceArray.reduce((resultArray, item, index) => {
-        const chunkIndex = Math.floor(index / chunkSize)
-
-        if (!resultArray[chunkIndex]) {
-            resultArray[chunkIndex] = [] // start a new chunk
-        }
-
-        resultArray[chunkIndex].push(item)
-
-        return resultArray
-    }, [])
-}
-
-//where objects have falsy values, delete those keys
-exports.cleanObject = function (obj) {
-    //dirtyClone
+exports.objClean = function removeFalsyValues(obj) {
+    //where objects have falsy values, delete those keys
     let target = JSON.parse(JSON.stringify(obj))
 
     function isObject(val) {
@@ -193,71 +268,58 @@ exports.cleanObject = function (obj) {
 
         // recursion
         if (isObject(target[k])) {
-            exports.cleanObject(target[k])
+            exports.objClean(target[k])
         }
     }
 
     return target
 }
 
-
-//https://stackoverflow.com/a/14919494
-exports.bytesHuman = function (bytes, si = false, dp = 2) {
-    const thresh = si ? 1000 : 1024;
-
-    if (Math.abs(bytes) < thresh) {
-        return bytes + ' B';
+exports.clone = function deepClone(thing, opts) {
+    var newObject = {};
+    if (thing instanceof Array) {
+        return thing.map(function (i) { return exports.clone(i, opts); });
+    } else if (thing instanceof Date) {
+        return new Date(thing);
+    } else if (thing instanceof RegExp) {
+        return new RegExp(thing);
+    } else if (thing instanceof Function) {
+        return opts && opts.newFns ?
+            new Function('return ' + thing.toString())() :
+            thing;
+    } else if (thing instanceof Object) {
+        Object.keys(thing).forEach(function (key) {
+            newObject[key] = exports.clone(thing[key], opts);
+        });
+        return newObject;
+    } else if ([undefined, null].indexOf(thing) > -1) {
+        return thing;
+    } else {
+        if (thing.constructor.name === 'Symbol') {
+            return Symbol(thing.toString()
+                .replace(/^Symbol\(/, '')
+                .slice(0, -1));
+        }
+        // return _.clone(thing);  // If you must use _ ;)
+        return thing.__proto__.constructor(thing);
     }
-
-    const units = si ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'] : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
-    let u = -1;
-    const r = 10 ** dp;
-
-    do {
-        bytes /= thresh;
-        ++u;
-    } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
-
-
-    return bytes.toFixed(dp) + ' ' + units[u];
-}
-//helper to open the finder
-exports.revealMac = function (path, callback) {
-    path = path || '/';
-    let p = spawn('open', [path]);
-    p.on('error', (err) => {
-        p.kill();
-        return callback(err);
-    });
-}
-
-exports.json = function (data) {
-    return JSON.stringify(data, null, 2)
-}
-//caculates size in bytes; assumes utf-8 encoding: https://stackoverflow.com/a/63805778 
-exports.calcSize = function (event) {
-    return Buffer.byteLength(JSON.stringify(event))
-}
-//https://gist.github.com/djD-REK/068cba3d430cf7abfddfd32a5d7903c3
-exports.round = function (number, decimalPlaces = 0) {
-    return Number(Math.round(number + "e" + decimalPlaces) + "e-" + decimalPlaces)
 }
 
 
-//utility function for visiting every single key on an object
-exports.ensureIntegers = function (obj, isClone = false) {
+exports.typecastInt = function mutateObjValToIntegers(obj, isClone = false) {
+    //utility function for visiting every single key on an object
     let target;
     if (isClone) {
         target = obj
     } else {
-        target = exports.deepClone(obj)
+        target = exports.clone(obj)
     }
 
     Object.keys(target).forEach(key => {
 
         //recursion :(
         if (typeof target[key] === 'object') {
-            exports.ensureIntegers(target[key], true);
+            exports.typecastInt(target[key], true);
         }
 
         //ewww ... mutating the input
@@ -272,9 +334,9 @@ exports.ensureIntegers = function (obj, isClone = false) {
     return target;
 }
 
-//the best way to find strings that are integers in disguise
-//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseInt#a_stricter_parse_function
+
 function makeInteger(value) {
+    //the best way to find strings that are integers in disguise
     if (/^[-+]?(\d+|Infinity)$/.test(value)) {
         return Number(value);
     } else {
@@ -283,9 +345,62 @@ function makeInteger(value) {
 }
 
 
-//the best logging function ever
-//https://stackoverflow.com/a/27610197/4808195
-exports.log = function (item, maxDepth = 100, depth = 0) {
+// ARRAY UTILITES
+
+exports.dedupe = function deepDeDupe(arrayOfThings) {
+    return Array.from(new Set(arrayOfThings.map(JSON.stringify))).map(JSON.parse)
+    //another way: https://stackoverflow.com/a/56757215/4808195
+    //[].filter((v, i, a) => a.findIndex(t => (t.funnelName === v.funnelName)) === i);
+}
+
+exports.chkArray = function chunkArray(sourceArray, chunkSize) {
+    return sourceArray.reduce((resultArray, item, index) => {
+        const chunkIndex = Math.floor(index / chunkSize)
+
+        if (!resultArray[chunkIndex]) {
+            resultArray[chunkIndex] = [] // start a new chunk
+        }
+
+        resultArray[chunkIndex].push(item)
+
+        return resultArray
+    }, [])
+}
+
+exports.shuffle = function shuffleArrayVals(array, mutate = false) {
+    //https://stackoverflow.com/a/12646864/4808195
+    let target;
+    if (mutate) {
+        target = array
+    } else {
+        target = exports.clone(array)
+    }
+    for (let i = target.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [target[i], target[j]] = [target[j], target[i]];
+    }
+
+    return target;
+};
+
+exports.range = function buildRangeArray(min, max, step = 1) {
+    const result = [];
+    step = !step ? 1 : step;
+    max = max / step;
+    for (var i = min; i <= max; i++) {
+        result.push(i * step);
+    }
+    return result;
+};
+
+
+
+
+//LOGGING
+
+exports.log = function comprehensiveLog(item, maxDepth = 100, depth = 0) {
+    //the best logging function ever
+    //https://stackoverflow.com/a/27610197/4808195
     if (depth > maxDepth) {
         console.log(item);
         return;
@@ -301,61 +416,66 @@ exports.log = function (item, maxDepth = 100, depth = 0) {
     }
 };
 
-
-exports.deepDeDupe = function (arrayOfThings) {
-    return Array.from(new Set(arrayOfThings.map(JSON.stringify))).map(JSON.parse)
-    //another way: https://stackoverflow.com/a/56757215/4808195
-    //[].filter((v, i, a) => a.findIndex(t => (t.funnelName === v.funnelName)) === i);
-}
-
-exports.capitalize = function(s) {
-    return s.charAt(0).toUpperCase() + s.slice(1);
-}
-
-//array shuffling
-//https://stackoverflow.com/a/12646864/4808195
-exports.shuffle = function(array, mutate = false) {
-	let target;
-	if (mutate) {
-		target = array
-	}
-	else {
-		target = exports.deepClone(array)
-	}
-    for (let i = target.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [target[i], target[j]] = [target[j], target[i]];
-    }
-
-    return target;
-};
-
-//random string makin'
-//https://stackoverflow.com/a/1349426/4808195
-exports.makeId = function(length = 64) {
-    var result = [];
-    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    var charactersLength = characters.length;
-    for (var i = 0; i < length; i++) {
-        result.push(characters.charAt(Math.floor(Math.random() *
-            charactersLength)));
-    }
-    return result.join('');
-};
-
-
-exports.range = function (min, max, step = 1) {
-	const result = [];
-	step = !step ? 1 : step;
-    max = max / step;
-    for (var i = min; i <= max; i++) {
-        result.push(i * step);
-    }
-    return result;
-};
-
-exports.showProgress = function(thing, p) {
+exports.progress = function showProgress(thing, p) {
     //readline.clearLine(process.stdout);
     readline.cursorTo(process.stdout, 0);
     process.stdout.write(`${thing} processed ... ${p}`);
+}
+
+class Timer {
+    constructor(label) {
+        this.label = label
+
+        this.startTime = null
+        this.endTime = null
+        this.delta = null
+    }
+    start() {
+        this.startTime = Date.now()
+    }
+    end(consoleOutput = true) {
+        const endTime = Date.now();
+        this.endTime = endTime
+
+        const delta = this.endTime - this.startTime
+        this.delta = delta
+
+        if (consoleOutput) {
+            console.log(`${this.label}: ${this.prettyTime(delta)}`)
+        }
+    }
+    report(consoleOutput = true) {
+        if (consoleOutput) {
+            console.log(`${this.label} took ${this.prettyTime(this.delta)}`)
+        }
+        return {
+            label: this.label,
+            start: this.startTime,
+            end: this.endTime,
+            delta: this.delta,
+            human: this.prettyTime(this.delta)
+
+        }
+    }
+    prettyTime(miliseconds) {
+        let seconds = miliseconds / 1000
+        const levels = [
+            [Math.floor(seconds / 31536000), 'years'],
+            [Math.floor((seconds % 31536000) / 86400), 'days'],
+            [Math.floor(((seconds % 31536000) % 86400) / 3600), 'hours'],
+            [Math.floor((((seconds % 31536000) % 86400) % 3600) / 60), 'minutes'],
+            [(((seconds % 31536000) % 86400) % 3600) % 60, 'seconds'],
+        ];
+        let result = '';
+
+        for (var i = 0, max = levels.length; i < max; i++) {
+            if (levels[i][0] === 0) continue;
+            result += ' ' + levels[i][0] + ' ' + (levels[i][0] === 1 ? levels[i][1].substr(0, levels[i][1].length - 1) : levels[i][1]);
+        };
+        return result.trim();
+    }
+}
+
+exports.time = function (label) {
+    return new Timer(label)
 }
