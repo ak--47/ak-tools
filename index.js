@@ -89,6 +89,14 @@ exports.isJSON = function hasJsonStructure(string) {
     }
 }
 
+exports.is = function isPrimiativeType(type, val) {
+    return ![, null].includes(val) && val.constructor === type
+};
+
+exports.isNil = function isNullOrUndefined(val) {
+    return val === undefined || val === null
+};
+
 exports.comma = function addCommas(num) {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
@@ -193,6 +201,10 @@ exports.rand = function generateRandomNumber(min = 1, max = 100) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+exports.avg = function calcAverage(...nums) {
+    return nums.reduce((acc, val) => acc + val, 0) / nums.length
+}
+
 
 exports.calcSize = function (event) {
     //caculates size in bytes; assumes utf-8 encoding: https://stackoverflow.com/a/63805778 
@@ -223,6 +235,11 @@ exports.uuid = function uuidv4() {
         return v.toString(16);
     });
 }
+
+exports.sleep = function pauseFor(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 
 
 // OBJECT UTILITES
@@ -294,6 +311,15 @@ exports.objClean = function removeFalsyValues(obj) {
     return target
 }
 
+exports.objDefault = function assignDefaultProps(obj, ...defs) {
+    return Object.assign({}, obj, ...defs.reverse(), obj)
+};
+
+exports.objMatch = function doObjectsMatch(obj, source) {
+    return Object.keys(source).every(key => obj.hasOwnProperty(key) && obj[key] === source[key]);
+}
+
+
 exports.clone = function deepClone(thing, opts) {
     var newObject = {};
     if (thing instanceof Array) {
@@ -324,7 +350,6 @@ exports.clone = function deepClone(thing, opts) {
     }
 }
 
-
 exports.typecastInt = function mutateObjValToIntegers(obj, isClone = false) {
     //utility function for visiting every single key on an object
     let target;
@@ -352,6 +377,8 @@ exports.typecastInt = function mutateObjValToIntegers(obj, isClone = false) {
 
     return target;
 }
+
+
 
 
 function makeInteger(value) {
@@ -412,8 +439,26 @@ exports.range = function buildRangeArray(min, max, step = 1) {
     return result;
 };
 
+exports.deepFlat = function deepFlatten(arr) {
+    return [].concat(...arr.map(v => (Array.isArray(v) ? deepFlatten(v) : v)))
+};
 
 
+exports.strToArr = function extractWords(str, pattern = /[^a-zA-Z-]+/) {
+    return str.split(pattern).filter(Boolean)
+};
+
+
+
+//FUNCTION UTILITIES
+
+exports.attempt = async function tryToExec(fn, ...args) {
+    try {
+        return await fn(...args);
+    } catch (e) {
+        return e instanceof Error ? e : new Error(e);
+    }
+};
 
 //LOGGING
 
@@ -498,3 +543,10 @@ class Timer {
 exports.time = function (label) {
     return new Timer(label)
 }
+
+exports.quickTime = function timeTaken(callback) {
+    console.time('timeTaken');
+    const r = callback();
+    console.timeEnd('timeTaken');
+    return r;
+};

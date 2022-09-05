@@ -13,3 +13,7 @@ const utils = require('ak-tools')
 ```
 
 examine the `utils` object to see methods
+
+```javascript
+console.table(utils)
+```
