@@ -485,7 +485,7 @@ exports.attempt = async function tryToExec(fn, ...args) {
 
 exports.cLog = function cloudFunctionLogger(data = { foo: "bar" }, message, severity = `INFO`) {
 	if (global?.isTest) {
-		if (isJSON(data)) {
+		if (exports.isJSON(data)) {
 			if (message) console.log(message);
 			if (data) console.log(JSON.stringify(data, null, 2));
 		}
