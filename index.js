@@ -5,6 +5,8 @@ const path = require('path');
 const fs = require('fs').promises;
 const { existsSync, mkdirSync } = require('fs');
 const readline = require('readline');
+const http = require("https");
+const os = require("os");
 
 
 //FILE MANAGEMENT
@@ -608,4 +610,46 @@ exports.quickTime = function timeTaken(callback) {
 	const r = callback();
 	console.timeEnd('timeTaken');
 	return r;
+};
+
+exports.tracker = function sendToMixpanel(token = "99a1209a992b3f9fba55a293e211186a") {
+	return function (eventName = "ping", props = {}, distinct_id = os.userInfo().username) {
+		
+		const options = {
+			"method": "POST",
+			"hostname": "api.mixpanel.com",
+			"port": null,
+			"path": "/track?verbose=1",
+			"headers": {
+				"Content-Type": "application/json",
+				"Accept": "text/plain",
+			}
+		};
+
+		const req = http.request(options, function (res) {
+			const chunks = [];
+
+			res.on("data", function (chunk) {
+				chunks.push(chunk);
+			});
+
+			res.on("end", function () {
+				const body = Buffer.concat(chunks);
+				return body.toString('utf-8');
+			});
+		});
+
+		const payload = [
+			{
+				event: eventName,
+				properties: {
+					token: token,
+					distinct_id: distinct_id,
+					...props
+				}
+			}
+		];
+		req.write(JSON.stringify(payload));
+		req.end();
+	};
 };
