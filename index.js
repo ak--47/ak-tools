@@ -612,8 +612,8 @@ exports.quickTime = function timeTaken(callback) {
 	return r;
 };
 
-exports.tracker = function sendToMixpanel(app = 'akTools', token = "99a1209a992b3f9fba55a293e211186a") {
-	return function (eventName = "ping", props = {}, distinct_id = os.userInfo().username, callback = () => { }) {
+exports.tracker = function sendToMixpanel(app = 'akTools', token = "99a1209a992b3f9fba55a293e211186a", distinct_id = os.userInfo().username) {
+	return function (eventName = "ping", props = {}, callback = (res) => { return res }) {
 
 		const optionsEv = {
 			"method": "POST",
