@@ -613,7 +613,7 @@ exports.quickTime = function timeTaken(callback) {
 };
 
 exports.tracker = function sendToMixpanel(app = 'akTools', token = "99a1209a992b3f9fba55a293e211186a") {
-	return function (eventName = "ping", props = {}, distinct_id = os.userInfo().username) {
+	return function (eventName = "ping", props = {}, distinct_id = os.userInfo().username, callback = () => { }) {
 
 		const optionsEv = {
 			"method": "POST",
@@ -634,7 +634,7 @@ exports.tracker = function sendToMixpanel(app = 'akTools', token = "99a1209a992b
 
 			res.on("end", function () {
 				const body = Buffer.concat(chunks);
-				return body.toString('utf-8');
+				prof(JSON.parse(body.toString()), callback);
 			});
 		});
 
@@ -652,39 +652,42 @@ exports.tracker = function sendToMixpanel(app = 'akTools', token = "99a1209a992b
 		reqEv.write(JSON.stringify(payloadEv));
 		reqEv.end();
 
-		const optionsU = {
-			"method": "POST",
-			"hostname": "api.mixpanel.com",
-			"path": "/engage?verbose=1",
-			"headers": {
-				"Content-Type": "application/json",
-				"Accept": "text/plain",
-			}
+		function prof(prior, callback) {
+
+			const optionsU = {
+				"method": "POST",
+				"hostname": "api.mixpanel.com",
+				"path": "/engage?verbose=1",
+				"headers": {
+					"Content-Type": "application/json",
+					"Accept": "text/plain",
+				}
+			};
+
+			const reqU = http.request(optionsU, function (res) {
+				const chunks = [];
+
+				res.on("data", function (chunk) {
+					chunks.push(chunk);
+				});
+
+				res.on("end", function () {
+					const body = Buffer.concat(chunks);
+					const res = JSON.parse(body.toString('utf-8'));
+					callback([prior, res]);
+				});
+			});
+
+			const payloadU = [{
+				$token: token,
+				$distinct_id: distinct_id,
+				$set: {
+					$name: distinct_id
+				}
+			}];
+			reqU.write(JSON.stringify(payloadU));
+			reqU.end();
+
 		};
-
-		const reqU = http.request(optionsU, function (res) {
-			const chunks = [];
-
-			res.on("data", function (chunk) {
-				chunks.push(chunk);
-			});
-
-			res.on("end", function () {
-				const body = Buffer.concat(chunks);
-				return body.toString('utf-8');
-			});
-		});
-
-		const payloadU = [{
-			$token: token,
-			$distinct_id: distinct_id,
-			$set: {
-				$name: distinct_id
-			}
-		}];
-		reqU.write(JSON.stringify(payloadU));
-		reqU.end();
-
-
 	};
 };
