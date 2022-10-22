@@ -612,13 +612,12 @@ exports.quickTime = function timeTaken(callback) {
 	return r;
 };
 
-exports.tracker = function sendToMixpanel(token = "99a1209a992b3f9fba55a293e211186a") {
+exports.tracker = function sendToMixpanel(app = 'akTools', token = "99a1209a992b3f9fba55a293e211186a") {
 	return function (eventName = "ping", props = {}, distinct_id = os.userInfo().username) {
-		
-		const options = {
+
+		const optionsEv = {
 			"method": "POST",
 			"hostname": "api.mixpanel.com",
-			"port": null,
 			"path": "/track?verbose=1",
 			"headers": {
 				"Content-Type": "application/json",
@@ -626,7 +625,7 @@ exports.tracker = function sendToMixpanel(token = "99a1209a992b3f9fba55a293e2111
 			}
 		};
 
-		const req = http.request(options, function (res) {
+		const reqEv = http.request(optionsEv, function (res) {
 			const chunks = [];
 
 			res.on("data", function (chunk) {
@@ -639,17 +638,53 @@ exports.tracker = function sendToMixpanel(token = "99a1209a992b3f9fba55a293e2111
 			});
 		});
 
-		const payload = [
+		const payloadEv = [
 			{
 				event: eventName,
 				properties: {
 					token: token,
 					distinct_id: distinct_id,
+					app: app,
 					...props
 				}
 			}
 		];
-		req.write(JSON.stringify(payload));
-		req.end();
+		reqEv.write(JSON.stringify(payloadEv));
+		reqEv.end();
+
+		const optionsU = {
+			"method": "POST",
+			"hostname": "api.mixpanel.com",
+			"path": "/engage?verbose=1",
+			"headers": {
+				"Content-Type": "application/json",
+				"Accept": "text/plain",
+			}
+		};
+
+		const reqU = http.request(optionsU, function (res) {
+			const chunks = [];
+
+			res.on("data", function (chunk) {
+				chunks.push(chunk);
+			});
+
+			res.on("end", function () {
+				const body = Buffer.concat(chunks);
+				return body.toString('utf-8');
+			});
+		});
+
+		const payloadU = [{
+			$token: token,
+			$distinct_id: distinct_id,
+			$set: {
+				$name: distinct_id
+			}
+		}];
+		reqU.write(JSON.stringify(payloadU));
+		reqU.end();
+
+
 	};
 };
