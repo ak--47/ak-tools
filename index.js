@@ -1,6 +1,5 @@
 // AK's utils
 // things to make things ... easier
-
 const path = require('path');
 const fs = require('fs').promises;
 const { existsSync, mkdirSync } = require('fs');
@@ -9,7 +8,31 @@ const http = require("https");
 const os = require("os");
 
 
-//FILE MANAGEMENT
+/*
+-----
+TYPES
+-----
+*/
+
+/**
+ * Arbitrary data
+ * @typedef {(string|object[])} Data
+ */
+
+
+
+/*
+------
+FILES
+------
+*/
+
+/** 
+ * list directory contents
+ * @param  {string} [dir=./] - directory to enumerate; default `./`
+ * @param  {boolean} [objectMode=false] - return `{name: path}` instead of `[path]`; default `false`
+ * @returns {string[]} `[]` of files in folder
+ */
 exports.ls = async function listFiles(dir = "./", objectMode = false) {
 	let fileList = await fs.readdir(dir);
 	if (!objectMode) {
@@ -23,6 +46,10 @@ exports.ls = async function listFiles(dir = "./", objectMode = false) {
 	return results;
 };
 
+/**
+ * remove a file or directory
+ * @param  {string} fileNameOrPath - file or path to be removed
+ */
 exports.rm = async function removeFileOrFolder(fileNameOrPath) {
 	let fileRemoved;
 	try {
@@ -39,7 +66,14 @@ exports.rm = async function removeFileOrFolder(fileNameOrPath) {
 	return fileRemoved;
 };
 
-exports.touch = async function addFile(fileNameOrPath, data, isJson = false) {
+/**
+ * create a file
+ * @param  {string} fileNameOrPath - file to create
+ * @param  {Data} [data=""] - data to write; default `""`
+ * @param  {boolean} [isJson=false] - is `data` JSON; default `false`
+ * @returns {(Promise<string | false>)} the name of the file
+ */
+exports.touch = async function addFile(fileNameOrPath, data = "", isJson = false) {
 	let fileCreated;
 	let dataToWrite = isJson ? exports.json(data) : data;
 
@@ -48,17 +82,24 @@ exports.touch = async function addFile(fileNameOrPath, data, isJson = false) {
 	} catch (e) {
 		console.error(`${fileNameOrPath} not created!`);
 		console.error(e);
+		return false;
 	}
 
-	return true;
+	return path.resolve(fileNameOrPath);
 
 };
 
-exports.load = async function loadFile(fileNameOrPath, isJson = false) {
+/**
+ * load a filed into memory
+ * @param  {string} fileNameOrPath - file to create
+ * @param  {boolean} [isJson=false] - is `data` JSON; default `false`
+ * @param {string} [encoding=utf-8] - file encoring; default `utf-8`
+ */
+exports.load = async function loadFile(fileNameOrPath, isJson = false, encoding = 'utf-8') {
 	let fileLoaded;
 
 	try {
-		fileLoaded = await fs.readFile(path.resolve(fileNameOrPath), 'utf-8');
+		fileLoaded = await fs.readFile(path.resolve(fileNameOrPath), encoding);
 	} catch (e) {
 		console.error(`${fileNameOrPath} not loaded!`);
 		console.error(e);
@@ -71,13 +112,21 @@ exports.load = async function loadFile(fileNameOrPath, isJson = false) {
 	return fileLoaded;
 };
 
-exports.mkdir = function (dirPath = `./`) {
+/**
+ * make a directory
+ * @param  {string} [dirPath=./tmp] - path to create; default `./tmp`
+ */
+exports.mkdir = function (dirPath = `./tmp`) {
 	let fullPath = path.resolve(dirPath);
 	!existsSync(fullPath) ? mkdirSync(fullPath) : undefined;
 	return fullPath;
 };
 
-//VALIDATION, FORMAT, & DISPLAY
+/*
+-----------
+VALIDATION
+-----------
+*/
 
 exports.isJSONStr = function hasJsonStructure(string) {
 	if (typeof string !== 'string') return false;
@@ -115,12 +164,21 @@ exports.isJSON = function canBeStrinigified(data) {
 };
 
 exports.is = function isPrimiativeType(type, val) {
+	if (typeof type === 'string') {
+		return typeof val === type;
+	}
 	return ![, null].includes(val) && val.constructor === type;
 };
 
 exports.isNil = function isNullOrUndefined(val) {
 	return val === undefined || val === null;
 };
+
+/*
+-------
+DISPLAY
+-------
+*/
 
 exports.comma = function addCommas(num) {
 	return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -208,7 +266,11 @@ exports.toCSV = function arrayToCSV(arr, delimiter = ',', headers = []) {
 };
 
 
-// GENERATORS + CALCULATIONS
+/*
+------------
+CALCULATIONS
+------------
+*/
 
 exports.dupeVals = function duplicateArrayValues(array, times = 1) {
 	let dupeArray = [];
@@ -230,10 +292,9 @@ exports.avg = function calcAverage(...nums) {
 	return nums.reduce((acc, val) => acc + val, 0) / nums.length;
 };
 
-
-exports.calcSize = function (event) {
+exports.calcSize = function (data) {
 	//caculates size in bytes; assumes utf-8 encoding: https://stackoverflow.com/a/63805778 
-	return Buffer.byteLength(JSON.stringify(event));
+	return Buffer.byteLength(JSON.stringify(data));
 };
 
 exports.round = function roundsNumbers(number, decimalPlaces = 0) {
@@ -261,13 +322,12 @@ exports.uuid = function uuidv4() {
 	});
 };
 
-exports.sleep = function pauseFor(ms) {
-	return new Promise(resolve => setTimeout(resolve, ms));
-};
 
-
-
-// OBJECT UTILITES
+/*
+-------
+OBJECTS
+-------
+*/
 
 exports.rnKeys = function renameObjectKeys(obj, newKeys) {
 	//https://stackoverflow.com/a/45287523
@@ -279,6 +339,11 @@ exports.rnKeys = function renameObjectKeys(obj, newKeys) {
 	});
 	return Object.assign({}, ...keyValues);
 };
+
+exports.rnVals = function renameValues(obj, pairs = [['old', 'new'], [], []]) {
+	return JSON.parse(exports.multiReplace(JSON.stringify(obj), pairs));
+};
+
 
 exports.objFilter = function filterObjectKeys(hash, test_function) {
 	var filtered, key, keys, i;
@@ -344,7 +409,6 @@ exports.objMatch = function doObjectsMatch(obj, source) {
 	return Object.keys(source).every(key => obj.hasOwnProperty(key) && obj[key] === source[key]);
 };
 
-
 exports.clone = function deepClone(thing, opts) {
 	var newObject = {};
 	if (thing instanceof Array) {
@@ -403,6 +467,35 @@ exports.typecastInt = function mutateObjValToIntegers(obj, isClone = false) {
 	return target;
 };
 
+exports.awaitObj = function resolveObjVals(obj) {
+	// https://stackoverflow.com/a/53112435
+	const keys = Object.keys(obj);
+	const values = Object.values(obj);
+	return Promise.all(values)
+		.then(resolved => {
+			const res = {};
+			for (let i = 0; i < keys.length; i += 1) {
+				res[keys[i]] = resolved[i];
+			}
+			return res;
+		});
+};
+
+
+function removeNulls(sfdcObj) {
+	for (let key in sfdcObj) {
+		if (sfdcObj[key] === null) {
+			delete sfdcObj[key];
+		}
+
+		if (sfdcObj[key] === undefined) {
+			delete sfdcObj[key];
+		}
+
+	}
+	return sfdcObj;
+};
+
 
 function makeInteger(value) {
 	//the best way to find strings that are integers in disguise
@@ -414,15 +507,23 @@ function makeInteger(value) {
 }
 
 
-// ARRAY UTILITES
+/*
+-------
+ARRAYS
+--------
+*/
 
 exports.dedupe = function deepDeDupe(arrayOfThings) {
 	return Array.from(new Set(arrayOfThings.map(JSON.stringify))).map(JSON.parse);
-	//another way: https://stackoverflow.com/a/56757215/4808195
-	//[].filter((v, i, a) => a.findIndex(t => (t.funnelName === v.funnelName)) === i);
 };
 
-exports.chkArray = function chunkArray(sourceArray, chunkSize) {
+exports.dedupeVal = function dedupeByValues(arr, keyNames = []) {
+	// https://stackoverflow.com/a/56757215/4808195
+	return arr.filter((v, i, a) => a.findIndex(v2 => keyNames.every(k => v2[k] === v[k])) === i);
+
+};
+
+exports.chunk = function chunkArray(sourceArray, chunkSize) {
 	return sourceArray.reduce((resultArray, item, index) => {
 		const chunkIndex = Math.floor(index / chunkSize);
 
@@ -473,7 +574,11 @@ exports.strToArr = function extractWords(str, pattern = /[^a-zA-Z-]+/) {
 
 
 
-//FUNCTION UTILITIES
+/*
+---------
+FUNCTIONS
+---------
+*/
 
 exports.attempt = async function tryToExec(fn, ...args) {
 	try {
@@ -483,7 +588,70 @@ exports.attempt = async function tryToExec(fn, ...args) {
 	}
 };
 
-//LOGGING
+exports.times = function doNTimes(n, iteratee, context) {
+	var accum = Array(Math.max(0, n));
+	iteratee = optimizeCb(iteratee, context, 1);
+	for (var i = 0; i < n; i++) accum[i] = iteratee(i);
+	return accum;
+};
+
+exports.throttle = function throttle(func, wait, options = { leading: true, trailing: true }) {
+	var timeout, context, args, result;
+	var previous = 0;
+	if (!options) options = {};
+
+	var later = function () {
+		previous = options.leading === false ? 0 : Date.now();
+		timeout = null;
+		result = func.apply(context, args);
+		if (!timeout) context = args = null;
+	};
+
+	var throttled = function () {
+		var _now = Date.now();
+		if (!previous && options.leading === false) previous = _now;
+		var remaining = wait - (_now - previous);
+		context = this;
+		args = arguments;
+		if (remaining <= 0 || remaining > wait) {
+			if (timeout) {
+				clearTimeout(timeout);
+				timeout = null;
+			}
+			previous = _now;
+			result = func.apply(context, args);
+			if (!timeout) context = args = null;
+		} else if (!timeout && options.trailing !== false) {
+			timeout = setTimeout(later, remaining);
+		}
+		return result;
+	};
+
+	throttled.cancel = function () {
+		clearTimeout(timeout);
+		previous = 0;
+		timeout = context = args = null;
+	};
+
+	return throttled;
+};
+
+exports.compose = function composeFns() {
+	var args = arguments;
+	var start = args.length - 1;
+	return function () {
+		var i = start;
+		var result = args[start].apply(this, arguments);
+		while (i--) result = args[i].call(this, result);
+		return result;
+	};
+};
+
+/*
+-------
+LOGGING
+-------
+*/
 
 exports.cLog = function cloudFunctionLogger(data = { foo: "bar" }, message, severity = `INFO`) {
 	if (global?.isTest) {
@@ -613,7 +781,7 @@ exports.quickTime = function timeTaken(callback) {
 };
 
 exports.tracker = function sendToMixpanel(app = 'akTools', token = "99a1209a992b3f9fba55a293e211186a", distinct_id = os.userInfo().username) {
-	return function (eventName = "ping", props = {}, callback = (res) => { return res }) {
+	return function (eventName = "ping", props = {}, callback = (res) => { return res; }) {
 
 		const optionsEv = {
 			"method": "POST",
@@ -691,3 +859,28 @@ exports.tracker = function sendToMixpanel(app = 'akTools', token = "99a1209a992b
 		};
 	};
 };
+
+exports.sleep = function pauseFor(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+};
+
+
+// ripped out of underscore; should not be called directly
+function optimizeCb(func, context, argCount) {
+	if (context === void 0) return func;
+	switch (argCount == null ? 3 : argCount) {
+		case 1: return function (value) {
+			return func.call(context, value);
+		};
+
+		case 3: return function (value, index, collection) {
+			return func.call(context, value, index, collection);
+		};
+		case 4: return function (accumulator, value, index, collection) {
+			return func.call(context, accumulator, value, index, collection);
+		};
+	}
+	return function () {
+		return func.apply(context, arguments);
+	};
+}
