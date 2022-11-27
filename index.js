@@ -346,6 +346,13 @@ CALCULATIONS
 ------------
 */
 
+/**
+ * duplicate values within an array N times
+ *
+ * @param  {any[]} array - array to duplicate
+ * @param  {number} [times=1] -  number of dupes per item
+ * @returns {any[]} duplicated array
+ */
 exports.dupeVals = function duplicateArrayValues(array, times = 1) {
 	let dupeArray = [];
 
@@ -356,26 +363,54 @@ exports.dupeVals = function duplicateArrayValues(array, times = 1) {
 	return dupeArray;
 };
 
+/**
+ * random integer between `min` and `max` (inclusive)
+ * @param  {number} min=1 - minimum
+ * @param  {number} max=100 - maximum
+ * @returns {number} random number
+ */
 exports.rand = function generateRandomNumber(min = 1, max = 100) {
 	min = Math.ceil(min);
 	max = Math.floor(max);
 	return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
+/**
+ * calculate average of `...nums`
+ * @param  {...number} ...nums - numbers to average
+ * @returns {number} average
+ */
 exports.avg = function calcAverage(...nums) {
 	return nums.reduce((acc, val) => acc + val, 0) / nums.length;
 };
 
-exports.calcSize = function (data) {
+/**
+ * calculate the size (on disk)
+ * @param  {JSON} data - JSON to estimate
+ * @returns {number} estimated size in bytes
+ */
+exports.calcSize = function estimateSizeOnDisk(data) {
 	//caculates size in bytes; assumes utf-8 encoding: https://stackoverflow.com/a/63805778 
 	return Buffer.byteLength(JSON.stringify(data));
 };
 
+/**
+ * round a number to a number of decimal places
+ * @param  {number} number - number to round
+ * @param  {number} [decimalPlaces=0] - decimal places; default `0`
+ * @returns {number} rounded number
+ */
 exports.round = function roundsNumbers(number, decimalPlaces = 0) {
 	//https://gist.github.com/djD-REK/068cba3d430cf7abfddfd32a5d7903c3
 	return Number(Math.round(number + "e" + decimalPlaces) + "e-" + decimalPlaces);
 };
 
+/**
+ * generate a random uid:
+ * - `6NswVtnKWsvRGNTi0H2YtuqGwsqJi4dKW6qUgSiUx1XNctr4rkGRFOA9HRl9i60S`
+ * @param  {number} [length=64] length of id 
+ * @returns {string} a uid of specified length
+ */
 exports.uid = function makeUid(length = 64) {
 	//https://stackoverflow.com/a/1349426/4808195
 	var result = [];
@@ -388,6 +423,11 @@ exports.uid = function makeUid(length = 64) {
 	return result.join('');
 };
 
+/**
+ * generated a uuid in v4 format:
+ * - `72452488-ded9-46c1-8c22-2403ea924a8e`
+ * @returns {string} a uuid 
+ */
 exports.uuid = function uuidv4() {
 	return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
 		var r = Math.random() * 16 | 0,
@@ -403,6 +443,12 @@ OBJECTS
 -------
 */
 
+/**
+ * rename object keys with a mapping object `{oldKey: newKey}`
+ * @param  {Object} obj - object to rename
+ * @param  {Object} newKeys - map of form `{oldKey: newKey}`
+ * @returns {Object} new object with renamed keys
+ */
 exports.rnKeys = function renameObjectKeys(obj, newKeys) {
 	//https://stackoverflow.com/a/45287523
 	const keyValues = Object.keys(obj).map(key => {
@@ -414,11 +460,22 @@ exports.rnKeys = function renameObjectKeys(obj, newKeys) {
 	return Object.assign({}, ...keyValues);
 };
 
-exports.rnVals = function renameValues(obj, pairs = [['old', 'new'], [], []]) {
+/**
+ * rename object values using a mapping array
+ * @param  {Object} obj
+ * @param  {Array[]} pairs `[['old', 'new']]`
+ * @returns {Object} object with renamed values
+ */
+exports.rnVals = function renameValues(obj, pairs) {
 	return JSON.parse(exports.multiReplace(JSON.stringify(obj), pairs));
 };
 
-
+/**
+ * filter arrays by values or objects by keys
+ * @param  {Object} hash - object or array to filter
+ * @param  {callback} test_function - a function which is called on keys/values 
+ * @returns {Object} filtered object
+ */
 exports.objFilter = function filterObjectKeys(hash, test_function) {
 	var filtered, key, keys, i;
 	keys = Object.keys(hash);
@@ -432,6 +489,15 @@ exports.objFilter = function filterObjectKeys(hash, test_function) {
 	return filtered;
 };
 
+/**
+ * removes the following from deeply nested objects:
+ * - `null`
+ * - `undefined` 
+ * - `{}`
+ * - `[]` 
+ * @param  {Object} obj
+ * @returns cleaned object
+ */
 exports.objClean = function removeFalsyValues(obj) {
 	//where objects have falsy values, delete those keys
 	let target = JSON.parse(JSON.stringify(obj));
@@ -475,14 +541,31 @@ exports.objClean = function removeFalsyValues(obj) {
 	return target;
 };
 
+/**
+ * apply default props to an object; don't override values from source
+ * @param  {Object} obj - original object
+ * @param  {Object} ...defs - props to add without overriding
+ * @returns {Object} an object which has `defs` props
+ */
 exports.objDefault = function assignDefaultProps(obj, ...defs) {
 	return Object.assign({}, obj, ...defs.reverse(), obj);
 };
 
+/**
+ * deep equality match for any two objects
+ * @param  {Object} obj
+ * @param  {Object} source
+ * @returns {boolean} do objects match?
+ */
 exports.objMatch = function doObjectsMatch(obj, source) {
 	return Object.keys(source).every(key => obj.hasOwnProperty(key) && obj[key] === source[key]);
 };
 
+/**
+ * an efficient way to clone an Object; outpreforms `JSON.parse(JSON.strigify())` by 100x
+ * @param  {Object} thing - object to clone
+ * @returns {Object} copied object
+ */
 exports.clone = function deepClone(thing, opts) {
 	var newObject = {};
 	if (thing instanceof Array) {
@@ -513,6 +596,13 @@ exports.clone = function deepClone(thing, opts) {
 	}
 };
 
+/**
+ * visit every property of an object a turn "number" values into numbers
+ * - ex: `{foo: {bar: '42'}}` => `{foo: {bar: 42}}`
+ * @param  {object} obj - object to traverse
+ * @param  {boolean} [isClone=false] - default `false`; if `true` will mutate the passed in object
+ * @returns {Object} object with all "numbers" as proper numbers
+ */
 exports.typecastInt = function mutateObjValToIntegers(obj, isClone = false) {
 	//utility function for visiting every single key on an object
 	let target;
@@ -540,7 +630,12 @@ exports.typecastInt = function mutateObjValToIntegers(obj, isClone = false) {
 
 	return target;
 };
-
+/**
+ * utility to `await` object values
+ * - ex: `{foo: await bar()}`
+ * @param  {object} obj object
+ * @returns {Promise} the resolved values of the object's keys
+ */
 exports.awaitObj = function resolveObjVals(obj) {
 	// https://stackoverflow.com/a/53112435
 	const keys = Object.keys(obj);
@@ -555,22 +650,31 @@ exports.awaitObj = function resolveObjVals(obj) {
 		});
 };
 
-
-function removeNulls(sfdcObj) {
-	for (let key in sfdcObj) {
-		if (sfdcObj[key] === null) {
-			delete sfdcObj[key];
+/**
+ * explicitly remove keys with `null` or `undefined` values; mutates object
+ * - ex: `{foo: "bar", baz: null}` => `{foo: "bar"}`
+ * @param  {Object} objWithNullOrUndef - an object with `null` or `undefined` values
+ * @returns {Object} an object without `null` or `undefined` values
+ */
+exports.removeNulls = function(objWithNullOrUndef) {
+	for (let key in objWithNullOrUndef) {
+		if (objWithNullOrUndef[key] === null) {
+			delete objWithNullOrUndef[key];
 		}
 
-		if (sfdcObj[key] === undefined) {
-			delete sfdcObj[key];
+		if (objWithNullOrUndef[key] === undefined) {
+			delete objWithNullOrUndef[key];
 		}
 
 	}
-	return sfdcObj;
+	return objWithNullOrUndef;
 };
 
-
+/**
+ * check if a value is an integer, if so return it
+ * @param  {unknown} value - a value to test
+ * @returns {(number | NaN)} a `number` or `NaN`
+ */
 function makeInteger(value) {
 	//the best way to find strings that are integers in disguise
 	if (/^[-+]?(\d+|Infinity)$/.test(value)) {
@@ -587,16 +691,27 @@ ARRAYS
 --------
 */
 
+/**
+ * @param  {} arrayOfThings
+ */
 exports.dedupe = function deepDeDupe(arrayOfThings) {
 	return Array.from(new Set(arrayOfThings.map(JSON.stringify))).map(JSON.parse);
 };
 
+/**
+ * @param  {} arr
+ * @param  {} keyNames=[]
+ */
 exports.dedupeVal = function dedupeByValues(arr, keyNames = []) {
 	// https://stackoverflow.com/a/56757215/4808195
 	return arr.filter((v, i, a) => a.findIndex(v2 => keyNames.every(k => v2[k] === v[k])) === i);
 
 };
 
+/**
+ * @param  {} sourceArray
+ * @param  {} chunkSize
+ */
 exports.chunk = function chunkArray(sourceArray, chunkSize) {
 	return sourceArray.reduce((resultArray, item, index) => {
 		const chunkIndex = Math.floor(index / chunkSize);
@@ -611,6 +726,10 @@ exports.chunk = function chunkArray(sourceArray, chunkSize) {
 	}, []);
 };
 
+/**
+ * @param  {} array
+ * @param  {} mutate=false
+ */
 exports.shuffle = function shuffleArrayVals(array, mutate = false) {
 	//https://stackoverflow.com/a/12646864/4808195
 	let target;
@@ -627,6 +746,11 @@ exports.shuffle = function shuffleArrayVals(array, mutate = false) {
 	return target;
 };
 
+/**
+ * @param  {} min
+ * @param  {} max
+ * @param  {} step=1
+ */
 exports.range = function buildRangeArray(min, max, step = 1) {
 	const result = [];
 	step = !step ? 1 : step;
@@ -637,11 +761,17 @@ exports.range = function buildRangeArray(min, max, step = 1) {
 	return result;
 };
 
+/**
+ * @param  {} arr
+ */
 exports.deepFlat = function deepFlatten(arr) {
 	return [].concat(...arr.map(v => (Array.isArray(v) ? deepFlatten(v) : v)));
 };
 
-
+/**
+ * @param  {} str
+ * @param  {} pattern=/[^a-zA-Z-]+/
+ */
 exports.strToArr = function extractWords(str, pattern = /[^a-zA-Z-]+/) {
 	return str.split(pattern).filter(Boolean);
 };
@@ -654,6 +784,10 @@ FUNCTIONS
 ---------
 */
 
+/**
+ * @param  {} fn
+ * @param  {} ...args
+ */
 exports.attempt = async function tryToExec(fn, ...args) {
 	try {
 		return await fn(...args);
@@ -662,6 +796,11 @@ exports.attempt = async function tryToExec(fn, ...args) {
 	}
 };
 
+/**
+ * @param  {} n
+ * @param  {} iteratee
+ * @param  {} context
+ */
 exports.times = function doNTimes(n, iteratee, context) {
 	var accum = Array(Math.max(0, n));
 	iteratee = optimizeCb(iteratee, context, 1);
@@ -669,6 +808,12 @@ exports.times = function doNTimes(n, iteratee, context) {
 	return accum;
 };
 
+/**
+ * @param  {} func
+ * @param  {} wait
+ * @param  {true} options={leading
+ * @param  {true}} trailing
+ */
 exports.throttle = function throttle(func, wait, options = { leading: true, trailing: true }) {
 	var timeout, context, args, result;
 	var previous = 0;
@@ -710,6 +855,9 @@ exports.throttle = function throttle(func, wait, options = { leading: true, trai
 	return throttled;
 };
 
+/**
+ * 
+ */
 exports.compose = function composeFns() {
 	var args = arguments;
 	var start = args.length - 1;
@@ -727,6 +875,11 @@ LOGGING
 -------
 */
 
+/**
+ * @param  {"bar"}} data={foo
+ * @param  {} message
+ * @param  {} severity=`INFO`
+ */
 exports.cLog = function cloudFunctionLogger(data = { foo: "bar" }, message, severity = `INFO`) {
 	if (global?.isTest) {
 		if (exports.isJSON(data)) {
@@ -765,6 +918,11 @@ exports.cLog = function cloudFunctionLogger(data = { foo: "bar" }, message, seve
 
 };
 
+/**
+ * @param  {} item
+ * @param  {} maxDepth=100
+ * @param  {} depth=0
+ */
 exports.log = function comprehensiveLog(item, maxDepth = 100, depth = 0) {
 	//the best logging function ever
 	//https://stackoverflow.com/a/27610197/4808195
@@ -783,6 +941,10 @@ exports.log = function comprehensiveLog(item, maxDepth = 100, depth = 0) {
 	}
 };
 
+/**
+ * @param  {} thing
+ * @param  {} p
+ */
 exports.progress = function showProgress(thing, p) {
 	//readline.clearLine(process.stdout);
 	readline.cursorTo(process.stdout, 0);
@@ -842,11 +1004,16 @@ class Timer {
 		return result.trim();
 	}
 }
-
+/**
+ * @param  {} label
+ */
 exports.time = function (label) {
 	return new Timer(label);
 };
 
+/**
+ * @param  {} callback
+ */
 exports.quickTime = function timeTaken(callback) {
 	console.time('timeTaken');
 	const r = callback();
@@ -854,6 +1021,12 @@ exports.quickTime = function timeTaken(callback) {
 	return r;
 };
 
+/**
+ * @param  {} app='akTools'
+ * @param  {} token="99a1209a992b3f9fba55a293e211186a"
+ * @param  {} distinct_id=os.userInfo(
+ * @param  {} .username
+ */
 exports.tracker = function sendToMixpanel(app = 'akTools', token = "99a1209a992b3f9fba55a293e211186a", distinct_id = os.userInfo().username) {
 	return function (eventName = "ping", props = {}, callback = (res) => { return res; }) {
 
@@ -934,6 +1107,9 @@ exports.tracker = function sendToMixpanel(app = 'akTools', token = "99a1209a992b
 	};
 };
 
+/**
+ * @param  {} ms
+ */
 exports.sleep = function pauseFor(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 };

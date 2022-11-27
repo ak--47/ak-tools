@@ -148,14 +148,94 @@ describe('display', () => {
 
 // CALCULATIONS
 
-describe('calculations', ()=>{
-	
-})
+describe('calculations', () => {
+
+	test('dupe array', () => {
+		let arr = [1];
+		let answer = [1, 1, 1, 1, 1];
+
+		expect(u.dupeVals(arr, 4)).toEqual(answer);
+	});
+
+
+	test('random', () => {
+		let min = 10;
+		let max = 14;
+		u.times(50, () => {
+			let rand = u.rand(min, max);
+			expect(rand).toBeGreaterThan(9);
+			expect(rand).toBeLessThan(15);
+		});
+
+
+	});
+
+	test('average', () => {
+		let nums = [2,4,6,8]
+		expect(u.avg(...nums)).toBe(5)
+
+	});
+
+	test('calcSize', () => {
+		let obj = {foo: "bar", baz: "qux"}
+		expect(u.calcSize(obj)).toBe(25)
+
+	});
+
+	test('round', () => {
+		let num = 4.21
+		let otherNum = 4.5
+
+		expect(u.round(num)).toBe(4)
+		expect(u.round(otherNum)).toBe(5)
+
+	});
+
+	test('uid', () => {
+		let uid = u.uid()
+		let longuid = u.uid(128)
+
+		expect(uid.length).toBe(64)
+		expect(longuid.length).toBe(128)
+
+		const manyUid = [];
+
+		u.times(1000, () =>{ 
+			manyUid.push(u.uid())
+		})
+
+
+		expect(u.dedupe(manyUid).length).toBe(1000)
+
+	});
+
+	test('uuid', () => {
+		const uuids = [];
+
+		u.times(1000, () =>{ 
+			uuids.push(u.uuid())
+		})
+
+
+
+		expect(u.dedupe(uuids).length).toBe(1000)
+	});
+
+});
+
+
 
 
 // OBJECT UTILITES
 
 describe('objects', () => {
+
+	test('rename keys', () =>{ 
+		const oldObj = {foo: "bar", baz: "qux"}
+		const newObj = {dude: "bar", man: "qux"}
+		const mapping = {foo: "dude", baz: "man"}
+		expect(u.rnKeys(oldObj, mapping)).toEqual(newObj)
+	})
 
 	test('deep clone', () => {
 		const source = {
