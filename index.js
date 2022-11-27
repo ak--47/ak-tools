@@ -49,6 +49,7 @@ exports.ls = async function listFiles(dir = "./", objectMode = false) {
 /**
  * remove a file or directory
  * @param  {string} fileNameOrPath - file or path to be removed
+ * @returns {(string|boolean)} path or `false` if fail
  */
 exports.rm = async function removeFileOrFolder(fileNameOrPath) {
 	let fileRemoved;
@@ -60,6 +61,7 @@ exports.rm = async function removeFileOrFolder(fileNameOrPath) {
 		} catch (e) {
 			console.error(`${fileNameOrPath} not removed!`);
 			console.error(e);
+			return false;
 		}
 	}
 
@@ -128,6 +130,11 @@ VALIDATION
 -----------
 */
 
+/**
+ * test if `string` has JSON structure; if `true` it can be safely parsed
+ * @param  {string} string
+ * @returns {boolean}
+ */
 exports.isJSONStr = function hasJsonStructure(string) {
 	if (typeof string !== 'string') return false;
 	try {
@@ -140,6 +147,11 @@ exports.isJSONStr = function hasJsonStructure(string) {
 	}
 };
 
+/**
+ * test if `data` can be stringified as JSON
+ * @param  {string} data
+ * @returns {boolean}
+ */
 exports.isJSON = function canBeStrinigified(data) {
 	try {
 		let attempt = JSON.stringify(data);
@@ -163,6 +175,12 @@ exports.isJSON = function canBeStrinigified(data) {
 	}
 };
 
+/**
+ * check if a `type` matches a `value`
+ * @param  {any} type - a native type like `Number` or `Boolean`
+ * @param  {any} val - any value to check
+ * @returns {boolean}
+ */
 exports.is = function isPrimiativeType(type, val) {
 	if (typeof type === 'string') {
 		return typeof val === type;
@@ -170,6 +188,11 @@ exports.is = function isPrimiativeType(type, val) {
 	return ![, null].includes(val) && val.constructor === type;
 };
 
+/**
+ * check if a `val` is `null` or `undefined`
+ * @param  {any} val - value to check
+ * @returns {boolean}
+ */
 exports.isNil = function isNullOrUndefined(val) {
 	return val === undefined || val === null;
 };
@@ -180,10 +203,23 @@ DISPLAY
 -------
 */
 
+/**
+ * turn a number into a comma separated value; `1000` => `"1,000"`
+ * @param  {(string | number)} num
+ * @returns {string} formatted number 
+ */
 exports.comma = function addCommas(num) {
 	return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
 
+/**
+ * truncate a string; using an elipses (`...`)
+ * @param  {string} text - text to truncate
+ * @param  {number} chars=500 - # of max characters
+ * @param  {boolean} [useWordBoundary=true] - don't break words; default `true`
+ * @returns {string} truncated string
+ * 
+ */
 exports.truncate = function intelligentlyTruncate(text, chars = 500, useWordBoundary = true) {
 	if (!text) {
 		return "";
@@ -197,6 +233,13 @@ exports.truncate = function intelligentlyTruncate(text, chars = 500, useWordBoun
 		subString) + "...";
 };
 
+/**
+ * turn a number (of bytes) into a human readable string
+ * @param  {number} bytes - number of bytes to convert
+ * @param  {boolean} [si=false] - threshold of 1000 or 1024; default `false`
+ * @param  {number} [dp=2] - decmimal points; default `2`
+ * @returns {string} # of bytes
+ */
 exports.bytesHuman = function (bytes, si = false, dp = 2) {
 	//https://stackoverflow.com/a/14919494
 	const thresh = si ? 1000 : 1024;
@@ -218,14 +261,31 @@ exports.bytesHuman = function (bytes, si = false, dp = 2) {
 	return bytes.toFixed(dp) + ' ' + units[u];
 };
 
+/** stringify object to json
+ * @param  {object} data - any serializable object
+ * @param  {number} [padding=2] - padding to use
+ * @returns {string} valid json
+ */
 exports.json = function stringifyJSON(data, padding = 2) {
 	return JSON.stringify(data, null, padding);
 };
 
-exports.stripHTML = function (str) {
+/**
+ * strip all `<html>` tags from a string
+ * @param  {string} str string with html tags
+ * @returns {string} sanitized string
+ * @note note: `<br>` tags are replace with `\n`
+ */
+exports.stripHTML = function removeHTMLEntities(str) {
 	return str.replace(/<br\s*[\/]?>/gi, "\n").replace(/<[^>]*>?/gm, '');
 };
 
+/**
+ * find and replace _many_ values in string
+ * @param  {string} str - string to replace
+ * @param  {Array[]} [replacePairs=[["|"],["<"],[">"]]] shape: `[ [old, new] ]`
+ * @returns {string} multi-replaced string
+ */
 exports.multiReplace = function (str, replacePairs = [
 	["|"],
 	["<"],
@@ -240,19 +300,33 @@ exports.multiReplace = function (str, replacePairs = [
 	return text.split(" ").filter(x => x).join(" ");
 };
 
-exports.replaceAll = function (str, newStr) {
+/**
+ * replace all occurance of `old` with `new`
+ * @param  {(string | RegExp)} oldVal - old value
+ * @param  {(string)} newVal - new value
+ * @returns {string} replaced result 
+ * @note this can't be called on any string directly
+ */
+exports.replaceAll = function (oldVal, newVal) {
 
 	// If a regex pattern
-	if (Object.prototype.toString.call(str).toLowerCase() === '[object regexp]') {
-		return this.replace(str, newStr);
+	if (Object.prototype.toString.call(oldVal).toLowerCase() === '[object regexp]') {
+		return this.replace(oldVal, newVal);
 	}
 
 	// If a string
-	return this.replace(new RegExp(str, 'g'), newStr);
+	return this.replace(new RegExp(oldVal, 'g'), newVal);
 
 };
 
-exports.toCSV = function arrayToCSV(arr, delimiter = ',', headers = []) {
+/**
+ * convert array of arrays to CSV like string
+ * @param  {Array[]} arr - data of the form `[ [], [], [] ]`
+ * @param  {String[]} [headers=[]] - header column 
+ * @param  {string} [delimiter=,] - delimeter for cells; default `,`
+ * @returns {string} a valid CSV
+ */
+exports.toCSV = function arrayToCSV(arr, headers = [], delimiter = ',') {
 	if (!delimiter) {
 		delimiter = `,`;
 	}
