@@ -8,18 +8,60 @@ const http = require("https");
 const os = require("os");
 
 /*
+-----------
+NAMESPACES
+-----------
+*/
+
+/**
+ * file management utilities 
+ * @namespace files
+*/
+
+/**
+ * data validation utilities
+ * @namespace validation
+*/
+
+/**
+ * display, formatting, and other "make it look right" utilities
+ * @namespace display
+*/
+
+/**
+ * functions for maths, crypto, and calculations
+ * @namespace calculations
+*/
+
+/**
+ * object utilities
+ * @namespace objects
+*/
+
+/**
+ * array utilities
+ * @namespace arrays
+*/
+
+/**
+ * function utilities 
+ * @namespace functions
+*/
+
+/**
+ * logging, timers and other diagnostic utilities
+ * @namespace logging
+*/
+
+/*
 ------
 FILES
 ------
 */
 
-/**
- * file managment 
- * @namespace files
-*/
-
 /** 
  * list directory contents
+ * @memberof files
  * @param  {string} [dir="./"] - directory to enumerate; default `./`
  * @param  {boolean} [objectMode=false] - return `{name: path}` instead of `[path]`; default `false`
  * @returns {Promise<any>} `[]` of files in folder
@@ -39,6 +81,7 @@ exports.ls = async function listFiles(dir = "./", objectMode = false) {
 
 /**
  * remove a file or directory
+ * @memberof files
  * @param  {string} fileNameOrPath - file or path to be removed
  * @returns {(Promise<string|boolean|void>)} path or `false` if fail
  */
@@ -61,6 +104,7 @@ exports.rm = async function removeFileOrFolder(fileNameOrPath) {
 
 /**
  * create a file
+ * @memberof files
  * @param  {string} fileNameOrPath - file to create
  * @param  {string} [data=""] - data to write; default `""`
  * @param  {boolean} [isJson=false] - is `data` JSON; default `false`
@@ -84,6 +128,7 @@ exports.touch = async function addFile(fileNameOrPath, data = "", isJson = false
 
 /**
  * load a filed into memory
+ * @memberof files
  * @param  {string} fileNameOrPath - file to create
  * @param  {boolean} [isJson=false] - is `data` JSON; default `false`
  * @param {string} [encoding=utf-8] - file encoring; default `utf-8`
@@ -109,6 +154,7 @@ exports.load = async function loadFile(fileNameOrPath, isJson = false, encoding 
 
 /**
  * make a directory
+ * @memberof files
  * @param  {string} [dirPath="./tmp"] - path to create; default `./tmp`
  */
 exports.mkdir = function (dirPath = `./tmp`) {
@@ -124,13 +170,8 @@ VALIDATION
 */
 
 /**
- * data validation utilities
- * @namespace validation
-*/
-
-
-/**
  * test if `string` has JSON structure; if `true` it can be safely parsed
+ * @memberof validation
  * @param  {string} string
  * @returns {boolean}
  */
@@ -148,6 +189,7 @@ exports.isJSONStr = function hasJsonStructure(string) {
 
 /**
  * test if `data` can be stringified as JSON
+ * @memberof validation
  * @param  {string | JSON} data
  * @returns {boolean}
  */
@@ -176,6 +218,7 @@ exports.isJSON = function canBeStrinigified(data) {
 
 /**
  * check if a `type` matches a `value`
+ * @memberof validation
  * @param  {any} type - a native type like `Number` or `Boolean`
  * @param  {any} val - any value to check
  * @returns {boolean}
@@ -189,6 +232,7 @@ exports.is = function isPrimiativeType(type, val) {
 
 /**
  * check if a `val` is `null` or `undefined`
+ * @memberof validation
  * @param  {any} val - value to check
  * @returns {boolean}
  */
@@ -203,13 +247,8 @@ DISPLAY
 */
 
 /**
- * display, formatting, and other "make it look right" utilities
- * @namespace display
-*/
-
-
-/**
  * turn a number into a comma separated value; `1000` => `"1,000"`
+ * @memberof display
  * @param  {(string | number)} num
  * @returns {string} formatted number 
  */
@@ -219,6 +258,7 @@ exports.comma = function addCommas(num) {
 
 /**
  * truncate a string; using an elipses (`...`)
+ * @memberof display
  * @param  {string} text - text to truncate
  * @param  {number} chars=500 - # of max characters
  * @param  {boolean} [useWordBoundary=true] - don't break words; default `true`
@@ -240,6 +280,7 @@ exports.truncate = function intelligentlyTruncate(text, chars = 500, useWordBoun
 
 /**
  * turn a number (of bytes) into a human readable string
+ * @memberof display
  * @param  {number} bytes - number of bytes to convert
  * @param  {boolean} [si=false] - threshold of 1000 or 1024; default `false`
  * @param  {number} [dp=2] - decmimal points; default `2`
@@ -267,6 +308,7 @@ exports.bytesHuman = function (bytes, si = false, dp = 2) {
 };
 
 /** stringify object to json
+ * @memberof display
  * @param  {object} data - any serializable object
  * @param  {number} [padding=2] - padding to use
  * @returns {string} valid json
@@ -277,6 +319,7 @@ exports.json = function stringifyJSON(data, padding = 2) {
 
 /**
  * strip all `<html>` tags from a string
+ * @memberof display
  * @param  {string} str string with html tags
  * @returns {string} sanitized string
  * @note note: `<br>` tags are replace with `\n`
@@ -287,6 +330,7 @@ exports.stripHTML = function removeHTMLEntities(str) {
 
 /**
  * find and replace _many_ values in string
+ * @memberof display
  * @param  {string} str - string to replace
  * @param  {Array[]} [replacePairs=[["|"],["<"],[">"]]] shape: `[ [old, new] ]`
  * @returns {string} multi-replaced string
@@ -308,6 +352,7 @@ exports.multiReplace = function (str, replacePairs = [
 
 /**
  * replace all occurance of `old` with `new`
+ * @memberof display
  * @param  {(string | RegExp)} oldVal - old value
  * @param  {(string)} newVal - new value
  * @returns {string} replaced result 
@@ -327,6 +372,7 @@ exports.replaceAll = function (oldVal, newVal) {
 
 /**
  * convert array of arrays to CSV like string
+ * @memberof display
  * @param  {Array[]} arr - data of the form `[ [], [], [] ]`
  * @param  {String[]} [headers=[]] - header column 
  * @param  {string} [delimiter=","] - delimeter for cells; default `,`
@@ -352,14 +398,8 @@ CALCULATIONS
 */
 
 /**
- * functions for maths, crypto, and calculations
- * @namespace calculations
-*/
-
-
-/**
  * duplicate values within an array N times
- *
+ * @memberof calculations
  * @param  {any[]} array - array to duplicate
  * @param  {number} [times=1] -  number of dupes per item
  * @returns {any[]} duplicated array
@@ -376,6 +416,7 @@ exports.dupeVals = function duplicateArrayValues(array, times = 1) {
 
 /**
  * random integer between `min` and `max` (inclusive)
+ * @memberof calculations
  * @param  {number} min=1 - minimum
  * @param  {number} max=100 - maximum
  * @returns {number} random number
@@ -388,6 +429,7 @@ exports.rand = function generateRandomNumber(min = 1, max = 100) {
 
 /**
  * calculate average of `...nums`
+ * @memberof calculations
  * @param  {...number} nums - numbers to average
  * @returns {number} average
  */
@@ -397,6 +439,7 @@ exports.avg = function calcAverage(...nums) {
 
 /**
  * calculate the size (on disk)
+ * @memberof calculations
  * @param  {JSON} data - JSON to estimate
  * @returns {number} estimated size in bytes
  */
@@ -407,6 +450,7 @@ exports.calcSize = function estimateSizeOnDisk(data) {
 
 /**
  * round a number to a number of decimal places
+ * @memberof calculations
  * @param  {number} number - number to round
  * @param  {number} [decimalPlaces=0] - decimal places; default `0`
  * @returns {number} rounded number
@@ -420,6 +464,7 @@ exports.round = function roundsNumbers(number, decimalPlaces = 0) {
 /**
  * generate a random uid:
  * - `6NswVtnKWsvRGNTi0H2YtuqGwsqJi4dKW6qUgSiUx1XNctr4rkGRFOA9HRl9i60S`
+ * @memberof calculations
  * @param  {number} [length=64] length of id 
  * @returns {string} a uid of specified length
  */
@@ -438,6 +483,7 @@ exports.uid = function makeUid(length = 64) {
 /**
  * generated a uuid in v4 format:
  * - `72452488-ded9-46c1-8c22-2403ea924a8e`
+ * @memberof calculations
  * @returns {string} a uuid 
  */
 exports.uuid = function uuidv4() {
@@ -448,6 +494,55 @@ exports.uuid = function uuidv4() {
 	});
 };
 
+/** 
+ * calculate the md5 hash of any data
+ * @memberof calculations
+ * @param {any} data - data to hash
+ * @returns {string} md5 hash of `data
+ */
+exports.md5 = function calcMd5Hash(data) {
+	var hc="0123456789abcdef";
+    function rh(n) {var j,s="";for(j=0;j<=3;j++) s+=hc.charAt((n>>(j*8+4))&0x0F)+hc.charAt((n>>(j*8))&0x0F);return s;}
+    function ad(x,y) {var l=(x&0xFFFF)+(y&0xFFFF);var m=(x>>16)+(y>>16)+(l>>16);return (m<<16)|(l&0xFFFF);}
+    function rl(n,c)            {return (n<<c)|(n>>>(32-c));}
+    function cm(q,a,b,x,s,t)    {return ad(rl(ad(ad(a,q),ad(x,t)),s),b);}
+    function ff(a,b,c,d,x,s,t)  {return cm((b&c)|((~b)&d),a,b,x,s,t);}
+    function gg(a,b,c,d,x,s,t)  {return cm((b&d)|(c&(~d)),a,b,x,s,t);}
+    function hh(a,b,c,d,x,s,t)  {return cm(b^c^d,a,b,x,s,t);}
+    function ii(a,b,c,d,x,s,t)  {return cm(c^(b|(~d)),a,b,x,s,t);}
+    function sb(x) {
+        var i;var nblk=((x.length+8)>>6)+1;var blks=new Array(nblk*16);for(i=0;i<nblk*16;i++) blks[i]=0;
+        for(i=0;i<x.length;i++) blks[i>>2]|=x.charCodeAt(i)<<((i%4)*8);
+        blks[i>>2]|=0x80<<((i%4)*8);blks[nblk*16-2]=x.length*8;return blks;
+    }
+    var i,x=sb(data),a=1732584193,b=-271733879,c=-1732584194,d=271733878,olda,oldb,oldc,oldd;
+    for(i=0;i<x.length;i+=16) {olda=a;oldb=b;oldc=c;oldd=d;
+        a=ff(a,b,c,d,x[i+ 0], 7, -680876936);d=ff(d,a,b,c,x[i+ 1],12, -389564586);c=ff(c,d,a,b,x[i+ 2],17,  606105819);
+        b=ff(b,c,d,a,x[i+ 3],22,-1044525330);a=ff(a,b,c,d,x[i+ 4], 7, -176418897);d=ff(d,a,b,c,x[i+ 5],12, 1200080426);
+        c=ff(c,d,a,b,x[i+ 6],17,-1473231341);b=ff(b,c,d,a,x[i+ 7],22,  -45705983);a=ff(a,b,c,d,x[i+ 8], 7, 1770035416);
+        d=ff(d,a,b,c,x[i+ 9],12,-1958414417);c=ff(c,d,a,b,x[i+10],17,     -42063);b=ff(b,c,d,a,x[i+11],22,-1990404162);
+        a=ff(a,b,c,d,x[i+12], 7, 1804603682);d=ff(d,a,b,c,x[i+13],12,  -40341101);c=ff(c,d,a,b,x[i+14],17,-1502002290);
+        b=ff(b,c,d,a,x[i+15],22, 1236535329);a=gg(a,b,c,d,x[i+ 1], 5, -165796510);d=gg(d,a,b,c,x[i+ 6], 9,-1069501632);
+        c=gg(c,d,a,b,x[i+11],14,  643717713);b=gg(b,c,d,a,x[i+ 0],20, -373897302);a=gg(a,b,c,d,x[i+ 5], 5, -701558691);
+        d=gg(d,a,b,c,x[i+10], 9,   38016083);c=gg(c,d,a,b,x[i+15],14, -660478335);b=gg(b,c,d,a,x[i+ 4],20, -405537848);
+        a=gg(a,b,c,d,x[i+ 9], 5,  568446438);d=gg(d,a,b,c,x[i+14], 9,-1019803690);c=gg(c,d,a,b,x[i+ 3],14, -187363961);
+        b=gg(b,c,d,a,x[i+ 8],20, 1163531501);a=gg(a,b,c,d,x[i+13], 5,-1444681467);d=gg(d,a,b,c,x[i+ 2], 9,  -51403784);
+        c=gg(c,d,a,b,x[i+ 7],14, 1735328473);b=gg(b,c,d,a,x[i+12],20,-1926607734);a=hh(a,b,c,d,x[i+ 5], 4,    -378558);
+        d=hh(d,a,b,c,x[i+ 8],11,-2022574463);c=hh(c,d,a,b,x[i+11],16, 1839030562);b=hh(b,c,d,a,x[i+14],23,  -35309556);
+        a=hh(a,b,c,d,x[i+ 1], 4,-1530992060);d=hh(d,a,b,c,x[i+ 4],11, 1272893353);c=hh(c,d,a,b,x[i+ 7],16, -155497632);
+        b=hh(b,c,d,a,x[i+10],23,-1094730640);a=hh(a,b,c,d,x[i+13], 4,  681279174);d=hh(d,a,b,c,x[i+ 0],11, -358537222);
+        c=hh(c,d,a,b,x[i+ 3],16, -722521979);b=hh(b,c,d,a,x[i+ 6],23,   76029189);a=hh(a,b,c,d,x[i+ 9], 4, -640364487);
+        d=hh(d,a,b,c,x[i+12],11, -421815835);c=hh(c,d,a,b,x[i+15],16,  530742520);b=hh(b,c,d,a,x[i+ 2],23, -995338651);
+        a=ii(a,b,c,d,x[i+ 0], 6, -198630844);d=ii(d,a,b,c,x[i+ 7],10, 1126891415);c=ii(c,d,a,b,x[i+14],15,-1416354905);
+        b=ii(b,c,d,a,x[i+ 5],21,  -57434055);a=ii(a,b,c,d,x[i+12], 6, 1700485571);d=ii(d,a,b,c,x[i+ 3],10,-1894986606);
+        c=ii(c,d,a,b,x[i+10],15,   -1051523);b=ii(b,c,d,a,x[i+ 1],21,-2054922799);a=ii(a,b,c,d,x[i+ 8], 6, 1873313359);
+        d=ii(d,a,b,c,x[i+15],10,  -30611744);c=ii(c,d,a,b,x[i+ 6],15,-1560198380);b=ii(b,c,d,a,x[i+13],21, 1309151649);
+        a=ii(a,b,c,d,x[i+ 4], 6, -145523070);d=ii(d,a,b,c,x[i+11],10,-1120210379);c=ii(c,d,a,b,x[i+ 2],15,  718787259);
+        b=ii(b,c,d,a,x[i+ 9],21, -343485551);a=ad(a,olda);b=ad(b,oldb);c=ad(c,oldc);d=ad(d,oldd);
+    }
+    return rh(a)+rh(b)+rh(c)+rh(d);
+}
+
 
 /*
 -------
@@ -456,13 +551,8 @@ OBJECTS
 */
 
 /**
- * object utilities
- * @namespace objects
-*/
-
-
-/**
  * rename object keys with a mapping object `{oldKey: newKey}`
+ * @memberof objects
  * @param  {Object} obj - object to rename
  * @param  {Object} newKeys - map of form `{oldKey: newKey}`
  * @returns {Object} new object with renamed keys
@@ -480,6 +570,7 @@ exports.rnKeys = function renameObjectKeys(obj, newKeys) {
 
 /**
  * rename object values using a mapping array
+ * @memberof objects
  * @param  {Object} obj
  * @param  {Array[]} pairs `[['old', 'new']]`
  * @returns {Object} object with renamed values
@@ -490,6 +581,7 @@ exports.rnVals = function renameValues(obj, pairs) {
 
 /**
  * filter arrays by values or objects by keys
+ * @memberof objects
  * @param  {Object} hash - object or array to filter
  * @param  {Function} test_function - a function which is called on keys/values 
  * @returns {Object} filtered object
@@ -513,8 +605,9 @@ exports.objFilter = function filterObjectKeys(hash, test_function) {
  * - `undefined` 
  * - `{}`
  * - `[]` 
+ * @memberof objects
  * @param  {Object} obj
- * @returns cleaned object
+ * @returns {Object} cleaned object
  */
 exports.objClean = function removeFalsyValues(obj) {
 	//where objects have falsy values, delete those keys
@@ -561,6 +654,7 @@ exports.objClean = function removeFalsyValues(obj) {
 
 /**
  * apply default props to an object; don't override values from source
+ * @memberof objects
  * @param  {Object} obj - original object
  * @param  {Object} defs - props to add without overriding
  * @returns {Object} an object which has `defs` props
@@ -571,6 +665,7 @@ exports.objDefault = function assignDefaultProps(obj, ...defs) {
 
 /**
  * deep equality match for any two objects
+ * @memberof objects
  * @param  {Object} obj
  * @param  {Object} source
  * @returns {boolean} do objects match?
@@ -581,6 +676,7 @@ exports.objMatch = function doObjectsMatch(obj, source) {
 
 /**
  * an efficient way to clone an Object; outpreforms `JSON.parse(JSON.strigify())` by 100x
+ * @memberof objects
  * @param  {Object} thing - object to clone
  * @param {unknown} [opts]
  * @returns {Object} copied object
@@ -619,6 +715,7 @@ exports.clone = function deepClone(thing, opts) {
 /**
  * visit every property of an object a turn "number" values into numbers
  * - ex: `{foo: {bar: '42'}}` => `{foo: {bar: 42}}`
+ * @memberof objects
  * @param  {object} obj - object to traverse
  * @param  {boolean} [isClone=false] - default `false`; if `true` will mutate the passed in object
  * @returns {Object} object with all "numbers" as proper numbers
@@ -650,9 +747,11 @@ exports.typecastInt = function mutateObjValToIntegers(obj, isClone = false) {
 
 	return target;
 };
+
 /**
  * utility to `await` object values
  * - ex: `{foo: await bar()}`
+ * @memberof objects
  * @param  {object} obj object
  * @returns {Promise} the resolved values of the object's keys
  */
@@ -673,6 +772,7 @@ exports.awaitObj = function resolveObjVals(obj) {
 /**
  * explicitly remove keys with `null` or `undefined` values; mutates object
  * - ex: `{foo: "bar", baz: null}` => `{foo: "bar"}`
+ * @memberof objects
  * @param  {Object} objWithNullOrUndef - an object with `null` or `undefined` values
  * @returns {Object} an object without `null` or `undefined` values
  */
@@ -692,6 +792,7 @@ exports.removeNulls = function (objWithNullOrUndef) {
 
 /**
  * check if a value is an integer, if so return it
+ * @ignore
  * @param  {string} value - a value to test
  * @returns {(number | NaN)} a `number` or `NaN`
  */
@@ -711,13 +812,8 @@ ARRAYS
 */
 
 /**
- * array utilities
- * @namespace arrays
-*/
-
-
-/**
  * de-dupe array of objects w/Set, stringify, parse
+ * @memberof arrays
  * @param  {any} arrayOfThings - array to dedupe
  * @returns {any[]} deduped array
  */
@@ -728,6 +824,7 @@ exports.dedupe = function deepDeDupe(arrayOfThings) {
 
 /**
  * de-dupe array of objects by value of specific keys
+ * @memberof arrays
  * @param  {any[]} arr - array to dedupe
  * @param  {string[]} keyNames - keynames to dedupe values on
  * @returns {any[]} deduped array of objected
@@ -741,6 +838,7 @@ exports.dedupeVal = function dedupeByValues(arr, keyNames) {
 /**
  * chunk array of objects into array of arrays with each less than or equal to `chunkSize`
  * - `[{},{},{},{}]` => `[[{},{}],[{},{}]]`
+ * @memberof arrays
  * @param  {any[]} sourceArray - array to batch
  * @param  {number} chunkSize - max length of each batch
  * @returns {any[]} chunked array
@@ -761,6 +859,7 @@ exports.chunk = function chunkArray(sourceArray, chunkSize) {
 
 /**
  * fisher-yates shuffle of array elements
+ * @memberof arrays
  * @param  {any[]} array - array to shuffle
  * @param  {boolean} [mutate=false] - mutate array in place? default: `false`
  * @returns {any[]} shuffled array
@@ -783,6 +882,7 @@ exports.shuffle = function shuffleArrayVals(array, mutate = false) {
 
 /**
  * the classic python built-in for generating arrays of integers
+ * @memberof arrays
  * @param  {number} min - starting number
  * @param  {number} max - ending nunber
  * @param  {number} [step=1] - step for each interval; default `1`
@@ -801,6 +901,7 @@ exports.range = function buildRangeArray(min, max, step = 1) {
 /**
  * recursively and deeply flatten a nested array of objects
  * - ex: `[ [ [{},{}], {}], {} ]` => `[{},{},{},{}]`
+ * @memberof arrays
  * @param  {any[]} arr - array to flatten
  * @returns {any[]} flat array
  */
@@ -811,6 +912,7 @@ exports.deepFlat = function deepFlatten(arr) {
 /**
  * extract words from a string as an array
  * - ex `"foo bar baz"` => `['foo','bar','baz']`
+ * @memberof arrays
  * @param  {string} str - string to extract from
  * @returns {string[]} extracted words
  */
@@ -825,13 +927,8 @@ FUNCTIONS
 */
 
 /**
- * function utilities 
- * @namespace functions
-*/
-
-
-/**
  * `try{} catch{}` a function; return results
+ * @memberof functions
  * @param  {Function} fn
  * @param  {...any} args
  */
@@ -845,6 +942,7 @@ exports.attempt = async function tryToExec(fn, ...args) {
 
 /**
  * do a function `N` times
+ * @memberof functions
  * @param  {number} n - number of times
  * @param  {Function} iteratee - function to run
  */
@@ -857,6 +955,7 @@ exports.times = function doNTimes(n, iteratee, context) {
 
 /**
  * throttle a functions's execution every `N` ms
+ * @memberof functions
  * @param  {function} func - function to throttle
  * @param  {number} wait - ms to wait between executiations
  * @param  {object} [options={leading: true, trailing: false}]
@@ -905,6 +1004,7 @@ exports.throttle = function throttle(func, wait, options = { leading: true, trai
 /**
  * compose functions, left-to-right
  * - ex: `c(a,b,c)` => `a(b(c()))`
+ * @memberof functions
  * @returns {function} a composed chain of functions
  */
 exports.compose = function composeFns() {
@@ -920,6 +1020,7 @@ exports.compose = function composeFns() {
 
 /**
  * a function which returns it's value 
+ * @memberof functions
  * @param  {any} any - anything
  * @return {any} the same thing
  */
@@ -934,13 +1035,8 @@ LOGGING
 */
 
 /**
- * logging, timers and other diagnostic utilities
- * @namespace logging
-*/
-
-
-/**
  * a cloud function compatible `console.log()`
+ * @memberof logging
  * @param  {(string | JSON)} data - data to log
  * @param  {string} message - accopanying message
  * @param  {string} [severity=`INFO`] - {@link https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity| google sev label}; default `INFO`
@@ -986,6 +1082,7 @@ exports.cLog = function cloudFunctionLogger(data, message, severity = `INFO`) {
 
 /**
  * a comprehensive logging utility in all terminal environments
+ * @memberof logging
  * @param  {any} item - an item to log
  * @param  {number} [depth=0] - depth to log
  * @param  {number} [maxDepth=100] - maximum nested depth
@@ -1012,6 +1109,7 @@ exports.log = function comprehensiveLog(item, depth = 0, maxDepth = 100) {
 /**
  * dumb progress bar; incrementing console message
  * - ex: `thing message #`
+ * @memberof logging
  * @param {string} thing - what is being 
  * @param {number} p - the number to show
  * @param {string} message - 
@@ -1085,6 +1183,7 @@ class Timer {
  * - `timer.end()`
  * - `timer.report()`
  * - `timer.prettyTime()`
+ * @memberof logging
  * @param  {string} label - name for timer
  * @return {Timer} a time
  */
@@ -1095,6 +1194,7 @@ exports.time = function (label) {
 /**
  * a very quick way to check the length of a function; uses `console.time`
  * - ex: `timeTaken(main)`
+ * @memberof logging
  * @param  {function} callback
  */
 exports.quickTime = function timeTaken(callback) {
@@ -1107,6 +1207,7 @@ exports.quickTime = function timeTaken(callback) {
 /**
  * track stuff to mixpanel
  * - ex: `var t = track(); t('foo', {bar: "baz"})`
+ * @memberof logging
  * @param  {string} [app='akTools'] - value of `$source` prop
  * @param  {string} [token="99a1209a992b3f9fba55a293e211186a"] - mixpanel token
  * @param  {string} [distinct_id=os.userInfo().username] - distinct_id
@@ -1194,11 +1295,31 @@ exports.tracker = function sendToMixpanel(app = 'akTools', token = "99a1209a992b
 
 /**
  * arbitrary sleep for `N` ms
+ * @memberof logging
  * @param {number} ms - amount of time to sleep
  */
 exports.sleep = function pauseFor(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 };
+
+/**
+ * copy arbitrary data to your clipboard
+ * @memberof logging
+ * @param  {any} data - data to put on your clipboard
+ * @returns {void} but there's data on your clipboard!
+ */
+exports.clip = function copyToClipboard(data) {
+    var proc = require('child_process').spawn('pbcopy'); 
+    proc.stdin.write(data); proc.stdin.end();
+}
+
+
+/*
+--------
+ALIASES
+--------
+*/
+exports.copy = exports.clip
 
 
 // ripped out of underscore; should not be called directly
