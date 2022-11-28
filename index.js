@@ -329,7 +329,7 @@ exports.replaceAll = function (oldVal, newVal) {
  * convert array of arrays to CSV like string
  * @param  {Array[]} arr - data of the form `[ [], [], [] ]`
  * @param  {String[]} [headers=[]] - header column 
- * @param  {string} [delimiter=,] - delimeter for cells; default `,`
+ * @param  {string} [delimiter=","] - delimeter for cells; default `,`
  * @returns {string} a valid CSV
  */
 exports.toCSV = function arrayToCSV(arr, headers = [], delimiter = ',') {
