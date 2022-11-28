@@ -9,7 +9,7 @@ $ npm i ak-tools
 
 use:
 ```javascript
-const utils = require('ak-tools') 		//cjs
+const utils = require('ak-tools') 	//cjs
 import {* as utils} from 'ak-tools' 	//esm
 ```
 

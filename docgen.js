@@ -10,6 +10,7 @@ function main() {
 		.replace('## Object', '## API')
 		.replaceAll(` : <code>object</code>`, "")
 		.replaceAll(`**Kind**: global namespace  `, "");
+		
 	const docs = prefix.concat(genDocs).trim();
 	const written = u.touch('./README.md', docs);
 	u.copy(docs);
