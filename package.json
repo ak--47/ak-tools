@@ -1,13 +1,14 @@
 {
   "name": "ak-tools",
-  "version": "1.0.19",
+  "version": "1.0.2",
   "description": "AK's collections of useful things...",
   "main": "index.js",
   "scripts": {
     "test": "jest --watch",
     "post": "npm publish",
-	"dev" : "nodemon scratch.js",
-	"prune": "rm -rf ./tmp/*"
+    "dev": "nodemon scratch.js",
+    "prune": "rm -rf ./tmp/*",
+	"docs": "node docgen.js"
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,7 @@
   "homepage": "https://github.com/ak--47/ak-tools#readme",
   "devDependencies": {
     "jest": "^29.0.1",
+    "jsdoc-to-markdown": "^7.1.1",
     "nodemon": "^2.0.19"
   }
 }

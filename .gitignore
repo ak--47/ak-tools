@@ -1,4 +1,5 @@
 .DS_Store
+baseReadMe.js
 scratch.js
 tmp/*
 !tmp/.gitkeep
