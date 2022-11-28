@@ -7,31 +7,22 @@ const readline = require('readline');
 const http = require("https");
 const os = require("os");
 
-
-/*
------
-TYPES
------
-*/
-
-/**
- * Arbitrary data
- * @typedef {(string|object[])} Data
- */
-
-
-
 /*
 ------
 FILES
 ------
 */
 
+/**
+ * file managment 
+ * @namespace files
+*/
+
 /** 
  * list directory contents
- * @param  {string} [dir=./] - directory to enumerate; default `./`
+ * @param  {string} [dir="./"] - directory to enumerate; default `./`
  * @param  {boolean} [objectMode=false] - return `{name: path}` instead of `[path]`; default `false`
- * @returns {string[]} `[]` of files in folder
+ * @returns {Promise<any>} `[]` of files in folder
  */
 exports.ls = async function listFiles(dir = "./", objectMode = false) {
 	let fileList = await fs.readdir(dir);
@@ -39,7 +30,7 @@ exports.ls = async function listFiles(dir = "./", objectMode = false) {
 		return fileList.map(fileName => path.resolve(`${dir}/${fileName}`));
 	}
 	let results = {};
-	for (fileName of fileList) {
+	for (const fileName of fileList) {
 		// let keyName = fileName.split('.')
 		results[fileName] = path.resolve(`${dir}/${fileName}`);
 	}
@@ -49,7 +40,7 @@ exports.ls = async function listFiles(dir = "./", objectMode = false) {
 /**
  * remove a file or directory
  * @param  {string} fileNameOrPath - file or path to be removed
- * @returns {(string|boolean)} path or `false` if fail
+ * @returns {(Promise<string|boolean|void>)} path or `false` if fail
  */
 exports.rm = async function removeFileOrFolder(fileNameOrPath) {
 	let fileRemoved;
@@ -71,7 +62,7 @@ exports.rm = async function removeFileOrFolder(fileNameOrPath) {
 /**
  * create a file
  * @param  {string} fileNameOrPath - file to create
- * @param  {Data} [data=""] - data to write; default `""`
+ * @param  {string} [data=""] - data to write; default `""`
  * @param  {boolean} [isJson=false] - is `data` JSON; default `false`
  * @returns {(Promise<string | false>)} the name of the file
  */
@@ -101,6 +92,7 @@ exports.load = async function loadFile(fileNameOrPath, isJson = false, encoding 
 	let fileLoaded;
 
 	try {
+		// @ts-ignore
 		fileLoaded = await fs.readFile(path.resolve(fileNameOrPath), encoding);
 	} catch (e) {
 		console.error(`${fileNameOrPath} not loaded!`);
@@ -108,6 +100,7 @@ exports.load = async function loadFile(fileNameOrPath, isJson = false, encoding 
 	}
 
 	if (isJson) {
+		// @ts-ignore
 		fileLoaded = JSON.parse(fileLoaded);
 	}
 
@@ -116,7 +109,7 @@ exports.load = async function loadFile(fileNameOrPath, isJson = false, encoding 
 
 /**
  * make a directory
- * @param  {string} [dirPath=./tmp] - path to create; default `./tmp`
+ * @param  {string} [dirPath="./tmp"] - path to create; default `./tmp`
  */
 exports.mkdir = function (dirPath = `./tmp`) {
 	let fullPath = path.resolve(dirPath);
@@ -129,6 +122,12 @@ exports.mkdir = function (dirPath = `./tmp`) {
 VALIDATION
 -----------
 */
+
+/**
+ * data validation utilities
+ * @namespace validation
+*/
+
 
 /**
  * test if `string` has JSON structure; if `true` it can be safely parsed
@@ -149,7 +148,7 @@ exports.isJSONStr = function hasJsonStructure(string) {
 
 /**
  * test if `data` can be stringified as JSON
- * @param  {string} data
+ * @param  {string | JSON} data
  * @returns {boolean}
  */
 exports.isJSON = function canBeStrinigified(data) {
@@ -202,6 +201,12 @@ exports.isNil = function isNullOrUndefined(val) {
 DISPLAY
 -------
 */
+
+/**
+ * display, formatting, and other "make it look right" utilities
+ * @namespace display
+*/
+
 
 /**
  * turn a number into a comma separated value; `1000` => `"1,000"`
@@ -293,6 +298,7 @@ exports.multiReplace = function (str, replacePairs = [
 ]) {
 	let text = str;
 	for (const pair of replacePairs) {
+		// @ts-ignore
 		text = text?.replaceAll(pair[0], pair[1] || " ");
 	}
 
@@ -339,12 +345,17 @@ exports.toCSV = function arrayToCSV(arr, headers = [], delimiter = ',') {
 	return body;
 };
 
-
 /*
 ------------
 CALCULATIONS
 ------------
 */
+
+/**
+ * functions for maths, crypto, and calculations
+ * @namespace calculations
+*/
+
 
 /**
  * duplicate values within an array N times
@@ -377,7 +388,7 @@ exports.rand = function generateRandomNumber(min = 1, max = 100) {
 
 /**
  * calculate average of `...nums`
- * @param  {...number} ...nums - numbers to average
+ * @param  {...number} nums - numbers to average
  * @returns {number} average
  */
 exports.avg = function calcAverage(...nums) {
@@ -402,6 +413,7 @@ exports.calcSize = function estimateSizeOnDisk(data) {
  */
 exports.round = function roundsNumbers(number, decimalPlaces = 0) {
 	//https://gist.github.com/djD-REK/068cba3d430cf7abfddfd32a5d7903c3
+	// @ts-ignore
 	return Number(Math.round(number + "e" + decimalPlaces) + "e-" + decimalPlaces);
 };
 
@@ -444,6 +456,12 @@ OBJECTS
 */
 
 /**
+ * object utilities
+ * @namespace objects
+*/
+
+
+/**
  * rename object keys with a mapping object `{oldKey: newKey}`
  * @param  {Object} obj - object to rename
  * @param  {Object} newKeys - map of form `{oldKey: newKey}`
@@ -473,7 +491,7 @@ exports.rnVals = function renameValues(obj, pairs) {
 /**
  * filter arrays by values or objects by keys
  * @param  {Object} hash - object or array to filter
- * @param  {callback} test_function - a function which is called on keys/values 
+ * @param  {Function} test_function - a function which is called on keys/values 
  * @returns {Object} filtered object
  */
 exports.objFilter = function filterObjectKeys(hash, test_function) {
@@ -544,7 +562,7 @@ exports.objClean = function removeFalsyValues(obj) {
 /**
  * apply default props to an object; don't override values from source
  * @param  {Object} obj - original object
- * @param  {Object} ...defs - props to add without overriding
+ * @param  {Object} defs - props to add without overriding
  * @returns {Object} an object which has `defs` props
  */
 exports.objDefault = function assignDefaultProps(obj, ...defs) {
@@ -564,6 +582,7 @@ exports.objMatch = function doObjectsMatch(obj, source) {
 /**
  * an efficient way to clone an Object; outpreforms `JSON.parse(JSON.strigify())` by 100x
  * @param  {Object} thing - object to clone
+ * @param {unknown} [opts]
  * @returns {Object} copied object
  */
 exports.clone = function deepClone(thing, opts) {
@@ -575,6 +594,7 @@ exports.clone = function deepClone(thing, opts) {
 	} else if (thing instanceof RegExp) {
 		return new RegExp(thing);
 	} else if (thing instanceof Function) {
+		// @ts-ignore
 		return opts && opts.newFns ?
 			new Function('return ' + thing.toString())() :
 			thing;
@@ -656,7 +676,7 @@ exports.awaitObj = function resolveObjVals(obj) {
  * @param  {Object} objWithNullOrUndef - an object with `null` or `undefined` values
  * @returns {Object} an object without `null` or `undefined` values
  */
-exports.removeNulls = function(objWithNullOrUndef) {
+exports.removeNulls = function (objWithNullOrUndef) {
 	for (let key in objWithNullOrUndef) {
 		if (objWithNullOrUndef[key] === null) {
 			delete objWithNullOrUndef[key];
@@ -672,7 +692,7 @@ exports.removeNulls = function(objWithNullOrUndef) {
 
 /**
  * check if a value is an integer, if so return it
- * @param  {unknown} value - a value to test
+ * @param  {string} value - a value to test
  * @returns {(number | NaN)} a `number` or `NaN`
  */
 function makeInteger(value) {
@@ -684,7 +704,6 @@ function makeInteger(value) {
 	}
 }
 
-
 /*
 -------
 ARRAYS
@@ -692,25 +711,39 @@ ARRAYS
 */
 
 /**
- * @param  {} arrayOfThings
+ * array utilities
+ * @namespace arrays
+*/
+
+
+/**
+ * de-dupe array of objects w/Set, stringify, parse
+ * @param  {any} arrayOfThings - array to dedupe
+ * @returns {any[]} deduped array
  */
 exports.dedupe = function deepDeDupe(arrayOfThings) {
+	// @ts-ignore
 	return Array.from(new Set(arrayOfThings.map(JSON.stringify))).map(JSON.parse);
 };
 
 /**
- * @param  {} arr
- * @param  {} keyNames=[]
+ * de-dupe array of objects by value of specific keys
+ * @param  {any[]} arr - array to dedupe
+ * @param  {string[]} keyNames - keynames to dedupe values on
+ * @returns {any[]} deduped array of objected
  */
-exports.dedupeVal = function dedupeByValues(arr, keyNames = []) {
+exports.dedupeVal = function dedupeByValues(arr, keyNames) {
 	// https://stackoverflow.com/a/56757215/4808195
 	return arr.filter((v, i, a) => a.findIndex(v2 => keyNames.every(k => v2[k] === v[k])) === i);
 
 };
 
 /**
- * @param  {} sourceArray
- * @param  {} chunkSize
+ * chunk array of objects into array of arrays with each less than or equal to `chunkSize`
+ * - `[{},{},{},{}]` => `[[{},{}],[{},{}]]`
+ * @param  {any[]} sourceArray - array to batch
+ * @param  {number} chunkSize - max length of each batch
+ * @returns {any[]} chunked array
  */
 exports.chunk = function chunkArray(sourceArray, chunkSize) {
 	return sourceArray.reduce((resultArray, item, index) => {
@@ -727,8 +760,10 @@ exports.chunk = function chunkArray(sourceArray, chunkSize) {
 };
 
 /**
- * @param  {} array
- * @param  {} mutate=false
+ * fisher-yates shuffle of array elements
+ * @param  {any[]} array - array to shuffle
+ * @param  {boolean} [mutate=false] - mutate array in place? default: `false`
+ * @returns {any[]} shuffled array
  */
 exports.shuffle = function shuffleArrayVals(array, mutate = false) {
 	//https://stackoverflow.com/a/12646864/4808195
@@ -747,9 +782,11 @@ exports.shuffle = function shuffleArrayVals(array, mutate = false) {
 };
 
 /**
- * @param  {} min
- * @param  {} max
- * @param  {} step=1
+ * the classic python built-in for generating arrays of integers
+ * @param  {number} min - starting number
+ * @param  {number} max - ending nunber
+ * @param  {number} [step=1] - step for each interval; default `1`
+ * @return {number[]} a range of integers
  */
 exports.range = function buildRangeArray(min, max, step = 1) {
 	const result = [];
@@ -762,21 +799,24 @@ exports.range = function buildRangeArray(min, max, step = 1) {
 };
 
 /**
- * @param  {} arr
+ * recursively and deeply flatten a nested array of objects
+ * - ex: `[ [ [{},{}], {}], {} ]` => `[{},{},{},{}]`
+ * @param  {any[]} arr - array to flatten
+ * @returns {any[]} flat array
  */
 exports.deepFlat = function deepFlatten(arr) {
 	return [].concat(...arr.map(v => (Array.isArray(v) ? deepFlatten(v) : v)));
 };
 
 /**
- * @param  {} str
- * @param  {} pattern=/[^a-zA-Z-]+/
+ * extract words from a string as an array
+ * - ex `"foo bar baz"` => `['foo','bar','baz']`
+ * @param  {string} str - string to extract from
+ * @returns {string[]} extracted words
  */
 exports.strToArr = function extractWords(str, pattern = /[^a-zA-Z-]+/) {
 	return str.split(pattern).filter(Boolean);
 };
-
-
 
 /*
 ---------
@@ -785,8 +825,15 @@ FUNCTIONS
 */
 
 /**
- * @param  {} fn
- * @param  {} ...args
+ * function utilities 
+ * @namespace functions
+*/
+
+
+/**
+ * `try{} catch{}` a function; return results
+ * @param  {Function} fn
+ * @param  {...any} args
  */
 exports.attempt = async function tryToExec(fn, ...args) {
 	try {
@@ -797,9 +844,9 @@ exports.attempt = async function tryToExec(fn, ...args) {
 };
 
 /**
- * @param  {} n
- * @param  {} iteratee
- * @param  {} context
+ * do a function `N` times
+ * @param  {number} n - number of times
+ * @param  {Function} iteratee - function to run
  */
 exports.times = function doNTimes(n, iteratee, context) {
 	var accum = Array(Math.max(0, n));
@@ -809,10 +856,10 @@ exports.times = function doNTimes(n, iteratee, context) {
 };
 
 /**
- * @param  {} func
- * @param  {} wait
- * @param  {true} options={leading
- * @param  {true}} trailing
+ * throttle a functions's execution every `N` ms
+ * @param  {function} func - function to throttle
+ * @param  {number} wait - ms to wait between executiations
+ * @param  {object} [options={leading: true, trailing: false}]
  */
 exports.throttle = function throttle(func, wait, options = { leading: true, trailing: true }) {
 	var timeout, context, args, result;
@@ -856,7 +903,9 @@ exports.throttle = function throttle(func, wait, options = { leading: true, trai
 };
 
 /**
- * 
+ * compose functions, left-to-right
+ * - ex: `c(a,b,c)` => `a(b(c()))`
+ * @returns {function} a composed chain of functions
  */
 exports.compose = function composeFns() {
 	var args = arguments;
@@ -869,6 +918,15 @@ exports.compose = function composeFns() {
 	};
 };
 
+/**
+ * a function which returns it's value 
+ * @param  {any} any - anything
+ * @return {any} the same thing
+ */
+exports.id = function identity(any) {
+	return any
+}
+
 /*
 -------
 LOGGING
@@ -876,11 +934,19 @@ LOGGING
 */
 
 /**
- * @param  {"bar"}} data={foo
- * @param  {} message
- * @param  {} severity=`INFO`
+ * logging, timers and other diagnostic utilities
+ * @namespace logging
+*/
+
+
+/**
+ * a cloud function compatible `console.log()`
+ * @param  {(string | JSON)} data - data to log
+ * @param  {string} message - accopanying message
+ * @param  {string} [severity=`INFO`] - {@link https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity| google sev label}; default `INFO`
+ * 
  */
-exports.cLog = function cloudFunctionLogger(data = { foo: "bar" }, message, severity = `INFO`) {
+exports.cLog = function cloudFunctionLogger(data, message, severity = `INFO`) {
 	if (global?.isTest) {
 		if (exports.isJSON(data)) {
 			if (message) console.log(message);
@@ -899,7 +965,7 @@ exports.cLog = function cloudFunctionLogger(data = { foo: "bar" }, message, seve
 			// https://cloud.google.com/functions/docs/monitoring/logging#writing_structured_logs
 			const structuredLog = Object.assign({
 				severity: severity,
-				message: message || `${moduleName || 'CF'} log`,
+				message: message || `${global.moduleName || 'CF'} log`,
 			},
 				data
 			);
@@ -919,11 +985,13 @@ exports.cLog = function cloudFunctionLogger(data = { foo: "bar" }, message, seve
 };
 
 /**
- * @param  {} item
- * @param  {} maxDepth=100
- * @param  {} depth=0
+ * a comprehensive logging utility in all terminal environments
+ * @param  {any} item - an item to log
+ * @param  {number} [depth=0] - depth to log
+ * @param  {number} [maxDepth=100] - maximum nested depth
+ * @returns {void}
  */
-exports.log = function comprehensiveLog(item, maxDepth = 100, depth = 0) {
+exports.log = function comprehensiveLog(item, depth = 0, maxDepth = 100) {
 	//the best logging function ever
 	//https://stackoverflow.com/a/27610197/4808195
 	if (depth > maxDepth) {
@@ -942,13 +1010,17 @@ exports.log = function comprehensiveLog(item, maxDepth = 100, depth = 0) {
 };
 
 /**
- * @param  {} thing
- * @param  {} p
+ * dumb progress bar; incrementing console message
+ * - ex: `thing message #`
+ * @param {string} thing - what is being 
+ * @param {number} p - the number to show
+ * @param {string} message - 
+ * @returns {void}
  */
-exports.progress = function showProgress(thing, p) {
+exports.progress = function showProgress(thing, p, message = `processed ...`) {
 	//readline.clearLine(process.stdout);
 	readline.cursorTo(process.stdout, 0);
-	process.stdout.write(`${thing} processed ... ${p}`);
+	process.stdout.write(`${thing} ${message} ${exports.comma(p)}`);
 };
 
 class Timer {
@@ -966,6 +1038,7 @@ class Timer {
 		const endTime = Date.now();
 		this.endTime = endTime;
 
+		// @ts-ignore
 		const delta = this.endTime - this.startTime;
 		this.delta = delta;
 
@@ -999,20 +1072,30 @@ class Timer {
 
 		for (var i = 0, max = levels.length; i < max; i++) {
 			if (levels[i][0] === 0) continue;
+			// @ts-ignore
 			result += ' ' + levels[i][0] + ' ' + (levels[i][0] === 1 ? levels[i][1].substr(0, levels[i][1].length - 1) : levels[i][1]);
 		};
 		return result.trim();
 	}
 }
+
 /**
- * @param  {} label
+ * returns a timer with the following API
+ * - `timer.start()`
+ * - `timer.end()`
+ * - `timer.report()`
+ * - `timer.prettyTime()`
+ * @param  {string} label - name for timer
+ * @return {Timer} a time
  */
 exports.time = function (label) {
 	return new Timer(label);
 };
 
 /**
- * @param  {} callback
+ * a very quick way to check the length of a function; uses `console.time`
+ * - ex: `timeTaken(main)`
+ * @param  {function} callback
  */
 exports.quickTime = function timeTaken(callback) {
 	console.time('timeTaken');
@@ -1022,10 +1105,12 @@ exports.quickTime = function timeTaken(callback) {
 };
 
 /**
- * @param  {} app='akTools'
- * @param  {} token="99a1209a992b3f9fba55a293e211186a"
- * @param  {} distinct_id=os.userInfo(
- * @param  {} .username
+ * track stuff to mixpanel
+ * - ex: `var t = track(); t('foo', {bar: "baz"})`
+ * @param  {string} [app='akTools'] - value of `$source` prop
+ * @param  {string} [token="99a1209a992b3f9fba55a293e211186a"] - mixpanel token
+ * @param  {string} [distinct_id=os.userInfo().username] - distinct_id
+ * @returns {function} func with signature: `(event, props = {}, cb = ()=>{})`
  */
 exports.tracker = function sendToMixpanel(app = 'akTools', token = "99a1209a992b3f9fba55a293e211186a", distinct_id = os.userInfo().username) {
 	return function (eventName = "ping", props = {}, callback = (res) => { return res; }) {
@@ -1059,7 +1144,7 @@ exports.tracker = function sendToMixpanel(app = 'akTools', token = "99a1209a992b
 				properties: {
 					token: token,
 					distinct_id: distinct_id,
-					app: app,
+					$source: app,
 					...props
 				}
 			}
@@ -1108,7 +1193,8 @@ exports.tracker = function sendToMixpanel(app = 'akTools', token = "99a1209a992b
 };
 
 /**
- * @param  {} ms
+ * arbitrary sleep for `N` ms
+ * @param {number} ms - amount of time to sleep
  */
 exports.sleep = function pauseFor(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));

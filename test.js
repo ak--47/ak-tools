@@ -1,3 +1,4 @@
+// @ts-nocheck
 const u = require('./index');
 
 test('do tests work?', () => {
