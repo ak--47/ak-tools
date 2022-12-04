@@ -1,5 +1,5 @@
 # ak-tools
- AK's collections of useful things...cobbled together from various projects over the years...
+ AK's (nearly typesafe) collections of useful things...cobbled together from various projects over the years...
 
 install:
 
@@ -13,8 +13,36 @@ const utils = require('ak-tools') 	//cjs
 import {* as utils} from 'ak-tools' 	//esm
 ```
 
+verify
+```bash
+$ npm run test
+```
+
 if using an IDE with jsdoc support you should have a good experience. 
 
+## demo
+```javascript
+/**
+ * make a folder, and a file
+ * measure it... remove it
+ * time the whole thing
+**/
+const u = require('ak-tools');
+const timer = u.time('myProcess')
+timer.start()
+
+const newFolder = u.mkdir('./tmp')
+const myData = [{foo: "bar"}, {baz: "qux"}]
+const file = await u.touch('./tmp/data.json', u.dupeVals(myData, 1000), true);
+const contents = await u.load(file)
+
+const size = u.calcSize(u.json(contents))
+const del = u.rm('./tmp/data.json')
+timer.end(false)
+
+const diag = { size: u.bytesHuman(size),...timer.report(false) }
+u.log(diag)
+```
 
 ## APIs
 
@@ -22,7 +50,7 @@ if using an IDE with jsdoc support you should have a good experience.
 <dt><a href="#files">files</a></dt>
 <dd><p>file management utilities</p>
 </dd>
-<dt><a href="#validation">validation</a></dt>
+<dt><a href="#validate">validate</a></dt>
 <dd><p>data validation utilities</p>
 </dd>
 <dt><a href="#display">display</a></dt>
@@ -115,7 +143,7 @@ create a file
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | fileNameOrPath | <code>string</code> |  | file to create |
-| [data] | <code>string</code> | <code>\\</code> | data to write; default `""` |
+| [data] | <code>string</code> \| [<code>generalObject</code>](#generalObject) \| [<code>arrayOfObjects</code>](#arrayOfObjects) | <code>\\</code> | data to write; default `""` |
 | [isJson] | <code>boolean</code> | <code>false</code> | is `data` JSON; default `false` |
 
 **Example**  
@@ -158,26 +186,26 @@ make a directory
 ```js
 const myTmpDir = mkdir('./tmp')
 ```
-<a name="validation"></a>
+<a name="validate"></a>
 
-## validation
+## validate
 data validation utilities
 
 
 
-* [validation](#validation)
-    * [.isJSONStr(string)](#validation.isJSONStr) ⇒ <code>boolean</code>
-    * [.isJSON(data)](#validation.isJSON) ⇒ <code>boolean</code>
-    * [.is(type, val)](#validation.is) ⇒ <code>boolean</code>
-    * [.isNil(val)](#validation.isNil) ⇒ <code>boolean</code>
-    * [.similar(o1, o2)](#validation.similar) ⇒ <code>boolean</code>
+* [validate](#validate)
+    * [.isJSONStr(string)](#validate.isJSONStr) ⇒ <code>boolean</code>
+    * [.isJSON(data)](#validate.isJSON) ⇒ <code>boolean</code>
+    * [.is(type, val)](#validate.is) ⇒ <code>boolean</code>
+    * [.isNil(val)](#validate.isNil) ⇒ <code>boolean</code>
+    * [.similar(o1, o2)](#validate.similar) ⇒ <code>boolean</code>
 
-<a name="validation.isJSONStr"></a>
+<a name="validate.isJSONStr"></a>
 
-### validation.isJSONStr(string) ⇒ <code>boolean</code>
+### validate.isJSONStr(string) ⇒ <code>boolean</code>
 test if `string` has JSON structure
 
-**Kind**: static method of [<code>validation</code>](#validation)  
+**Kind**: static method of [<code>validate</code>](#validate)  
 
 | Param | Type |
 | --- | --- |
@@ -187,12 +215,12 @@ test if `string` has JSON structure
 ```js
 isJSONStr('{"foo": "bar"}') // => true
 ```
-<a name="validation.isJSON"></a>
+<a name="validate.isJSON"></a>
 
-### validation.isJSON(data) ⇒ <code>boolean</code>
+### validate.isJSON(data) ⇒ <code>boolean</code>
 test if `data` can be stringified as JSON
 
-**Kind**: static method of [<code>validation</code>](#validation)  
+**Kind**: static method of [<code>validate</code>](#validate)  
 
 | Param | Type |
 | --- | --- |
@@ -202,12 +230,12 @@ test if `data` can be stringified as JSON
 ```js
 isJSON({foo: "bar"}) // => true
 ```
-<a name="validation.is"></a>
+<a name="validate.is"></a>
 
-### validation.is(type, val) ⇒ <code>boolean</code>
+### validate.is(type, val) ⇒ <code>boolean</code>
 check if a `type` matches a `value`
 
-**Kind**: static method of [<code>validation</code>](#validation)  
+**Kind**: static method of [<code>validate</code>](#validate)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -218,12 +246,12 @@ check if a `type` matches a `value`
 ```js
 is(Number, 42) // => true
 ```
-<a name="validation.isNil"></a>
+<a name="validate.isNil"></a>
 
-### validation.isNil(val) ⇒ <code>boolean</code>
+### validate.isNil(val) ⇒ <code>boolean</code>
 check if a `val` is `null` or `undefined`
 
-**Kind**: static method of [<code>validation</code>](#validation)  
+**Kind**: static method of [<code>validate</code>](#validate)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -233,12 +261,12 @@ check if a `val` is `null` or `undefined`
 ```js
 isNil(null) // => true
 ```
-<a name="validation.similar"></a>
+<a name="validate.similar"></a>
 
-### validation.similar(o1, o2) ⇒ <code>boolean</code>
+### validate.similar(o1, o2) ⇒ <code>boolean</code>
 check if `a` and `b` have similar shape (keys), recusively
 
-**Kind**: static method of [<code>validation</code>](#validation)  
+**Kind**: static method of [<code>validate</code>](#validate)  
 **Returns**: <code>boolean</code> - do they have the same shape?  
 
 | Param | Type | Description |
@@ -259,9 +287,9 @@ display, formatting, and other "make it look right" utilities
 
 * [display](#display)
     * [.comma(num)](#display.comma) ⇒ <code>string</code>
-    * [.truncate(text, chars, [useWordBoundary])](#display.truncate) ⇒ <code>string</code>
-    * [.bytesHuman(bytes, [si], [dp])](#display.bytesHuman) ⇒ <code>string</code>
-    * [.json(data, [padding])](#display.json) ⇒ <code>string</code>
+    * [.truncate(text, [chars], [useWordBoundary])](#display.truncate) ⇒ <code>string</code>
+    * [.bytesHuman(bytes, [dp], [si])](#display.bytesHuman) ⇒ <code>string</code>
+    * [.json(data, [padding])](#display.json) ⇒ <code>string</code> \| <code>false</code>
     * [.stripHTML(str)](#display.stripHTML) ⇒ <code>string</code>
     * [.multiReplace(str, [replacePairs])](#display.multiReplace) ⇒ <code>string</code>
     * [.replaceAll(oldVal, newVal)](#display.replaceAll) ⇒ <code>string</code>
@@ -270,7 +298,7 @@ display, formatting, and other "make it look right" utilities
 <a name="display.comma"></a>
 
 ### display.comma(num) ⇒ <code>string</code>
-turn a number into a comma separated value; `1000` => `"1,000"`
+turn a number into a comma separated (human reable) string
 
 **Kind**: static method of [<code>display</code>](#display)  
 **Returns**: <code>string</code> - formatted number  
@@ -279,10 +307,14 @@ turn a number into a comma separated value; `1000` => `"1,000"`
 | --- | --- |
 | num | <code>string</code> \| <code>number</code> | 
 
+**Example**  
+```js
+comma(1000) // => "1,000"
+```
 <a name="display.truncate"></a>
 
-### display.truncate(text, chars, [useWordBoundary]) ⇒ <code>string</code>
-truncate a string; using an elipses (`...`)
+### display.truncate(text, [chars], [useWordBoundary]) ⇒ <code>string</code>
+truncate a string w/elipses
 
 **Kind**: static method of [<code>display</code>](#display)  
 **Returns**: <code>string</code> - truncated string  
@@ -290,12 +322,16 @@ truncate a string; using an elipses (`...`)
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | text | <code>string</code> |  | text to truncate |
-| chars | <code>number</code> | <code>500</code> | # of max characters |
+| [chars] | <code>number</code> | <code>500</code> | # of max characters |
 | [useWordBoundary] | <code>boolean</code> | <code>true</code> | don't break words; default `true` |
 
+**Example**  
+```js
+truncate('foo bar baz', 3) // => 'foo...'
+```
 <a name="display.bytesHuman"></a>
 
-### display.bytesHuman(bytes, [si], [dp]) ⇒ <code>string</code>
+### display.bytesHuman(bytes, [dp], [si]) ⇒ <code>string</code>
 turn a number (of bytes) into a human readable string
 
 **Kind**: static method of [<code>display</code>](#display)  
@@ -304,22 +340,30 @@ turn a number (of bytes) into a human readable string
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | bytes | <code>number</code> |  | number of bytes to convert |
-| [si] | <code>boolean</code> | <code>false</code> | threshold of 1000 or 1024; default `false` |
 | [dp] | <code>number</code> | <code>2</code> | decmimal points; default `2` |
+| [si] | <code>boolean</code> | <code>false</code> | threshold of 1000 or 1024; default `false` |
 
+**Example**  
+```js
+bytesHuman(10000000) // => '9.54 MiB'
+```
 <a name="display.json"></a>
 
-### display.json(data, [padding]) ⇒ <code>string</code>
+### display.json(data, [padding]) ⇒ <code>string</code> \| <code>false</code>
 stringify object to json
 
 **Kind**: static method of [<code>display</code>](#display)  
-**Returns**: <code>string</code> - valid json  
+**Returns**: <code>string</code> \| <code>false</code> - valid json  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | data | <code>object</code> |  | any serializable object |
 | [padding] | <code>number</code> | <code>2</code> | padding to use |
 
+**Example**  
+```js
+json({foo: "bar"}) => '{"foo": "bar"}'
+```
 <a name="display.stripHTML"></a>
 
 ### display.stripHTML(str) ⇒ <code>string</code>
@@ -333,6 +377,10 @@ strip all `<html>` tags from a string
 | --- | --- | --- |
 | str | <code>string</code> | string with html tags |
 
+**Example**  
+```js
+stripHTML(`<div>i am <br/>text`) // => "i am \n text"
+```
 <a name="display.multiReplace"></a>
 
 ### display.multiReplace(str, [replacePairs]) ⇒ <code>string</code>
@@ -346,6 +394,10 @@ find and replace _many_ values in string
 | str | <code>string</code> |  | string to replace |
 | [replacePairs] | <code>Array.&lt;Array&gt;</code> | <code>[[|],[&lt;],[&gt;]]</code> | shape: `[ [old, new] ]` |
 
+**Example**  
+```js
+multiReplace('red fish said', [["red", "blue"],["said"]]) // => "blue fish"
+```
 <a name="display.replaceAll"></a>
 
 ### display.replaceAll(oldVal, newVal) ⇒ <code>string</code>
@@ -353,13 +405,17 @@ replace all occurance of `old` with `new`
 
 **Kind**: static method of [<code>display</code>](#display)  
 **Returns**: <code>string</code> - replaced result  
-**Note**: this can't be called on any string directly  
+**Note**: this CAN be called on any string directly  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | oldVal | <code>string</code> \| <code>RegExp</code> | old value |
 | newVal | <code>string</code> | new value |
 
+**Example**  
+```js
+'foo bar'.replaceAll('foo', 'qux') // => 'qux bar'
+```
 <a name="display.toCSV"></a>
 
 ### display.toCSV(arr, [headers], [delimiter]) ⇒ <code>string</code>
@@ -370,10 +426,14 @@ convert array of arrays to CSV like string
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| arr | <code>Array.&lt;Array&gt;</code> |  | data of the form `[ [], [], [] ]` |
+| arr | <code>Array.&lt;(Array.&lt;String&gt;\|Array.&lt;Number&gt;)&gt;</code> |  | data of the form `[ [], [], [] ]` |
 | [headers] | <code>Array.&lt;String&gt;</code> | <code>[]</code> | header column |
 | [delimiter] | <code>string</code> | <code>\,\</code> | delimeter for cells; default `,` |
 
+**Example**  
+```js
+toCSV([[1,2],[3,4]], ["foo", "bar"]) // => '"foo","bar"\n"1","2"\n"3","4"'
+```
 <a name="maths"></a>
 
 ## maths
@@ -382,7 +442,6 @@ functions for maths, crypto, and maths
 
 
 * [maths](#maths)
-    * [.dupeVals(array, [times])](#maths.dupeVals) ⇒ <code>Array.&lt;any&gt;</code>
     * [.rand(min, max)](#maths.rand) ⇒ <code>number</code>
     * [.avg(...nums)](#maths.avg) ⇒ <code>number</code>
     * [.calcSize(data)](#maths.calcSize) ⇒ <code>number</code>
@@ -391,19 +450,6 @@ functions for maths, crypto, and maths
     * [.uuid()](#maths.uuid) ⇒ <code>string</code>
     * [.md5(data)](#maths.md5) ⇒ <code>string</code>
 
-<a name="maths.dupeVals"></a>
-
-### maths.dupeVals(array, [times]) ⇒ <code>Array.&lt;any&gt;</code>
-duplicate values within an array N times
-
-**Kind**: static method of [<code>maths</code>](#maths)  
-**Returns**: <code>Array.&lt;any&gt;</code> - duplicated array  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| array | <code>Array.&lt;any&gt;</code> |  | array to duplicate |
-| [times] | <code>number</code> | <code>1</code> | number of dupes per item |
-
 <a name="maths.rand"></a>
 
 ### maths.rand(min, max) ⇒ <code>number</code>
@@ -411,12 +457,17 @@ random integer between `min` and `max` (inclusive)
 
 **Kind**: static method of [<code>maths</code>](#maths)  
 **Returns**: <code>number</code> - random number  
+**Note**: this is not cryptographically safe  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | min | <code>number</code> | <code>1</code> | minimum |
 | max | <code>number</code> | <code>100</code> | maximum |
 
+**Example**  
+```js
+rand(1,10) // 1 or 2 or 3 ... or 10
+```
 <a name="maths.avg"></a>
 
 ### maths.avg(...nums) ⇒ <code>number</code>
@@ -429,6 +480,10 @@ calculate average of `...nums`
 | --- | --- | --- |
 | ...nums | <code>number</code> | numbers to average |
 
+**Example**  
+```js
+avg(1,2,3) // => 2
+```
 <a name="maths.calcSize"></a>
 
 ### maths.calcSize(data) ⇒ <code>number</code>
@@ -439,8 +494,12 @@ calculate the size (on disk)
 
 | Param | Type | Description |
 | --- | --- | --- |
-| data | <code>JSON</code> | JSON to estimate |
+| data | <code>string</code> \| [<code>generalObject</code>](#generalObject) | JSON to estimate |
 
+**Example**  
+```js
+calcSize({foo: "bar"}) // => 13
+```
 <a name="maths.round"></a>
 
 ### maths.round(number, [decimalPlaces]) ⇒ <code>number</code>
@@ -454,27 +513,39 @@ round a number to a number of decimal places
 | number | <code>number</code> |  | number to round |
 | [decimalPlaces] | <code>number</code> | <code>0</code> | decimal places; default `0` |
 
+**Example**  
+```js
+round(3.14159, 3) // => 3.142
+```
 <a name="maths.uid"></a>
 
 ### maths.uid([length]) ⇒ <code>string</code>
 generate a random uid:
-- `6NswVtnKWsvRGNTi0H2YtuqGwsqJi4dKW6qUgSiUx1XNctr4rkGRFOA9HRl9i60S`
 
 **Kind**: static method of [<code>maths</code>](#maths)  
 **Returns**: <code>string</code> - a uid of specified length  
+**Note**: not cryptographically safe  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| [length] | <code>number</code> | <code>64</code> | length of id |
+| [length] | <code>number</code> | <code>64</code> | length of id; default `64` |
 
+**Example**  
+```js
+uid(4) // => 'AwD9rbntSj'
+```
 <a name="maths.uuid"></a>
 
 ### maths.uuid() ⇒ <code>string</code>
 generated a uuid in v4 format:
-- `72452488-ded9-46c1-8c22-2403ea924a8e`
 
 **Kind**: static method of [<code>maths</code>](#maths)  
 **Returns**: <code>string</code> - a uuid  
+**Note**: not cryptographically safe  
+**Example**  
+```js
+uuid() // => "f47e2fdf-e387-4a39-9bb9-80b0ed950b48"
+```
 <a name="maths.md5"></a>
 
 ### maths.md5(data) ⇒ <code>string</code>
@@ -487,6 +558,10 @@ calculate the md5 hash of any data
 | --- | --- | --- |
 | data | <code>any</code> | data to hash |
 
+**Example**  
+```js
+md5({foo: "bar"}) // => "d41d8cd98f00b204e9800998ecf8427e"
+```
 <a name="objects"></a>
 
 ## objects
@@ -648,6 +723,7 @@ array utilities
 
 
 * [arrays](#arrays)
+    * [.dupeVals(array, [times])](#arrays.dupeVals) ⇒ <code>Array.&lt;any&gt;</code>
     * [.dedupe(arrayOfThings)](#arrays.dedupe) ⇒ <code>Array.&lt;any&gt;</code>
     * [.dedupeVal(arr, keyNames)](#arrays.dedupeVal) ⇒ <code>Array.&lt;any&gt;</code>
     * [.chunk(sourceArray, chunkSize)](#arrays.chunk) ⇒ <code>Array.&lt;any&gt;</code>
@@ -656,6 +732,23 @@ array utilities
     * [.deepFlat(arr)](#arrays.deepFlat) ⇒ <code>Array.&lt;any&gt;</code>
     * [.strToArr(str)](#arrays.strToArr) ⇒ <code>Array.&lt;string&gt;</code>
 
+<a name="arrays.dupeVals"></a>
+
+### arrays.dupeVals(array, [times]) ⇒ <code>Array.&lt;any&gt;</code>
+duplicate values within an array N times
+
+**Kind**: static method of [<code>arrays</code>](#arrays)  
+**Returns**: <code>Array.&lt;any&gt;</code> - duplicated array  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| array | <code>Array.&lt;any&gt;</code> |  | array to duplicate |
+| [times] | <code>number</code> | <code>1</code> | number of dupes per item; default `1` |
+
+**Example**  
+```js
+dupeVals(["a","b","c"]) // => [ 'a', 'b', 'c', 'a', 'b', 'c' ]
+```
 <a name="arrays.dedupe"></a>
 
 ### arrays.dedupe(arrayOfThings) ⇒ <code>Array.&lt;any&gt;</code>

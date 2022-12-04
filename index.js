@@ -20,7 +20,7 @@ NAMESPACES + TYPES
 
 /**
  * data validation utilities
- * @namespace validation
+ * @namespace validate
 */
 
 /**
@@ -123,7 +123,7 @@ exports.rm = async function removeFileOrFolder(fileNameOrPath) {
  * await touch('newfile.txt', data)  // => '/path/to/newfile.txt' || false
  * await touch('newfile.json', data, true)  // => '/path/to/newfile.json' || false
  * @param  {string} fileNameOrPath - file to create
- * @param  {string} [data=""] - data to write; default `""`
+ * @param  {string | generalObject | arrayOfObjects} [data=""] - data to write; default `""`
  * @param  {boolean} [isJson=false] - is `data` JSON; default `false`
  * @returns {Promise<(string | false)>} the name of the file
  * @memberof files
@@ -133,6 +133,7 @@ exports.touch = async function addFile(fileNameOrPath, data = "", isJson = false
 	let dataToWrite = isJson ? exports.json(data) : data;
 
 	try {
+		//@ts-ignore
 		fileCreated = await fs.writeFile(path.resolve(fileNameOrPath), dataToWrite, 'utf-8');
 	} catch (e) {
 		console.error(`${fileNameOrPath} not created!`);
@@ -200,7 +201,7 @@ VALIDATION
  * isJSONStr('{"foo": "bar"}') // => true
  * @param  {string} string
  * @returns {boolean}
- * @memberof validation
+ * @memberof validate
  */
 exports.isJSONStr = function hasJsonStructure(string) {
 	if (typeof string !== 'string') return false;
@@ -220,7 +221,7 @@ exports.isJSONStr = function hasJsonStructure(string) {
  * isJSON({foo: "bar"}) // => true
  * @param  {string | JSON} data
  * @returns {boolean}
- * @memberof validation
+ * @memberof validate
  */
 exports.isJSON = function canBeStrinigified(data) {
 	try {
@@ -252,7 +253,7 @@ exports.isJSON = function canBeStrinigified(data) {
  * @param  {'string' | any} type - a native type like `Number` or `Boolean`
  * @param  {any} val - any value to check
  * @returns {boolean}
- * @memberof validation
+ * @memberof validate
  */
 exports.is = function isPrimiativeType(type, val) {
 	if (typeof type === 'string') {
@@ -267,7 +268,7 @@ exports.is = function isPrimiativeType(type, val) {
  * isNil(null) // => true
  * @param  {any} val - value to check
  * @returns {boolean}
- * @memberof validation
+ * @memberof validate
  */
 exports.isNil = function isNullOrUndefined(val) {
 	return val === undefined || val === null;
@@ -280,48 +281,48 @@ exports.isNil = function isNullOrUndefined(val) {
  * @param {generalObject} o1 - first obj
  * @param {generalObject} o2 - second obj
  * @returns {boolean} do they have the same shape?
- * @memberof validation
+ * @memberof validate
  */
 exports.similar = function deepSameKeys(o1, o2) {
 	// https://stackoverflow.com/a/41802431
-	  // Both nulls = same
-	  if (o1 === null && o2 === null) {
-        return true;
-    }
+	// Both nulls = same
+	if (o1 === null && o2 === null) {
+		return true;
+	}
 
-    // Get the keys of each object
-    const o1keys = o1 === null ? new Set() : new Set(Object.keys(o1));
-    const o2keys = o2 === null ? new Set() : new Set(Object.keys(o2));
-    if (o1keys.size !== o2keys.size) {
-        // Different number of own properties = not the same
-        return false;
-    }
+	// Get the keys of each object
+	const o1keys = o1 === null ? new Set() : new Set(Object.keys(o1));
+	const o2keys = o2 === null ? new Set() : new Set(Object.keys(o2));
+	if (o1keys.size !== o2keys.size) {
+		// Different number of own properties = not the same
+		return false;
+	}
 
-    // Look for differences, recursing as necessary
-    for (const key of o1keys) {
-        if (!o2keys.has(key)) {
-            // Different keys
-            return false;
-        }
-        
-        // Get the values and their types
-        const v1 = o1[key];
-        const v2 = o2[key];
-        const t1 = typeof v1;
-        const t2 = typeof v2;
-        if (t1 === "object") {
-            if (t2 === "object" && !deepSameKeys(v1, v2)) {
-                return false;
-            }
-        } else if (t2 === "object") {
-            // We know `v1` isn't an object
-            return false;
-        }
-    }
+	// Look for differences, recursing as necessary
+	for (const key of o1keys) {
+		if (!o2keys.has(key)) {
+			// Different keys
+			return false;
+		}
 
-    // No differences found
-    return true;
-}
+		// Get the values and their types
+		const v1 = o1[key];
+		const v2 = o2[key];
+		const t1 = typeof v1;
+		const t2 = typeof v2;
+		if (t1 === "object") {
+			if (t2 === "object" && !deepSameKeys(v1, v2)) {
+				return false;
+			}
+		} else if (t2 === "object") {
+			// We know `v1` isn't an object
+			return false;
+		}
+	}
+
+	// No differences found
+	return true;
+};
 
 /*
 -------
@@ -330,22 +331,26 @@ DISPLAY
 */
 
 /**
- * turn a number into a comma separated value; `1000` => `"1,000"`
- * @memberof display
+ * turn a number into a comma separated (human reable) string
+ * @example
+ * comma(1000) // => "1,000"
  * @param  {(string | number)} num
  * @returns {string} formatted number 
+ * @memberof display
  */
 exports.comma = function addCommas(num) {
 	return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
 
 /**
- * truncate a string; using an elipses (`...`)
- * @memberof display
+ * truncate a string w/elipses 
+ * @example
+ * truncate('foo bar baz', 3) // => 'foo...'
  * @param  {string} text - text to truncate
- * @param  {number} chars=500 - # of max characters
+ * @param  {number} [chars=500] - # of max characters
  * @param  {boolean} [useWordBoundary=true] - don't break words; default `true`
  * @returns {string} truncated string
+ * @memberof display
  * 
  */
 exports.truncate = function intelligentlyTruncate(text, chars = 500, useWordBoundary = true) {
@@ -355,21 +360,23 @@ exports.truncate = function intelligentlyTruncate(text, chars = 500, useWordBoun
 	if (text.length <= chars) {
 		return text;
 	}
-	var subString = text.substr(0, chars - 1);
+	var subString = text.substring(0, chars - 1);
 	return (useWordBoundary ?
-		subString.substr(0, subString.lastIndexOf(' ')) :
+		subString.substring(0, subString.lastIndexOf(' ')) :
 		subString) + "...";
 };
 
 /**
  * turn a number (of bytes) into a human readable string
- * @memberof display
+ * @example
+ * bytesHuman(10000000) // => '9.54 MiB'
  * @param  {number} bytes - number of bytes to convert
- * @param  {boolean} [si=false] - threshold of 1000 or 1024; default `false`
  * @param  {number} [dp=2] - decmimal points; default `2`
+ * @param  {boolean} [si=false] - threshold of 1000 or 1024; default `false`
  * @returns {string} # of bytes
+ * @memberof display
  */
-exports.bytesHuman = function (bytes, si = false, dp = 2) {
+exports.bytesHuman = function (bytes, dp = 2, si = false) {
 	//https://stackoverflow.com/a/14919494
 	const thresh = si ? 1000 : 1024;
 
@@ -391,21 +398,31 @@ exports.bytesHuman = function (bytes, si = false, dp = 2) {
 };
 
 /** stringify object to json
- * @memberof display
+ * @example
+ * json({foo: "bar"}) => '{"foo": "bar"}'
  * @param  {object} data - any serializable object
  * @param  {number} [padding=2] - padding to use
- * @returns {string} valid json
+ * @returns {string | false} valid json
+ * @memberof display
  */
 exports.json = function stringifyJSON(data, padding = 2) {
-	return JSON.stringify(data, null, padding);
+	try {
+		return JSON.stringify(data, null, padding);
+	}
+
+	catch (e) {
+		return false
+	}
 };
 
 /**
  * strip all `<html>` tags from a string
- * @memberof display
  * @param  {string} str string with html tags
+ * @example
+ * stripHTML(`<div>i am <br/>text`) // => "i am \n text"
  * @returns {string} sanitized string
  * @note note: `<br>` tags are replace with `\n`
+ * @memberof display
  */
 exports.stripHTML = function removeHTMLEntities(str) {
 	return str.replace(/<br\s*[\/]?>/gi, "\n").replace(/<[^>]*>?/gm, '');
@@ -413,10 +430,12 @@ exports.stripHTML = function removeHTMLEntities(str) {
 
 /**
  * find and replace _many_ values in string
- * @memberof display
+ * @example
+ * multiReplace('red fish said', [["red", "blue"],["said"]]) // => "blue fish"
  * @param  {string} str - string to replace
  * @param  {Array[]} [replacePairs=[["|"],["<"],[">"]]] shape: `[ [old, new] ]`
  * @returns {string} multi-replaced string
+ * @memberof display
  */
 exports.multiReplace = function (str, replacePairs = [
 	["|"],
@@ -435,11 +454,13 @@ exports.multiReplace = function (str, replacePairs = [
 
 /**
  * replace all occurance of `old` with `new`
- * @memberof display
+ * @example
+ * 'foo bar'.replaceAll('foo', 'qux') // => 'qux bar'
  * @param  {(string | RegExp)} oldVal - old value
  * @param  {(string)} newVal - new value
  * @returns {string} replaced result 
- * @note this can't be called on any string directly
+ * @memberof display
+ * @note this CAN be called on any string directly
  */
 exports.replaceAll = function (oldVal, newVal) {
 
@@ -455,11 +476,13 @@ exports.replaceAll = function (oldVal, newVal) {
 
 /**
  * convert array of arrays to CSV like string
- * @memberof display
- * @param  {Array[]} arr - data of the form `[ [], [], [] ]`
+ * @example
+ * toCSV([[1,2],[3,4]], ["foo", "bar"]) // => '"foo","bar"\n"1","2"\n"3","4"'
+ * @param  {Array<String[] | Number[]>} arr - data of the form `[ [], [], [] ]`
  * @param  {String[]} [headers=[]] - header column 
  * @param  {string} [delimiter=","] - delimeter for cells; default `,`
  * @returns {string} a valid CSV
+ * @memberof display
  */
 exports.toCSV = function arrayToCSV(arr, headers = [], delimiter = ',') {
 	if (!delimiter) {
@@ -475,34 +498,20 @@ exports.toCSV = function arrayToCSV(arr, headers = [], delimiter = ',') {
 };
 
 /*
-------------
-maths
-------------
+-----
+MATHS
+-----
 */
 
 /**
- * duplicate values within an array N times
- * @memberof maths
- * @param  {any[]} array - array to duplicate
- * @param  {number} [times=1] -  number of dupes per item
- * @returns {any[]} duplicated array
- */
-exports.dupeVals = function duplicateArrayValues(array, times = 1) {
-	let dupeArray = [];
-
-	for (let i = 0; i < times + 1; i++) {
-		array.forEach(item => dupeArray.push(item));
-	}
-
-	return dupeArray;
-};
-
-/**
  * random integer between `min` and `max` (inclusive)
- * @memberof maths
+ * @example
+ * rand(1,10) // 1 or 2 or 3 ... or 10
  * @param  {number} min=1 - minimum
  * @param  {number} max=100 - maximum
  * @returns {number} random number
+ * @note this is not cryptographically safe
+ * @memberof maths
  */
 exports.rand = function generateRandomNumber(min = 1, max = 100) {
 	min = Math.ceil(min);
@@ -512,9 +521,11 @@ exports.rand = function generateRandomNumber(min = 1, max = 100) {
 
 /**
  * calculate average of `...nums`
- * @memberof maths
+ * @example
+ * avg(1,2,3) // => 2
  * @param  {...number} nums - numbers to average
  * @returns {number} average
+ * @memberof maths
  */
 exports.avg = function calcAverage(...nums) {
 	return nums.reduce((acc, val) => acc + val, 0) / nums.length;
@@ -522,9 +533,11 @@ exports.avg = function calcAverage(...nums) {
 
 /**
  * calculate the size (on disk)
- * @memberof maths
- * @param  {JSON} data - JSON to estimate
+ * @example
+ * calcSize({foo: "bar"}) // => 13
+ * @param  {(string | generalObject)} data - JSON to estimate
  * @returns {number} estimated size in bytes
+ * @memberof maths
  */
 exports.calcSize = function estimateSizeOnDisk(data) {
 	//caculates size in bytes; assumes utf-8 encoding: https://stackoverflow.com/a/63805778 
@@ -533,10 +546,12 @@ exports.calcSize = function estimateSizeOnDisk(data) {
 
 /**
  * round a number to a number of decimal places
- * @memberof maths
+ * @example
+ * round(3.14159, 3) // => 3.142
  * @param  {number} number - number to round
  * @param  {number} [decimalPlaces=0] - decimal places; default `0`
  * @returns {number} rounded number
+ * @memberof maths
  */
 exports.round = function roundsNumbers(number, decimalPlaces = 0) {
 	//https://gist.github.com/djD-REK/068cba3d430cf7abfddfd32a5d7903c3
@@ -546,10 +561,12 @@ exports.round = function roundsNumbers(number, decimalPlaces = 0) {
 
 /**
  * generate a random uid:
- * - `6NswVtnKWsvRGNTi0H2YtuqGwsqJi4dKW6qUgSiUx1XNctr4rkGRFOA9HRl9i60S`
- * @memberof maths
- * @param  {number} [length=64] length of id 
+ * @example
+ * uid(4) // => 'AwD9rbntSj'
+ * @param  {number} [length=64] length of id; default `64` 
  * @returns {string} a uid of specified length
+ * @note not cryptographically safe
+ * @memberof maths
  */
 exports.uid = function makeUid(length = 64) {
 	//https://stackoverflow.com/a/1349426/4808195
@@ -565,9 +582,11 @@ exports.uid = function makeUid(length = 64) {
 
 /**
  * generated a uuid in v4 format:
- * - `72452488-ded9-46c1-8c22-2403ea924a8e`
- * @memberof maths
+ * @example
+ * uuid() // => "f47e2fdf-e387-4a39-9bb9-80b0ed950b48"
  * @returns {string} a uuid 
+ * @note not cryptographically safe
+ * @memberof maths
  */
 exports.uuid = function uuidv4() {
 	return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -579,52 +598,55 @@ exports.uuid = function uuidv4() {
 
 /** 
  * calculate the md5 hash of any data
- * @memberof maths
+ * @example
+ * md5({foo: "bar"}) // => "d41d8cd98f00b204e9800998ecf8427e"
  * @param {any} data - data to hash
  * @returns {string} md5 hash of `data
+ * @memberof maths
  */
 exports.md5 = function calcMd5Hash(data) {
-	var hc="0123456789abcdef";
-    function rh(n) {var j,s="";for(j=0;j<=3;j++) s+=hc.charAt((n>>(j*8+4))&0x0F)+hc.charAt((n>>(j*8))&0x0F);return s;}
-    function ad(x,y) {var l=(x&0xFFFF)+(y&0xFFFF);var m=(x>>16)+(y>>16)+(l>>16);return (m<<16)|(l&0xFFFF);}
-    function rl(n,c)            {return (n<<c)|(n>>>(32-c));}
-    function cm(q,a,b,x,s,t)    {return ad(rl(ad(ad(a,q),ad(x,t)),s),b);}
-    function ff(a,b,c,d,x,s,t)  {return cm((b&c)|((~b)&d),a,b,x,s,t);}
-    function gg(a,b,c,d,x,s,t)  {return cm((b&d)|(c&(~d)),a,b,x,s,t);}
-    function hh(a,b,c,d,x,s,t)  {return cm(b^c^d,a,b,x,s,t);}
-    function ii(a,b,c,d,x,s,t)  {return cm(c^(b|(~d)),a,b,x,s,t);}
-    function sb(x) {
-        var i;var nblk=((x.length+8)>>6)+1;var blks=new Array(nblk*16);for(i=0;i<nblk*16;i++) blks[i]=0;
-        for(i=0;i<x.length;i++) blks[i>>2]|=x.charCodeAt(i)<<((i%4)*8);
-        blks[i>>2]|=0x80<<((i%4)*8);blks[nblk*16-2]=x.length*8;return blks;
-    }
-    var i,x=sb(data),a=1732584193,b=-271733879,c=-1732584194,d=271733878,olda,oldb,oldc,oldd;
-    for(i=0;i<x.length;i+=16) {olda=a;oldb=b;oldc=c;oldd=d;
-        a=ff(a,b,c,d,x[i+ 0], 7, -680876936);d=ff(d,a,b,c,x[i+ 1],12, -389564586);c=ff(c,d,a,b,x[i+ 2],17,  606105819);
-        b=ff(b,c,d,a,x[i+ 3],22,-1044525330);a=ff(a,b,c,d,x[i+ 4], 7, -176418897);d=ff(d,a,b,c,x[i+ 5],12, 1200080426);
-        c=ff(c,d,a,b,x[i+ 6],17,-1473231341);b=ff(b,c,d,a,x[i+ 7],22,  -45705983);a=ff(a,b,c,d,x[i+ 8], 7, 1770035416);
-        d=ff(d,a,b,c,x[i+ 9],12,-1958414417);c=ff(c,d,a,b,x[i+10],17,     -42063);b=ff(b,c,d,a,x[i+11],22,-1990404162);
-        a=ff(a,b,c,d,x[i+12], 7, 1804603682);d=ff(d,a,b,c,x[i+13],12,  -40341101);c=ff(c,d,a,b,x[i+14],17,-1502002290);
-        b=ff(b,c,d,a,x[i+15],22, 1236535329);a=gg(a,b,c,d,x[i+ 1], 5, -165796510);d=gg(d,a,b,c,x[i+ 6], 9,-1069501632);
-        c=gg(c,d,a,b,x[i+11],14,  643717713);b=gg(b,c,d,a,x[i+ 0],20, -373897302);a=gg(a,b,c,d,x[i+ 5], 5, -701558691);
-        d=gg(d,a,b,c,x[i+10], 9,   38016083);c=gg(c,d,a,b,x[i+15],14, -660478335);b=gg(b,c,d,a,x[i+ 4],20, -405537848);
-        a=gg(a,b,c,d,x[i+ 9], 5,  568446438);d=gg(d,a,b,c,x[i+14], 9,-1019803690);c=gg(c,d,a,b,x[i+ 3],14, -187363961);
-        b=gg(b,c,d,a,x[i+ 8],20, 1163531501);a=gg(a,b,c,d,x[i+13], 5,-1444681467);d=gg(d,a,b,c,x[i+ 2], 9,  -51403784);
-        c=gg(c,d,a,b,x[i+ 7],14, 1735328473);b=gg(b,c,d,a,x[i+12],20,-1926607734);a=hh(a,b,c,d,x[i+ 5], 4,    -378558);
-        d=hh(d,a,b,c,x[i+ 8],11,-2022574463);c=hh(c,d,a,b,x[i+11],16, 1839030562);b=hh(b,c,d,a,x[i+14],23,  -35309556);
-        a=hh(a,b,c,d,x[i+ 1], 4,-1530992060);d=hh(d,a,b,c,x[i+ 4],11, 1272893353);c=hh(c,d,a,b,x[i+ 7],16, -155497632);
-        b=hh(b,c,d,a,x[i+10],23,-1094730640);a=hh(a,b,c,d,x[i+13], 4,  681279174);d=hh(d,a,b,c,x[i+ 0],11, -358537222);
-        c=hh(c,d,a,b,x[i+ 3],16, -722521979);b=hh(b,c,d,a,x[i+ 6],23,   76029189);a=hh(a,b,c,d,x[i+ 9], 4, -640364487);
-        d=hh(d,a,b,c,x[i+12],11, -421815835);c=hh(c,d,a,b,x[i+15],16,  530742520);b=hh(b,c,d,a,x[i+ 2],23, -995338651);
-        a=ii(a,b,c,d,x[i+ 0], 6, -198630844);d=ii(d,a,b,c,x[i+ 7],10, 1126891415);c=ii(c,d,a,b,x[i+14],15,-1416354905);
-        b=ii(b,c,d,a,x[i+ 5],21,  -57434055);a=ii(a,b,c,d,x[i+12], 6, 1700485571);d=ii(d,a,b,c,x[i+ 3],10,-1894986606);
-        c=ii(c,d,a,b,x[i+10],15,   -1051523);b=ii(b,c,d,a,x[i+ 1],21,-2054922799);a=ii(a,b,c,d,x[i+ 8], 6, 1873313359);
-        d=ii(d,a,b,c,x[i+15],10,  -30611744);c=ii(c,d,a,b,x[i+ 6],15,-1560198380);b=ii(b,c,d,a,x[i+13],21, 1309151649);
-        a=ii(a,b,c,d,x[i+ 4], 6, -145523070);d=ii(d,a,b,c,x[i+11],10,-1120210379);c=ii(c,d,a,b,x[i+ 2],15,  718787259);
-        b=ii(b,c,d,a,x[i+ 9],21, -343485551);a=ad(a,olda);b=ad(b,oldb);c=ad(c,oldc);d=ad(d,oldd);
-    }
-    return rh(a)+rh(b)+rh(c)+rh(d);
-}
+	var hc = "0123456789abcdef";
+	function rh(n) { var j, s = ""; for (j = 0; j <= 3; j++) s += hc.charAt((n >> (j * 8 + 4)) & 0x0F) + hc.charAt((n >> (j * 8)) & 0x0F); return s; }
+	function ad(x, y) { var l = (x & 0xFFFF) + (y & 0xFFFF); var m = (x >> 16) + (y >> 16) + (l >> 16); return (m << 16) | (l & 0xFFFF); }
+	function rl(n, c) { return (n << c) | (n >>> (32 - c)); }
+	function cm(q, a, b, x, s, t) { return ad(rl(ad(ad(a, q), ad(x, t)), s), b); }
+	function ff(a, b, c, d, x, s, t) { return cm((b & c) | ((~b) & d), a, b, x, s, t); }
+	function gg(a, b, c, d, x, s, t) { return cm((b & d) | (c & (~d)), a, b, x, s, t); }
+	function hh(a, b, c, d, x, s, t) { return cm(b ^ c ^ d, a, b, x, s, t); }
+	function ii(a, b, c, d, x, s, t) { return cm(c ^ (b | (~d)), a, b, x, s, t); }
+	function sb(x) {
+		var i; var nblk = ((x.length + 8) >> 6) + 1; var blks = new Array(nblk * 16); for (i = 0; i < nblk * 16; i++) blks[i] = 0;
+		for (i = 0; i < x.length; i++) blks[i >> 2] |= x.charCodeAt(i) << ((i % 4) * 8);
+		blks[i >> 2] |= 0x80 << ((i % 4) * 8); blks[nblk * 16 - 2] = x.length * 8; return blks;
+	}
+	var i, x = sb(data), a = 1732584193, b = -271733879, c = -1732584194, d = 271733878, olda, oldb, oldc, oldd;
+	for (i = 0; i < x.length; i += 16) {
+		olda = a; oldb = b; oldc = c; oldd = d;
+		a = ff(a, b, c, d, x[i + 0], 7, -680876936); d = ff(d, a, b, c, x[i + 1], 12, -389564586); c = ff(c, d, a, b, x[i + 2], 17, 606105819);
+		b = ff(b, c, d, a, x[i + 3], 22, -1044525330); a = ff(a, b, c, d, x[i + 4], 7, -176418897); d = ff(d, a, b, c, x[i + 5], 12, 1200080426);
+		c = ff(c, d, a, b, x[i + 6], 17, -1473231341); b = ff(b, c, d, a, x[i + 7], 22, -45705983); a = ff(a, b, c, d, x[i + 8], 7, 1770035416);
+		d = ff(d, a, b, c, x[i + 9], 12, -1958414417); c = ff(c, d, a, b, x[i + 10], 17, -42063); b = ff(b, c, d, a, x[i + 11], 22, -1990404162);
+		a = ff(a, b, c, d, x[i + 12], 7, 1804603682); d = ff(d, a, b, c, x[i + 13], 12, -40341101); c = ff(c, d, a, b, x[i + 14], 17, -1502002290);
+		b = ff(b, c, d, a, x[i + 15], 22, 1236535329); a = gg(a, b, c, d, x[i + 1], 5, -165796510); d = gg(d, a, b, c, x[i + 6], 9, -1069501632);
+		c = gg(c, d, a, b, x[i + 11], 14, 643717713); b = gg(b, c, d, a, x[i + 0], 20, -373897302); a = gg(a, b, c, d, x[i + 5], 5, -701558691);
+		d = gg(d, a, b, c, x[i + 10], 9, 38016083); c = gg(c, d, a, b, x[i + 15], 14, -660478335); b = gg(b, c, d, a, x[i + 4], 20, -405537848);
+		a = gg(a, b, c, d, x[i + 9], 5, 568446438); d = gg(d, a, b, c, x[i + 14], 9, -1019803690); c = gg(c, d, a, b, x[i + 3], 14, -187363961);
+		b = gg(b, c, d, a, x[i + 8], 20, 1163531501); a = gg(a, b, c, d, x[i + 13], 5, -1444681467); d = gg(d, a, b, c, x[i + 2], 9, -51403784);
+		c = gg(c, d, a, b, x[i + 7], 14, 1735328473); b = gg(b, c, d, a, x[i + 12], 20, -1926607734); a = hh(a, b, c, d, x[i + 5], 4, -378558);
+		d = hh(d, a, b, c, x[i + 8], 11, -2022574463); c = hh(c, d, a, b, x[i + 11], 16, 1839030562); b = hh(b, c, d, a, x[i + 14], 23, -35309556);
+		a = hh(a, b, c, d, x[i + 1], 4, -1530992060); d = hh(d, a, b, c, x[i + 4], 11, 1272893353); c = hh(c, d, a, b, x[i + 7], 16, -155497632);
+		b = hh(b, c, d, a, x[i + 10], 23, -1094730640); a = hh(a, b, c, d, x[i + 13], 4, 681279174); d = hh(d, a, b, c, x[i + 0], 11, -358537222);
+		c = hh(c, d, a, b, x[i + 3], 16, -722521979); b = hh(b, c, d, a, x[i + 6], 23, 76029189); a = hh(a, b, c, d, x[i + 9], 4, -640364487);
+		d = hh(d, a, b, c, x[i + 12], 11, -421815835); c = hh(c, d, a, b, x[i + 15], 16, 530742520); b = hh(b, c, d, a, x[i + 2], 23, -995338651);
+		a = ii(a, b, c, d, x[i + 0], 6, -198630844); d = ii(d, a, b, c, x[i + 7], 10, 1126891415); c = ii(c, d, a, b, x[i + 14], 15, -1416354905);
+		b = ii(b, c, d, a, x[i + 5], 21, -57434055); a = ii(a, b, c, d, x[i + 12], 6, 1700485571); d = ii(d, a, b, c, x[i + 3], 10, -1894986606);
+		c = ii(c, d, a, b, x[i + 10], 15, -1051523); b = ii(b, c, d, a, x[i + 1], 21, -2054922799); a = ii(a, b, c, d, x[i + 8], 6, 1873313359);
+		d = ii(d, a, b, c, x[i + 15], 10, -30611744); c = ii(c, d, a, b, x[i + 6], 15, -1560198380); b = ii(b, c, d, a, x[i + 13], 21, 1309151649);
+		a = ii(a, b, c, d, x[i + 4], 6, -145523070); d = ii(d, a, b, c, x[i + 11], 10, -1120210379); c = ii(c, d, a, b, x[i + 2], 15, 718787259);
+		b = ii(b, c, d, a, x[i + 9], 21, -343485551); a = ad(a, olda); b = ad(b, oldb); c = ad(c, oldc); d = ad(d, oldd);
+	}
+	return rh(a) + rh(b) + rh(c) + rh(d);
+};
 
 
 /*
@@ -895,6 +917,25 @@ ARRAYS
 */
 
 /**
+ * duplicate values within an array N times
+ * @example
+ * dupeVals(["a","b","c"]) // => [ 'a', 'b', 'c', 'a', 'b', 'c' ]
+ * @param  {any[]} array - array to duplicate
+ * @param  {number} [times=1] -  number of dupes per item; default `1`
+ * @returns {any[]} duplicated array
+ * @memberof arrays
+ */
+ exports.dupeVals = function duplicateArrayValues(array, times = 1) {
+	let dupeArray = [];
+
+	for (let i = 0; i < times + 1; i++) {
+		array.forEach(item => dupeArray.push(item));
+	}
+
+	return dupeArray;
+};
+
+/**
  * de-dupe array of objects w/Set, stringify, parse
  * @memberof arrays
  * @param  {any} arrayOfThings - array to dedupe
@@ -1108,8 +1149,8 @@ exports.compose = function composeFns() {
  * @return {any} the same thing
  */
 exports.id = function identity(any) {
-	return any
-}
+	return any;
+};
 
 /*
 -------
@@ -1392,9 +1433,9 @@ exports.sleep = function pauseFor(ms) {
  * @returns {void} but there's data on your clipboard!
  */
 exports.clip = function copyToClipboard(data) {
-    var proc = require('child_process').spawn('pbcopy'); 
-    proc.stdin.write(data); proc.stdin.end();
-}
+	var proc = require('child_process').spawn('pbcopy');
+	proc.stdin.write(data); proc.stdin.end();
+};
 
 
 /*
@@ -1402,21 +1443,44 @@ exports.clip = function copyToClipboard(data) {
 ALIASES
 --------
 */
-exports.copy = exports.clip
+exports.copy = exports.clip;
 exports.files = {
 	ls: exports.ls,
 	rm: exports.rm,
 	touch: exports.touch,
 	load: exports.load,
 	mkdir: exports.mkdir
-}
-exports.validation = {}
-exports.display = {}
-exports.maths = {}
-exports.objects = {}
-exports.arrays = {}
-exports.functions = {}
-exports.logging = {}
+};
+exports.validate = {
+	isJSONStr: exports.isJSONStr,
+	isJSON: exports.isJSON,
+	is: exports.is,
+	isNil: exports.isNil,
+	similar: exports.similar
+};
+exports.display = {
+	comma: exports.comma,
+	truncate: exports.truncate,
+	bytesHuman: exports.bytesHuman,
+	json: exports.json,
+	stripHTML: exports.stripHTML,
+	multiReplace: exports.multiReplace,
+	replaceAll: exports.replaceAll,
+	toCSV: exports.toCSV
+};
+exports.maths = {
+	rand: exports.rand,
+	avg: exports.avg,
+	calcSize: exports.calcSize,
+	round: exports.round,
+	uid: exports.uid,
+	uuid: exports.uuid,
+	md5: exports.md5
+};
+exports.objects = {};
+exports.arrays = {};
+exports.functions = {};
+exports.logging = {};
 
 
 // ripped out of underscore; should not be called directly

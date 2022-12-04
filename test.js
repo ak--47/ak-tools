@@ -78,6 +78,15 @@ describe('validation', () => {
 		expect(u.isNil(notNil)).toBe(false);
 	});
 
+	test ('similar', () =>{ 
+		let a = {foo: "bar"}
+		let b = {foo: "baz"}
+		let c = {foo: "bar", qux: "dux"}
+
+		expect(u.similar(a,b)).toBe(true)
+		expect(u.similar(a,c)).toBe(false)
+	})
+
 });
 
 describe('display', () => {
@@ -104,7 +113,7 @@ describe('display', () => {
 	test('bytes human', () => {
 		let num = 1551859712;
 		let answer = "1.4 GiB";
-		expect(u.bytesHuman(num, false, 1)).toBe(answer);
+		expect(u.bytesHuman(num, 1, false)).toBe(answer);
 	});
 
 	test('json', () => {
