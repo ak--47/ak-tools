@@ -9,7 +9,9 @@ function main() {
 		.renderSync({ files: './index.js', "heading-depth": 2 })
 		.replace('## Object', '## API')
 		.replaceAll(` : <code>object</code>`, "")
-		.replaceAll(`**Kind**: global namespace  `, "");
+		.replaceAll(`**Kind**: global namespace  `, "")
+		.replaceAll(`&quot;`, "")
+		.replaceAll('.exports', "");
 		
 	const docs = prefix.concat(genDocs).trim();
 	const written = u.touch('./README.md', docs);

@@ -8,9 +8,9 @@ const http = require("https");
 const os = require("os");
 
 /*
------------
-NAMESPACES
------------
+-------------------
+NAMESPACES + TYPES
+-------------------
 */
 
 /**
@@ -29,8 +29,8 @@ NAMESPACES
 */
 
 /**
- * functions for maths, crypto, and calculations
- * @namespace calculations
+ * functions for maths, crypto, and maths
+ * @namespace maths
 */
 
 /**
@@ -53,6 +53,16 @@ NAMESPACES
  * @namespace logging
 */
 
+/**
+ * generic for `{}` w/string keys
+ * @typedef {Object.<string, any>} generalObject
+ */
+
+/**
+ * generic for `[{},{},{}]`
+ * @typedef {generalObject[]} arrayOfObjects
+ */
+
 /*
 ------
 FILES
@@ -61,10 +71,13 @@ FILES
 
 /** 
  * list directory contents
- * @memberof files
- * @param  {string} [dir="./"] - directory to enumerate; default `./`
+ * @example
+ * await ls('./tmp') // => []
+ * await ls('./tmp', true) // => {}
+ * @param  {string} [dir='./'] - directory to enumerate; default `./`
  * @param  {boolean} [objectMode=false] - return `{name: path}` instead of `[path]`; default `false`
- * @returns {Promise<any>} `[]` of files in folder
+ * @returns {Promise<(string[] | generalObject)>} `[]` or `{}` of files in folder
+ * @memberof files
  */
 exports.ls = async function listFiles(dir = "./", objectMode = false) {
 	let fileList = await fs.readdir(dir);
@@ -81,9 +94,11 @@ exports.ls = async function listFiles(dir = "./", objectMode = false) {
 
 /**
  * remove a file or directory
- * @memberof files
+ * @example
+ * await rm('./myfile.txt') // => '/path/to/myfile.txt' || false
  * @param  {string} fileNameOrPath - file or path to be removed
- * @returns {(Promise<string|boolean|void>)} path or `false` if fail
+ * @returns {Promise<(string|boolean|void)>} path or `false` if fail
+ * @memberof files
  */
 exports.rm = async function removeFileOrFolder(fileNameOrPath) {
 	let fileRemoved;
@@ -104,11 +119,14 @@ exports.rm = async function removeFileOrFolder(fileNameOrPath) {
 
 /**
  * create a file
- * @memberof files
+ * @example
+ * await touch('newfile.txt', data)  // => '/path/to/newfile.txt' || false
+ * await touch('newfile.json', data, true)  // => '/path/to/newfile.json' || false
  * @param  {string} fileNameOrPath - file to create
  * @param  {string} [data=""] - data to write; default `""`
  * @param  {boolean} [isJson=false] - is `data` JSON; default `false`
- * @returns {(Promise<string | false>)} the name of the file
+ * @returns {Promise<(string | false)>} the name of the file
+ * @memberof files
  */
 exports.touch = async function addFile(fileNameOrPath, data = "", isJson = false) {
 	let fileCreated;
@@ -127,11 +145,15 @@ exports.touch = async function addFile(fileNameOrPath, data = "", isJson = false
 };
 
 /**
- * load a filed into memory
- * @memberof files
+ * load a file into memory
+ * @example
+ * await load('myfile.txt')  // => 'my file contents' || false
+ * await load('myfile.json', true)  // => {my: "data"} || false
  * @param  {string} fileNameOrPath - file to create
  * @param  {boolean} [isJson=false] - is `data` JSON; default `false`
  * @param {string} [encoding=utf-8] - file encoring; default `utf-8`
+ * @returns {Promise<(string | generalObject | arrayOfObjects)>} the file in memory
+ * @memberof files
  */
 exports.load = async function loadFile(fileNameOrPath, isJson = false, encoding = 'utf-8') {
 	let fileLoaded;
@@ -154,8 +176,11 @@ exports.load = async function loadFile(fileNameOrPath, isJson = false, encoding 
 
 /**
  * make a directory
- * @memberof files
+ * @example
+ * const myTmpDir = mkdir('./tmp')
  * @param  {string} [dirPath="./tmp"] - path to create; default `./tmp`
+ * @returns {string} the absolute path of the directory
+ * @memberof files
  */
 exports.mkdir = function (dirPath = `./tmp`) {
 	let fullPath = path.resolve(dirPath);
@@ -170,10 +195,12 @@ VALIDATION
 */
 
 /**
- * test if `string` has JSON structure; if `true` it can be safely parsed
- * @memberof validation
+ * test if `string` has JSON structure
+ * @example
+ * isJSONStr('{"foo": "bar"}') // => true
  * @param  {string} string
  * @returns {boolean}
+ * @memberof validation
  */
 exports.isJSONStr = function hasJsonStructure(string) {
 	if (typeof string !== 'string') return false;
@@ -189,9 +216,11 @@ exports.isJSONStr = function hasJsonStructure(string) {
 
 /**
  * test if `data` can be stringified as JSON
- * @memberof validation
+ * @example
+ * isJSON({foo: "bar"}) // => true
  * @param  {string | JSON} data
  * @returns {boolean}
+ * @memberof validation
  */
 exports.isJSON = function canBeStrinigified(data) {
 	try {
@@ -218,10 +247,12 @@ exports.isJSON = function canBeStrinigified(data) {
 
 /**
  * check if a `type` matches a `value`
- * @memberof validation
- * @param  {any} type - a native type like `Number` or `Boolean`
+ * @example
+ * is(Number, 42) // => true
+ * @param  {'string' | any} type - a native type like `Number` or `Boolean`
  * @param  {any} val - any value to check
  * @returns {boolean}
+ * @memberof validation
  */
 exports.is = function isPrimiativeType(type, val) {
 	if (typeof type === 'string') {
@@ -232,13 +263,65 @@ exports.is = function isPrimiativeType(type, val) {
 
 /**
  * check if a `val` is `null` or `undefined`
- * @memberof validation
+ * @example
+ * isNil(null) // => true
  * @param  {any} val - value to check
  * @returns {boolean}
+ * @memberof validation
  */
 exports.isNil = function isNullOrUndefined(val) {
 	return val === undefined || val === null;
 };
+
+/**
+ * check if `a` and `b` have similar shape (keys), recusively
+ * @example
+ * similar({a: "foo"}, {a: "bar"}) // => true
+ * @param {generalObject} o1 - first obj
+ * @param {generalObject} o2 - second obj
+ * @returns {boolean} do they have the same shape?
+ * @memberof validation
+ */
+exports.similar = function deepSameKeys(o1, o2) {
+	// https://stackoverflow.com/a/41802431
+	  // Both nulls = same
+	  if (o1 === null && o2 === null) {
+        return true;
+    }
+
+    // Get the keys of each object
+    const o1keys = o1 === null ? new Set() : new Set(Object.keys(o1));
+    const o2keys = o2 === null ? new Set() : new Set(Object.keys(o2));
+    if (o1keys.size !== o2keys.size) {
+        // Different number of own properties = not the same
+        return false;
+    }
+
+    // Look for differences, recursing as necessary
+    for (const key of o1keys) {
+        if (!o2keys.has(key)) {
+            // Different keys
+            return false;
+        }
+        
+        // Get the values and their types
+        const v1 = o1[key];
+        const v2 = o2[key];
+        const t1 = typeof v1;
+        const t2 = typeof v2;
+        if (t1 === "object") {
+            if (t2 === "object" && !deepSameKeys(v1, v2)) {
+                return false;
+            }
+        } else if (t2 === "object") {
+            // We know `v1` isn't an object
+            return false;
+        }
+    }
+
+    // No differences found
+    return true;
+}
 
 /*
 -------
@@ -393,13 +476,13 @@ exports.toCSV = function arrayToCSV(arr, headers = [], delimiter = ',') {
 
 /*
 ------------
-CALCULATIONS
+maths
 ------------
 */
 
 /**
  * duplicate values within an array N times
- * @memberof calculations
+ * @memberof maths
  * @param  {any[]} array - array to duplicate
  * @param  {number} [times=1] -  number of dupes per item
  * @returns {any[]} duplicated array
@@ -416,7 +499,7 @@ exports.dupeVals = function duplicateArrayValues(array, times = 1) {
 
 /**
  * random integer between `min` and `max` (inclusive)
- * @memberof calculations
+ * @memberof maths
  * @param  {number} min=1 - minimum
  * @param  {number} max=100 - maximum
  * @returns {number} random number
@@ -429,7 +512,7 @@ exports.rand = function generateRandomNumber(min = 1, max = 100) {
 
 /**
  * calculate average of `...nums`
- * @memberof calculations
+ * @memberof maths
  * @param  {...number} nums - numbers to average
  * @returns {number} average
  */
@@ -439,7 +522,7 @@ exports.avg = function calcAverage(...nums) {
 
 /**
  * calculate the size (on disk)
- * @memberof calculations
+ * @memberof maths
  * @param  {JSON} data - JSON to estimate
  * @returns {number} estimated size in bytes
  */
@@ -450,7 +533,7 @@ exports.calcSize = function estimateSizeOnDisk(data) {
 
 /**
  * round a number to a number of decimal places
- * @memberof calculations
+ * @memberof maths
  * @param  {number} number - number to round
  * @param  {number} [decimalPlaces=0] - decimal places; default `0`
  * @returns {number} rounded number
@@ -464,7 +547,7 @@ exports.round = function roundsNumbers(number, decimalPlaces = 0) {
 /**
  * generate a random uid:
  * - `6NswVtnKWsvRGNTi0H2YtuqGwsqJi4dKW6qUgSiUx1XNctr4rkGRFOA9HRl9i60S`
- * @memberof calculations
+ * @memberof maths
  * @param  {number} [length=64] length of id 
  * @returns {string} a uid of specified length
  */
@@ -483,7 +566,7 @@ exports.uid = function makeUid(length = 64) {
 /**
  * generated a uuid in v4 format:
  * - `72452488-ded9-46c1-8c22-2403ea924a8e`
- * @memberof calculations
+ * @memberof maths
  * @returns {string} a uuid 
  */
 exports.uuid = function uuidv4() {
@@ -496,7 +579,7 @@ exports.uuid = function uuidv4() {
 
 /** 
  * calculate the md5 hash of any data
- * @memberof calculations
+ * @memberof maths
  * @param {any} data - data to hash
  * @returns {string} md5 hash of `data
  */
@@ -1037,7 +1120,7 @@ LOGGING
 /**
  * a cloud function compatible `console.log()`
  * @memberof logging
- * @param  {(string | JSON)} data - data to log
+ * @param  {(string | JSON | object)} data - data to log
  * @param  {string} message - accopanying message
  * @param  {string} [severity=`INFO`] - {@link https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity| google sev label}; default `INFO`
  * 
@@ -1150,9 +1233,9 @@ class Timer {
 		}
 		return {
 			label: this.label,
-			start: this.startTime,
-			end: this.endTime,
-			delta: this.delta,
+			start: this.startTime || 0,
+			end: this.endTime || 0,
+			delta: this.delta || 0,
 			human: this.prettyTime(this.delta)
 
 		};
@@ -1320,6 +1403,20 @@ ALIASES
 --------
 */
 exports.copy = exports.clip
+exports.files = {
+	ls: exports.ls,
+	rm: exports.rm,
+	touch: exports.touch,
+	load: exports.load,
+	mkdir: exports.mkdir
+}
+exports.validation = {}
+exports.display = {}
+exports.maths = {}
+exports.objects = {}
+exports.arrays = {}
+exports.functions = {}
+exports.logging = {}
 
 
 // ripped out of underscore; should not be called directly

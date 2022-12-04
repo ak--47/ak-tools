@@ -1,4 +1,5 @@
 {
 	"jest.jestCommandLine": "npm run test --",
-	"jest.autoRun": "off"
+	"jest.autoRun": "off",
+	"js/ts.implicitProjectConfig.checkJs": true
 }
