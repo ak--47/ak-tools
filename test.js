@@ -78,14 +78,14 @@ describe('validation', () => {
 		expect(u.isNil(notNil)).toBe(false);
 	});
 
-	test ('similar', () =>{ 
-		let a = {foo: "bar"}
-		let b = {foo: "baz"}
-		let c = {foo: "bar", qux: "dux"}
+	test('similar', () => {
+		let a = { foo: "bar" };
+		let b = { foo: "baz" };
+		let c = { foo: "bar", qux: "dux" };
 
-		expect(u.similar(a,b)).toBe(true)
-		expect(u.similar(a,c)).toBe(false)
-	})
+		expect(u.similar(a, b)).toBe(true);
+		expect(u.similar(a, c)).toBe(false);
+	});
 
 });
 
@@ -156,17 +156,9 @@ describe('display', () => {
 
 });
 
-// CALCULATIONS
+// MATHS
 
-describe('calculations', () => {
-
-	test('dupe array', () => {
-		let arr = [1];
-		let answer = [1, 1, 1, 1, 1];
-
-		expect(u.dupeVals(arr, 4)).toEqual(answer);
-	});
-
+describe('maths', () => {
 
 	test('random', () => {
 		let min = 10;
@@ -181,71 +173,74 @@ describe('calculations', () => {
 	});
 
 	test('average', () => {
-		let nums = [2,4,6,8]
-		expect(u.avg(...nums)).toBe(5)
+		let nums = [2, 4, 6, 8];
+		expect(u.avg(...nums)).toBe(5);
 
 	});
 
 	test('calcSize', () => {
-		let obj = {foo: "bar", baz: "qux"}
-		expect(u.calcSize(obj)).toBe(25)
+		let obj = { foo: "bar", baz: "qux" };
+		expect(u.calcSize(obj)).toBe(25);
 
 	});
 
 	test('round', () => {
-		let num = 4.21
-		let otherNum = 4.5
+		let num = 4.21;
+		let otherNum = 4.5;
 
-		expect(u.round(num)).toBe(4)
-		expect(u.round(otherNum)).toBe(5)
+		expect(u.round(num)).toBe(4);
+		expect(u.round(otherNum)).toBe(5);
 
 	});
 
 	test('uid', () => {
-		let uid = u.uid()
-		let longuid = u.uid(128)
+		let uid = u.uid();
+		let longuid = u.uid(128);
 
-		expect(uid.length).toBe(64)
-		expect(longuid.length).toBe(128)
+		expect(uid.length).toBe(64);
+		expect(longuid.length).toBe(128);
 
 		const manyUid = [];
 
-		u.times(1000, () =>{ 
-			manyUid.push(u.uid())
-		})
+		u.times(1000, () => {
+			manyUid.push(u.uid());
+		});
 
 
-		expect(u.dedupe(manyUid).length).toBe(1000)
+		expect(u.dedupe(manyUid).length).toBe(1000);
 
 	});
 
 	test('uuid', () => {
 		const uuids = [];
 
-		u.times(1000, () =>{ 
-			uuids.push(u.uuid())
-		})
+		u.times(1000, () => {
+			uuids.push(u.uuid());
+		});
 
 
 
-		expect(u.dedupe(uuids).length).toBe(1000)
+		expect(u.dedupe(uuids).length).toBe(1000);
 	});
 
 });
 
 
-
-
 // OBJECT UTILITES
 
 describe('objects', () => {
+	test('dupe array', () => {
+		let arr = [1];
+		let answer = [1, 1, 1, 1, 1];
 
-	test('rename keys', () =>{ 
-		const oldObj = {foo: "bar", baz: "qux"}
-		const newObj = {dude: "bar", man: "qux"}
-		const mapping = {foo: "dude", baz: "man"}
-		expect(u.rnKeys(oldObj, mapping)).toEqual(newObj)
-	})
+		expect(u.dupeVals(arr, 4)).toEqual(answer);
+	});
+	test('rename keys', () => {
+		const oldObj = { foo: "bar", baz: "qux" };
+		const newObj = { dude: "bar", man: "qux" };
+		const mapping = { foo: "dude", baz: "man" };
+		expect(u.rnKeys(oldObj, mapping)).toEqual(newObj);
+	});
 
 	test('deep clone', () => {
 		const source = {

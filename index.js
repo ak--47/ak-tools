@@ -411,7 +411,7 @@ exports.json = function stringifyJSON(data, padding = 2) {
 	}
 
 	catch (e) {
-		return false
+		return false;
 	}
 };
 
@@ -433,7 +433,7 @@ exports.stripHTML = function removeHTMLEntities(str) {
  * @example
  * multiReplace('red fish said', [["red", "blue"],["said"]]) // => "blue fish"
  * @param  {string} str - string to replace
- * @param  {Array[]} [replacePairs=[["|"],["<"],[">"]]] shape: `[ [old, new] ]`
+ * @param  {Array<Array<string, string>>} [replacePairs=[["|"],["<"],[">"]]] shape: `[ [old, new] ]`
  * @returns {string} multi-replaced string
  * @memberof display
  */
@@ -656,11 +656,13 @@ OBJECTS
 */
 
 /**
- * rename object keys with a mapping object `{oldKey: newKey}`
+ * rename object keys with a mapping object
+ * @example
+ * rnKeys({foo: 'bar'}, {foo: 'baz'}) // => {baz: "bar"}
+ * @param  {generalObject} obj - object to rename
+ * @param  {generalObject} newKeys - map of form `{oldKey: newKey}`
+ * @returns {generalObject} new object with renamed keys
  * @memberof objects
- * @param  {Object} obj - object to rename
- * @param  {Object} newKeys - map of form `{oldKey: newKey}`
- * @returns {Object} new object with renamed keys
  */
 exports.rnKeys = function renameObjectKeys(obj, newKeys) {
 	//https://stackoverflow.com/a/45287523
@@ -675,48 +677,71 @@ exports.rnKeys = function renameObjectKeys(obj, newKeys) {
 
 /**
  * rename object values using a mapping array
+* @example
+ * rnVals({foo: "bar"}, [["bar","baz"]) // => {foo: "baz"}
+ * @param  {generalObject} obj
+ * @param  {Array<Array<string, string>>} pairs `[['old', 'new']]`
+ * @returns {generalObject} object with renamed values
  * @memberof objects
- * @param  {Object} obj
- * @param  {Array[]} pairs `[['old', 'new']]`
- * @returns {Object} object with renamed values
  */
 exports.rnVals = function renameValues(obj, pairs) {
 	return JSON.parse(exports.multiReplace(JSON.stringify(obj), pairs));
 };
 
 /**
- * filter arrays by values or objects by keys
+* @callback filterCallback
+* @param {string} keyOrValue object's value or key to test
+*/
+
+/**
+ * filter objects by values or objects by keys; like `map()` for objects
+ * @example
+ * const d = {foo: "bar", baz: "qux"}
+ * objFilter(d, x => x.startsWith('b')) // => {foo: "bar"}
+ * objFilter(d, x => x.startsWith('f'), 'key') // => {foo: "bar"}
+ * @param  {generalObject} hash - object or array to filter
+ * @param  {filterCallback} test_function - a function which is called on keys/values 
+ * @param  {"key" | "value"} [keysOrValues="value"] - test keys or values; default `value`
+ * @returns {generalObject} filtered object
  * @memberof objects
- * @param  {Object} hash - object or array to filter
- * @param  {Function} test_function - a function which is called on keys/values 
- * @returns {Object} filtered object
  */
-exports.objFilter = function filterObjectKeys(hash, test_function) {
-	var filtered, key, keys, i;
-	keys = Object.keys(hash);
-	filtered = {};
-	for (i = 0; i < keys.length; i++) {
-		key = keys[i];
-		if (test_function(hash[key])) {
-			filtered[key] = hash[key];
+exports.objFilter = function filterObjectKeys(hash, test_function, keysOrValues = "value") {
+	let key, i;
+	const iterator = Object.keys(hash);
+	const filtered = {};
+
+	for (i = 0; i < iterator.length; i++) {
+		key = iterator[i];
+		if (keysOrValues === 'value') {
+			if (test_function(hash[key])) {
+				filtered[key] = hash[key];
+			}
+		}
+		if (keysOrValues === 'key') {
+			if (test_function(key.toString())) {
+				filtered[key] = hash[key];
+			}
 		}
 	}
+
 	return filtered;
 };
 
 /**
  * removes the following from deeply nested objects:
- * - `null`
- * - `undefined` 
- * - `{}`
- * - `[]` 
+ * - `null` | `undefined` | `{}` | `[]` | `""` 
+ * @example
+ * objClean({foo: null, bar: undefined, baz: ""}) // => {}
+ * @param  {generalObject} obj object to clean
+ * @param {boolean} [clone=true] should produce a new object? default `true`
+ * @returns {generalObject} cleaned object
  * @memberof objects
- * @param  {Object} obj
- * @returns {Object} cleaned object
  */
-exports.objClean = function removeFalsyValues(obj) {
+exports.objClean = function removeFalsyValues(obj, clone = true) {
+	let target;
 	//where objects have falsy values, delete those keys
-	let target = JSON.parse(JSON.stringify(obj));
+	if (clone) target = JSON.parse(JSON.stringify(obj));
+	if (!clone) target = obj;
 
 	function isObject(val) {
 		if (val === null) { return false; }
@@ -759,10 +784,12 @@ exports.objClean = function removeFalsyValues(obj) {
 
 /**
  * apply default props to an object; don't override values from source
- * @memberof objects
- * @param  {Object} obj - original object
+ * @example
+ * objDefault({foo: "bar"}, {foo: "qux", b: "m"}) // => {foo: 'bar', b: 'm'}
+ * @param  {generalObject} obj - original object
  * @param  {Object} defs - props to add without overriding
- * @returns {Object} an object which has `defs` props
+ * @returns {generalObject} an object which has `defs` props
+ * @memberof objects
  */
 exports.objDefault = function assignDefaultProps(obj, ...defs) {
 	return Object.assign({}, obj, ...defs.reverse(), obj);
@@ -770,23 +797,27 @@ exports.objDefault = function assignDefaultProps(obj, ...defs) {
 
 /**
  * deep equality match for any two objects
+ * @example
+ * objMatch({f: {g: {h: 42}}}, {f: {g: {x: 42}}}) // => false
+ * @param  {Object} obj - object A
+ * @param  {Object} source - object B
+ * @returns {boolean} do objects A & B (deeply) match?
  * @memberof objects
- * @param  {Object} obj
- * @param  {Object} source
- * @returns {boolean} do objects match?
  */
 exports.objMatch = function doObjectsMatch(obj, source) {
 	return Object.keys(source).every(key => obj.hasOwnProperty(key) && obj[key] === source[key]);
 };
 
 /**
- * an efficient way to clone an Object; outpreforms `JSON.parse(JSON.strigify())` by 100x
- * @memberof objects
+ * efficient object cloning; outpreforms `parse(stringify())` by 100x
+ * @example
+ * objClone({f: {g: {h : 42}}}) // => { f: { g: { h: 42 } } }
  * @param  {Object} thing - object to clone
- * @param {unknown} [opts]
- * @returns {Object} copied object
+ * @param {Object} [opts]
+ * @returns {Object} deep copy of object
+ * @memberof objects
  */
-exports.clone = function deepClone(thing, opts) {
+exports.objClone = function deepClone(thing, opts) {
 	var newObject = {};
 	if (thing instanceof Array) {
 		return thing.map(function (i) { return exports.clone(i, opts); });
@@ -818,14 +849,15 @@ exports.clone = function deepClone(thing, opts) {
 };
 
 /**
- * visit every property of an object a turn "number" values into numbers
- * - ex: `{foo: {bar: '42'}}` => `{foo: {bar: 42}}`
- * @memberof objects
+ * visit every property of an object; turn "number" values into numbers
+ * @example
+ * objTypecast({foo: {bar: '42'}}) // => {foo: {bar: 42}}
  * @param  {object} obj - object to traverse
  * @param  {boolean} [isClone=false] - default `false`; if `true` will mutate the passed in object
  * @returns {Object} object with all "numbers" as proper numbers
+ * @memberof objects
  */
-exports.typecastInt = function mutateObjValToIntegers(obj, isClone = false) {
+exports.objTypecast = function mutateObjValToIntegers(obj, isClone = false) {
 	//utility function for visiting every single key on an object
 	let target;
 	if (isClone) {
@@ -855,12 +887,14 @@ exports.typecastInt = function mutateObjValToIntegers(obj, isClone = false) {
 
 /**
  * utility to `await` object values
- * - ex: `{foo: await bar()}`
+ * @example
+ * //bar is a promise
+ * await objAwait({foo: bar()}) // => {foo: "resolved_bar"}
+ * @param  {Object<string, Promise>} obj object
+ * @returns {Promise<generalObject>} the resolved values of the object's keys
  * @memberof objects
- * @param  {object} obj object
- * @returns {Promise} the resolved values of the object's keys
  */
-exports.awaitObj = function resolveObjVals(obj) {
+exports.objAwait = function resolveObjVals(obj) {
 	// https://stackoverflow.com/a/53112435
 	const keys = Object.keys(obj);
 	const values = Object.values(obj);
@@ -875,11 +909,13 @@ exports.awaitObj = function resolveObjVals(obj) {
 };
 
 /**
- * explicitly remove keys with `null` or `undefined` values; mutates object
- * - ex: `{foo: "bar", baz: null}` => `{foo: "bar"}`
- * @memberof objects
+ * explicitly remove keys with `null` or `undefined` values
+ * @example
+ * removeNulls({foo: "bar", baz: null}) // => {foo: "bar"}
  * @param  {Object} objWithNullOrUndef - an object with `null` or `undefined` values
  * @returns {Object} an object without `null` or `undefined` values
+ * @note WARNING mutates object
+ * @memberof objects
  */
 exports.removeNulls = function (objWithNullOrUndef) {
 	for (let key in objWithNullOrUndef) {
@@ -925,7 +961,7 @@ ARRAYS
  * @returns {any[]} duplicated array
  * @memberof arrays
  */
- exports.dupeVals = function duplicateArrayValues(array, times = 1) {
+exports.dupeVals = function duplicateArrayValues(array, times = 1) {
 	let dupeArray = [];
 
 	for (let i = 0; i < times + 1; i++) {
@@ -1443,7 +1479,13 @@ exports.clip = function copyToClipboard(data) {
 ALIASES
 --------
 */
+exports.objMap = exports.objFilter;
 exports.copy = exports.clip;
+exports.cleanObj = exports.objClean;
+exports.clone = exports.objClone;
+exports.awaitObj = exports.objAwait;
+exports.typecastInt = exports.objTypecast
+
 exports.files = {
 	ls: exports.ls,
 	rm: exports.rm,
@@ -1477,7 +1519,18 @@ exports.maths = {
 	uuid: exports.uuid,
 	md5: exports.md5
 };
-exports.objects = {};
+exports.objects = {
+	rnKeys: exports.rnKeys,
+	rnVals: exports.rnVals,
+	objClean: exports.objClean,
+	objDefault: exports.objDefault,
+	objMatch: exports.objMatch,
+	objClone: exports.objClone,
+	objTypecast: exports.objTypecast,
+	objAwait: exports.objAwait,
+	removeNulls: exports.removeNulls,
+
+};
 exports.arrays = {};
 exports.functions = {};
 exports.logging = {};

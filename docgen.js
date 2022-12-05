@@ -11,7 +11,9 @@ function main() {
 		.replaceAll(` : <code>object</code>`, "")
 		.replaceAll(`**Kind**: global namespace  `, "")
 		.replaceAll(`&quot;`, "")
-		.replaceAll('.exports', "");
+		.replaceAll('.exports', "")
+		.replaceAll(typeDefsPrefix, "")
+		.replaceAll(typeDefsSuffix, "");
 		
 	const docs = prefix.concat(genDocs).trim();
 	const written = u.touch('./README.md', docs);
@@ -28,7 +30,39 @@ function main() {
 
 
 
+const typeDefsPrefix = String.raw`## Typedefs
 
+<dl>
+<dt><a href="#generalObject">generalObject</a> : <code>Object.&lt;string, any&gt;</code></dt>
+<dd><p>generic for <code>{}</code> w/string keys</p>
+</dd>
+<dt><a href="#arrayOfObjects">arrayOfObjects</a> : <code><a href="#generalObject">Array.&lt;generalObject&gt;</a></code></dt>
+<dd><p>generic for <code>[{},{},{}]</code></p>
+</dd>
+<dt><a href="#filterCallback">filterCallback</a> : <code>function</code></dt>
+<dd></dd>
+</dl>`
+
+const typeDefsSuffix = `<a name="generalObject"></a>
+
+## generalObject : <code>Object.&lt;string, any&gt;</code>
+generic for \`{}\` w/string keys
+
+**Kind**: global typedef  
+<a name="arrayOfObjects"></a>
+
+## arrayOfObjects : [<code>Array.&lt;generalObject&gt;</code>](#generalObject)
+generic for \`[{},{},{}]\`
+
+**Kind**: global typedef  
+<a name="filterCallback"></a>
+
+## filterCallback : <code>function</code>
+**Kind**: global typedef  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| keyOrValue | <code>string</code> | object's value or key to test |`
 
 try {
 	main();

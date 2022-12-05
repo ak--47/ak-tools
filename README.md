@@ -73,16 +73,7 @@ u.log(diag)
 </dd>
 </dl>
 
-## Typedefs
 
-<dl>
-<dt><a href="#generalObject">generalObject</a> : <code>Object.&lt;string, any&gt;</code></dt>
-<dd><p>generic for <code>{}</code> w/string keys</p>
-</dd>
-<dt><a href="#arrayOfObjects">arrayOfObjects</a> : <code><a href="#generalObject">Array.&lt;generalObject&gt;</a></code></dt>
-<dd><p>generic for <code>[{},{},{}]</code></p>
-</dd>
-</dl>
 
 <a name="files"></a>
 
@@ -392,7 +383,7 @@ find and replace _many_ values in string
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | str | <code>string</code> |  | string to replace |
-| [replacePairs] | <code>Array.&lt;Array&gt;</code> | <code>[[|],[&lt;],[&gt;]]</code> | shape: `[ [old, new] ]` |
+| [replacePairs] | <code>Array.&lt;Array.&lt;string, string&gt;&gt;</code> | <code>[[|],[&lt;],[&gt;]]</code> | shape: `[ [old, new] ]` |
 
 **Example**  
 ```js
@@ -570,116 +561,144 @@ object utilities
 
 
 * [objects](#objects)
-    * [.rnKeys(obj, newKeys)](#objects.rnKeys) ⇒ <code>Object</code>
-    * [.rnVals(obj, pairs)](#objects.rnVals) ⇒ <code>Object</code>
-    * [.objFilter(hash, test_function)](#objects.objFilter) ⇒ <code>Object</code>
-    * [.objClean(obj)](#objects.objClean) ⇒ <code>Object</code>
-    * [.objDefault(obj, defs)](#objects.objDefault) ⇒ <code>Object</code>
+    * [.rnKeys(obj, newKeys)](#objects.rnKeys) ⇒ [<code>generalObject</code>](#generalObject)
+    * [.rnVals(obj, pairs)](#objects.rnVals) ⇒ [<code>generalObject</code>](#generalObject)
+    * [.objFilter(hash, test_function, [keysOrValues])](#objects.objFilter) ⇒ [<code>generalObject</code>](#generalObject)
+    * [.objClean(obj, [clone])](#objects.objClean) ⇒ [<code>generalObject</code>](#generalObject)
+    * [.objDefault(obj, defs)](#objects.objDefault) ⇒ [<code>generalObject</code>](#generalObject)
     * [.objMatch(obj, source)](#objects.objMatch) ⇒ <code>boolean</code>
-    * [.clone(thing, [opts])](#objects.clone) ⇒ <code>Object</code>
-    * [.typecastInt(obj, [isClone])](#objects.typecastInt) ⇒ <code>Object</code>
-    * [.awaitObj(obj)](#objects.awaitObj) ⇒ <code>Promise</code>
+    * [.objClone(thing, [opts])](#objects.objClone) ⇒ <code>Object</code>
+    * [.objTypecast(obj, [isClone])](#objects.objTypecast) ⇒ <code>Object</code>
+    * [.objAwait(obj)](#objects.objAwait) ⇒ [<code>Promise.&lt;generalObject&gt;</code>](#generalObject)
     * [.removeNulls(objWithNullOrUndef)](#objects.removeNulls) ⇒ <code>Object</code>
 
 <a name="objects.rnKeys"></a>
 
-### objects.rnKeys(obj, newKeys) ⇒ <code>Object</code>
-rename object keys with a mapping object `{oldKey: newKey}`
+### objects.rnKeys(obj, newKeys) ⇒ [<code>generalObject</code>](#generalObject)
+rename object keys with a mapping object
 
 **Kind**: static method of [<code>objects</code>](#objects)  
-**Returns**: <code>Object</code> - new object with renamed keys  
+**Returns**: [<code>generalObject</code>](#generalObject) - new object with renamed keys  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| obj | <code>Object</code> | object to rename |
-| newKeys | <code>Object</code> | map of form `{oldKey: newKey}` |
+| obj | [<code>generalObject</code>](#generalObject) | object to rename |
+| newKeys | [<code>generalObject</code>](#generalObject) | map of form `{oldKey: newKey}` |
 
+**Example**  
+```js
+rnKeys({foo: 'bar'}, {foo: 'baz'}) // => {baz: "bar"}
+```
 <a name="objects.rnVals"></a>
 
-### objects.rnVals(obj, pairs) ⇒ <code>Object</code>
+### objects.rnVals(obj, pairs) ⇒ [<code>generalObject</code>](#generalObject)
 rename object values using a mapping array
 
 **Kind**: static method of [<code>objects</code>](#objects)  
-**Returns**: <code>Object</code> - object with renamed values  
+**Returns**: [<code>generalObject</code>](#generalObject) - object with renamed values  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| obj | <code>Object</code> |  |
-| pairs | <code>Array.&lt;Array&gt;</code> | `[['old', 'new']]` |
+| obj | [<code>generalObject</code>](#generalObject) |  |
+| pairs | <code>Array.&lt;Array.&lt;string, string&gt;&gt;</code> | `[['old', 'new']]` |
 
+**Example**  
+```js
+rnVals({foo: "bar"}, [["bar","baz"]) // => {foo: "baz"}
+```
 <a name="objects.objFilter"></a>
 
-### objects.objFilter(hash, test_function) ⇒ <code>Object</code>
-filter arrays by values or objects by keys
+### objects.objFilter(hash, test_function, [keysOrValues]) ⇒ [<code>generalObject</code>](#generalObject)
+filter objects by values or objects by keys; like `map()` for objects
 
 **Kind**: static method of [<code>objects</code>](#objects)  
-**Returns**: <code>Object</code> - filtered object  
+**Returns**: [<code>generalObject</code>](#generalObject) - filtered object  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| hash | <code>Object</code> | object or array to filter |
-| test_function | <code>function</code> | a function which is called on keys/values |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| hash | [<code>generalObject</code>](#generalObject) |  | object or array to filter |
+| test_function | [<code>filterCallback</code>](#filterCallback) |  | a function which is called on keys/values |
+| [keysOrValues] | <code>key</code> \| <code>value</code> | <code>value</code> | test keys or values; default `value` |
 
+**Example**  
+```js
+const d = {foo: "bar", baz: "qux"}
+objFilter(d, x => x.startsWith('b')) // => {foo: "bar"}
+objFilter(d, x => x.startsWith('f'), 'key') // => {foo: "bar"}
+```
 <a name="objects.objClean"></a>
 
-### objects.objClean(obj) ⇒ <code>Object</code>
+### objects.objClean(obj, [clone]) ⇒ [<code>generalObject</code>](#generalObject)
 removes the following from deeply nested objects:
-- `null`
-- `undefined` 
-- `{}`
-- `[]`
+- `null` | `undefined` | `{}` | `[]` | `""`
 
 **Kind**: static method of [<code>objects</code>](#objects)  
-**Returns**: <code>Object</code> - cleaned object  
+**Returns**: [<code>generalObject</code>](#generalObject) - cleaned object  
 
-| Param | Type |
-| --- | --- |
-| obj | <code>Object</code> | 
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| obj | [<code>generalObject</code>](#generalObject) |  | object to clean |
+| [clone] | <code>boolean</code> | <code>true</code> | should produce a new object? default `true` |
 
+**Example**  
+```js
+objClean({foo: null, bar: undefined, baz: ""}) // => {}
+```
 <a name="objects.objDefault"></a>
 
-### objects.objDefault(obj, defs) ⇒ <code>Object</code>
+### objects.objDefault(obj, defs) ⇒ [<code>generalObject</code>](#generalObject)
 apply default props to an object; don't override values from source
 
 **Kind**: static method of [<code>objects</code>](#objects)  
-**Returns**: <code>Object</code> - an object which has `defs` props  
+**Returns**: [<code>generalObject</code>](#generalObject) - an object which has `defs` props  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| obj | <code>Object</code> | original object |
+| obj | [<code>generalObject</code>](#generalObject) | original object |
 | defs | <code>Object</code> | props to add without overriding |
 
+**Example**  
+```js
+objDefault({foo: "bar"}, {foo: "qux", b: "m"}) // => {foo: 'bar', b: 'm'}
+```
 <a name="objects.objMatch"></a>
 
 ### objects.objMatch(obj, source) ⇒ <code>boolean</code>
 deep equality match for any two objects
 
 **Kind**: static method of [<code>objects</code>](#objects)  
-**Returns**: <code>boolean</code> - do objects match?  
+**Returns**: <code>boolean</code> - do objects A & B (deeply) match?  
 
-| Param | Type |
-| --- | --- |
-| obj | <code>Object</code> | 
-| source | <code>Object</code> | 
+| Param | Type | Description |
+| --- | --- | --- |
+| obj | <code>Object</code> | object A |
+| source | <code>Object</code> | object B |
 
-<a name="objects.clone"></a>
+**Example**  
+```js
+objMatch({f: {g: {h: 42}}}, {f: {g: {x: 42}}}) // => false
+```
+<a name="objects.objClone"></a>
 
-### objects.clone(thing, [opts]) ⇒ <code>Object</code>
-an efficient way to clone an Object; outpreforms `JSON.parse(JSON.strigify())` by 100x
+### objects.objClone(thing, [opts]) ⇒ <code>Object</code>
+efficient object cloning; outpreforms `parse(stringify())` by 100x
 
 **Kind**: static method of [<code>objects</code>](#objects)  
-**Returns**: <code>Object</code> - copied object  
+**Returns**: <code>Object</code> - deep copy of object  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | thing | <code>Object</code> | object to clone |
-| [opts] | <code>unknown</code> |  |
+| [opts] | <code>Object</code> |  |
 
-<a name="objects.typecastInt"></a>
+**Example**  
+```js
+objClone({f: {g: {h : 42}}}) // => { f: { g: { h: 42 } } }
+```
+<a name="objects.objTypecast"></a>
 
-### objects.typecastInt(obj, [isClone]) ⇒ <code>Object</code>
-visit every property of an object a turn "number" values into numbers
-- ex: `{foo: {bar: '42'}}` => `{foo: {bar: 42}}`
+### objects.objTypecast(obj, [isClone]) ⇒ <code>Object</code>
+visit every property of an object; turn "number" values into numbers
 
 **Kind**: static method of [<code>objects</code>](#objects)  
 **Returns**: <code>Object</code> - object with all "numbers" as proper numbers  
@@ -689,32 +708,44 @@ visit every property of an object a turn "number" values into numbers
 | obj | <code>object</code> |  | object to traverse |
 | [isClone] | <code>boolean</code> | <code>false</code> | default `false`; if `true` will mutate the passed in object |
 
-<a name="objects.awaitObj"></a>
+**Example**  
+```js
+objTypecast({foo: {bar: '42'}}) // => {foo: {bar: 42}}
+```
+<a name="objects.objAwait"></a>
 
-### objects.awaitObj(obj) ⇒ <code>Promise</code>
+### objects.objAwait(obj) ⇒ [<code>Promise.&lt;generalObject&gt;</code>](#generalObject)
 utility to `await` object values
-- ex: `{foo: await bar()}`
 
 **Kind**: static method of [<code>objects</code>](#objects)  
-**Returns**: <code>Promise</code> - the resolved values of the object's keys  
+**Returns**: [<code>Promise.&lt;generalObject&gt;</code>](#generalObject) - the resolved values of the object's keys  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| obj | <code>object</code> | object |
+| obj | <code>Object.&lt;string, Promise&gt;</code> | object |
 
+**Example**  
+```js
+//bar is a promise
+await objAwait({foo: bar()}) // => {foo: "resolved_bar"}
+```
 <a name="objects.removeNulls"></a>
 
 ### objects.removeNulls(objWithNullOrUndef) ⇒ <code>Object</code>
-explicitly remove keys with `null` or `undefined` values; mutates object
-- ex: `{foo: "bar", baz: null}` => `{foo: "bar"}`
+explicitly remove keys with `null` or `undefined` values
 
 **Kind**: static method of [<code>objects</code>](#objects)  
 **Returns**: <code>Object</code> - an object without `null` or `undefined` values  
+**Note**: WARNING mutates object  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | objWithNullOrUndef | <code>Object</code> | an object with `null` or `undefined` values |
 
+**Example**  
+```js
+removeNulls({foo: "bar", baz: null}) // => {foo: "bar"}
+```
 <a name="arrays"></a>
 
 ## arrays
@@ -1034,16 +1065,3 @@ copy arbitrary data to your clipboard
 | Param | Type | Description |
 | --- | --- | --- |
 | data | <code>any</code> | data to put on your clipboard |
-
-<a name="generalObject"></a>
-
-## generalObject : <code>Object.&lt;string, any&gt;</code>
-generic for `{}` w/string keys
-
-**Kind**: global typedef  
-<a name="arrayOfObjects"></a>
-
-## arrayOfObjects : [<code>Array.&lt;generalObject&gt;</code>](#generalObject)
-generic for `[{},{},{}]`
-
-**Kind**: global typedef

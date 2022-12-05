@@ -1,6 +1,6 @@
 {
   "name": "ak-tools",
-  "version": "1.0.212",
+  "version": "1.0.213",
   "description": "AK's collections of useful things...",
   "main": "index.js",
   "scripts": {
@@ -15,7 +15,7 @@
     "url": "git+https://github.com/ak--47/ak-tools.git"
   },
   "type": "commonjs",
-  "keywords": [],
+  "keywords": ["node.js", "toolbelt", "utilities", "ak"],
   "author": "",
   "license": "ISC",
   "bugs": {
