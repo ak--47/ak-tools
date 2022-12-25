@@ -285,6 +285,7 @@ display, formatting, and other "make it look right" utilities
     * [.multiReplace(str, [replacePairs])](#display.multiReplace) ⇒ <code>string</code>
     * [.replaceAll(oldVal, newVal)](#display.replaceAll) ⇒ <code>string</code>
     * [.toCSV(arr, [headers], [delimiter])](#display.toCSV) ⇒ <code>string</code>
+    * [.unBase64(b64Str)](#display.unBase64) ⇒
 
 <a name="display.comma"></a>
 
@@ -424,6 +425,22 @@ convert array of arrays to CSV like string
 **Example**  
 ```js
 toCSV([[1,2],[3,4]], ["foo", "bar"]) // => '"foo","bar"\n"1","2"\n"3","4"'
+```
+<a name="display.unBase64"></a>
+
+### display.unBase64(b64Str) ⇒
+serialize a base64 string
+
+**Kind**: static method of [<code>display</code>](#display)  
+**Returns**: dict or array of data  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| b64Str | <code>string</code> | base64 encoded JSON data |
+
+**Example**  
+```js
+unBase64(`eyJmb28iOiAiYmFyIn0=`) => {"foo": "bar"}
 ```
 <a name="maths"></a>
 

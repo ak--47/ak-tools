@@ -497,6 +497,24 @@ exports.toCSV = function arrayToCSV(arr, headers = [], delimiter = ',') {
 	return body;
 };
 
+/**
+ * serialize a base64 string
+ * @example
+ * unBase64(`eyJmb28iOiAiYmFyIn0=`) => {"foo": "bar"}
+ * @param {string} b64Str - base64 encoded JSON data 
+ * @returns dict or array of data
+ * @memberof display
+ */
+exports.unBase64 = function decodeBase64ToJson(b64Str) {
+	const data = Buffer.from(b64Str, 'base64').toString('binary');
+	try {
+		return JSON.parse(data)
+	}
+	catch (e) {
+		return data
+	}	
+};
+
 /*
 -----
 MATHS

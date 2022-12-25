@@ -89,6 +89,8 @@ describe('validation', () => {
 
 });
 
+// DISPLAY
+
 describe('display', () => {
 
 	test('smart commas', () => {
@@ -153,6 +155,13 @@ describe('display', () => {
 
 		expect(u.toCSV(arr, headers)).toEqual(answer);
 	});
+
+	test('unbase64', () => { 
+		let data = `eyJmb28iOiAiYmFyIn0=`
+		let res = u.unBase64(data)
+		let answer = {foo: "bar"}
+		expect(res).toStrictEqual(answer)
+	})
 
 });
 
