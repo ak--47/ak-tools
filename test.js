@@ -1,3 +1,4 @@
+/* cSpell:disable */
 // @ts-nocheck
 const u = require('./index');
 
@@ -285,7 +286,6 @@ describe('arrays', () => {
 	});
 });
 
-// LOGGING
 
 
 

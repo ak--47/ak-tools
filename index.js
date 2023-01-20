@@ -223,7 +223,7 @@ exports.isJSONStr = function hasJsonStructure(string) {
  * @returns {boolean}
  * @memberof validate
  */
-exports.isJSON = function canBeStrinigified(data) {
+exports.isJSON = function canBeStringified(data) {
 	try {
 		let attempt = JSON.stringify(data);
 		if (attempt?.startsWith('{') || attempt?.startsWith('[')) {
@@ -255,7 +255,7 @@ exports.isJSON = function canBeStrinigified(data) {
  * @returns {boolean}
  * @memberof validate
  */
-exports.is = function isPrimiativeType(type, val) {
+exports.is = function isPrimitiveType(type, val) {
 	if (typeof type === 'string') {
 		return typeof val === type;
 	}
@@ -275,7 +275,7 @@ exports.isNil = function isNullOrUndefined(val) {
 };
 
 /**
- * check if `a` and `b` have similar shape (keys), recusively
+ * check if `a` and `b` have similar shape (keys), recursively
  * @example
  * similar({a: "foo"}, {a: "bar"}) // => true
  * @param {generalObject} o1 - first obj
@@ -331,7 +331,7 @@ DISPLAY
 */
 
 /**
- * turn a number into a comma separated (human reable) string
+ * turn a number into a comma separated (human readable) string
  * @example
  * comma(1000) // => "1,000"
  * @param  {(string | number)} num
@@ -343,7 +343,7 @@ exports.comma = function addCommas(num) {
 };
 
 /**
- * truncate a string w/elipses 
+ * truncate a string w/ellipses 
  * @example
  * truncate('foo bar baz', 3) // => 'foo...'
  * @param  {string} text - text to truncate
@@ -371,7 +371,7 @@ exports.truncate = function intelligentlyTruncate(text, chars = 500, useWordBoun
  * @example
  * bytesHuman(10000000) // => '9.54 MiB'
  * @param  {number} bytes - number of bytes to convert
- * @param  {number} [dp=2] - decmimal points; default `2`
+ * @param  {number} [dp=2] - decimal points; default `2`
  * @param  {boolean} [si=false] - threshold of 1000 or 1024; default `false`
  * @returns {string} # of bytes
  * @memberof display
@@ -453,7 +453,7 @@ exports.multiReplace = function (str, replacePairs = [
 };
 
 /**
- * replace all occurance of `old` with `new`
+ * replace all occurrence of `old` with `new`
  * @example
  * 'foo bar'.replaceAll('foo', 'qux') // => 'qux bar'
  * @param  {(string | RegExp)} oldVal - old value
@@ -480,7 +480,7 @@ exports.replaceAll = function (oldVal, newVal) {
  * toCSV([[1,2],[3,4]], ["foo", "bar"]) // => '"foo","bar"\n"1","2"\n"3","4"'
  * @param  {Array<String[] | Number[]>} arr - data of the form `[ [], [], [] ]`
  * @param  {String[]} [headers=[]] - header column 
- * @param  {string} [delimiter=","] - delimeter for cells; default `,`
+ * @param  {string} [delimiter=","] - delimiter for cells; default `,`
  * @returns {string} a valid CSV
  * @memberof display
  */
@@ -508,11 +508,11 @@ exports.toCSV = function arrayToCSV(arr, headers = [], delimiter = ',') {
 exports.unBase64 = function decodeBase64ToJson(b64Str) {
 	const data = Buffer.from(b64Str, 'base64').toString('binary');
 	try {
-		return JSON.parse(data)
+		return JSON.parse(data);
 	}
 	catch (e) {
-		return data
-	}	
+		return data;
+	}
 };
 
 /*
@@ -558,7 +558,7 @@ exports.avg = function calcAverage(...nums) {
  * @memberof maths
  */
 exports.calcSize = function estimateSizeOnDisk(data) {
-	//caculates size in bytes; assumes utf-8 encoding: https://stackoverflow.com/a/63805778 
+	//calculates size in bytes; assumes utf-8 encoding: https://stackoverflow.com/a/63805778 
 	return Buffer.byteLength(JSON.stringify(data));
 };
 
@@ -827,7 +827,7 @@ exports.objMatch = function doObjectsMatch(obj, source) {
 };
 
 /**
- * efficient object cloning; outpreforms `parse(stringify())` by 100x
+ * efficient object cloning; outperforms `parse(stringify())` by 100x
  * @example
  * objClone({f: {g: {h : 42}}}) // => { f: { g: { h: 42 } } }
  * @param  {Object} thing - object to clone
@@ -1004,7 +1004,7 @@ exports.dedupe = function deepDeDupe(arrayOfThings) {
  * de-dupe array of objects by value of specific keys
  * @memberof arrays
  * @param  {any[]} arr - array to dedupe
- * @param  {string[]} keyNames - keynames to dedupe values on
+ * @param  {string[]} keyNames - key names to dedupe values on
  * @returns {any[]} deduped array of objected
  */
 exports.dedupeVal = function dedupeByValues(arr, keyNames) {
@@ -1062,7 +1062,7 @@ exports.shuffle = function shuffleArrayVals(array, mutate = false) {
  * the classic python built-in for generating arrays of integers
  * @memberof arrays
  * @param  {number} min - starting number
- * @param  {number} max - ending nunber
+ * @param  {number} max - ending number
  * @param  {number} [step=1] - step for each interval; default `1`
  * @return {number[]} a range of integers
  */
@@ -1135,7 +1135,7 @@ exports.times = function doNTimes(n, iteratee, context) {
  * throttle a functions's execution every `N` ms
  * @memberof functions
  * @param  {function} func - function to throttle
- * @param  {number} wait - ms to wait between executiations
+ * @param  {number} wait - ms to wait between executions
  * @param  {object} [options={leading: true, trailing: false}]
  */
 exports.throttle = function throttle(func, wait, options = { leading: true, trailing: true }) {
@@ -1216,7 +1216,7 @@ LOGGING
  * a cloud function compatible `console.log()`
  * @memberof logging
  * @param  {(string | JSON | object)} data - data to log
- * @param  {string} message - accopanying message
+ * @param  {string} message - accompanying message
  * @param  {string} [severity=`INFO`] - {@link https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity| google sev label}; default `INFO`
  * 
  */
@@ -1302,24 +1302,42 @@ exports.progress = function showProgress(thing, p, message = `processed ...`) {
 class Timer {
 	constructor(label) {
 		this.label = label;
-
 		this.startTime = null;
 		this.endTime = null;
 		this.delta = null;
+		this.running = false;
+		this.cycles = 0;
+		this.stop = this.end
 	}
 	start() {
 		this.startTime = Date.now();
+		this.running = true;
 	}
 	end(consoleOutput = true) {
-		const endTime = Date.now();
-		this.endTime = endTime;
+		if (this.running) {
+			this.running = false;
+			this.cycles++
+			const endTime = Date.now();
+			this.endTime = endTime;
 
-		// @ts-ignore
-		const delta = this.endTime - this.startTime;
-		this.delta = delta;
+			// @ts-ignore
+			const currentDelta = this.endTime - this.startTime;
+			if (!this.delta) {
+				this.delta = currentDelta;
+			}
 
-		if (consoleOutput) {
-			console.log(`${this.label}: ${this.prettyTime(delta)}`);
+			else {
+				this.delta += currentDelta;
+			}
+
+
+			if (consoleOutput) {
+				console.log(`${this.label}: ${this.prettyTime(this.delta)}`);
+			}
+			
+		}
+		else {
+			console.log(`${this.label} has not been started...`)
 		}
 	}
 	report(consoleOutput = true) {
@@ -1331,12 +1349,13 @@ class Timer {
 			start: this.startTime || 0,
 			end: this.endTime || 0,
 			delta: this.delta || 0,
-			human: this.prettyTime(this.delta)
+			human: this.prettyTime(this.delta),
+			cycles: this.cycles
 
 		};
 	}
-	prettyTime(miliseconds) {
-		let seconds = miliseconds / 1000;
+	prettyTime(milliseconds) {
+		let seconds = milliseconds / 1000;
 		const levels = [
 			[Math.floor(seconds / 31536000), 'years'],
 			[Math.floor((seconds % 31536000) / 86400), 'days'],
@@ -1502,7 +1521,8 @@ exports.copy = exports.clip;
 exports.cleanObj = exports.objClean;
 exports.clone = exports.objClone;
 exports.awaitObj = exports.objAwait;
-exports.typecastInt = exports.objTypecast
+exports.typecastInt = exports.objTypecast;
+exports.timer = exports.time
 
 exports.files = {
 	ls: exports.ls,

@@ -255,7 +255,7 @@ isNil(null) // => true
 <a name="validate.similar"></a>
 
 ### validate.similar(o1, o2) ⇒ <code>boolean</code>
-check if `a` and `b` have similar shape (keys), recusively
+check if `a` and `b` have similar shape (keys), recursively
 
 **Kind**: static method of [<code>validate</code>](#validate)  
 **Returns**: <code>boolean</code> - do they have the same shape?  
@@ -290,7 +290,7 @@ display, formatting, and other "make it look right" utilities
 <a name="display.comma"></a>
 
 ### display.comma(num) ⇒ <code>string</code>
-turn a number into a comma separated (human reable) string
+turn a number into a comma separated (human readable) string
 
 **Kind**: static method of [<code>display</code>](#display)  
 **Returns**: <code>string</code> - formatted number  
@@ -306,7 +306,7 @@ comma(1000) // => "1,000"
 <a name="display.truncate"></a>
 
 ### display.truncate(text, [chars], [useWordBoundary]) ⇒ <code>string</code>
-truncate a string w/elipses
+truncate a string w/ellipses
 
 **Kind**: static method of [<code>display</code>](#display)  
 **Returns**: <code>string</code> - truncated string  
@@ -332,7 +332,7 @@ turn a number (of bytes) into a human readable string
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | bytes | <code>number</code> |  | number of bytes to convert |
-| [dp] | <code>number</code> | <code>2</code> | decmimal points; default `2` |
+| [dp] | <code>number</code> | <code>2</code> | decimal points; default `2` |
 | [si] | <code>boolean</code> | <code>false</code> | threshold of 1000 or 1024; default `false` |
 
 **Example**  
@@ -393,7 +393,7 @@ multiReplace('red fish said', [["red", "blue"],["said"]]) // => "blue fish"
 <a name="display.replaceAll"></a>
 
 ### display.replaceAll(oldVal, newVal) ⇒ <code>string</code>
-replace all occurance of `old` with `new`
+replace all occurrence of `old` with `new`
 
 **Kind**: static method of [<code>display</code>](#display)  
 **Returns**: <code>string</code> - replaced result  
@@ -420,7 +420,7 @@ convert array of arrays to CSV like string
 | --- | --- | --- | --- |
 | arr | <code>Array.&lt;(Array.&lt;String&gt;\|Array.&lt;Number&gt;)&gt;</code> |  | data of the form `[ [], [], [] ]` |
 | [headers] | <code>Array.&lt;String&gt;</code> | <code>[]</code> | header column |
-| [delimiter] | <code>string</code> | <code>\,\</code> | delimeter for cells; default `,` |
+| [delimiter] | <code>string</code> | <code>\,\</code> | delimiter for cells; default `,` |
 
 **Example**  
 ```js
@@ -698,7 +698,7 @@ objMatch({f: {g: {h: 42}}}, {f: {g: {x: 42}}}) // => false
 <a name="objects.objClone"></a>
 
 ### objects.objClone(thing, [opts]) ⇒ <code>Object</code>
-efficient object cloning; outpreforms `parse(stringify())` by 100x
+efficient object cloning; outperforms `parse(stringify())` by 100x
 
 **Kind**: static method of [<code>objects</code>](#objects)  
 **Returns**: <code>Object</code> - deep copy of object  
@@ -820,7 +820,7 @@ de-dupe array of objects by value of specific keys
 | Param | Type | Description |
 | --- | --- | --- |
 | arr | <code>Array.&lt;any&gt;</code> | array to dedupe |
-| keyNames | <code>Array.&lt;string&gt;</code> | keynames to dedupe values on |
+| keyNames | <code>Array.&lt;string&gt;</code> | key names to dedupe values on |
 
 <a name="arrays.chunk"></a>
 
@@ -860,7 +860,7 @@ the classic python built-in for generating arrays of integers
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | min | <code>number</code> |  | starting number |
-| max | <code>number</code> |  | ending nunber |
+| max | <code>number</code> |  | ending number |
 | [step] | <code>number</code> | <code>1</code> | step for each interval; default `1` |
 
 <a name="arrays.deepFlat"></a>
@@ -937,7 +937,7 @@ throttle a functions's execution every `N` ms
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | func | <code>function</code> |  | function to throttle |
-| wait | <code>number</code> |  | ms to wait between executiations |
+| wait | <code>number</code> |  | ms to wait between executions |
 | [options] | <code>object</code> | <code>{leading: true, trailing: false}</code> |  |
 
 <a name="functions.compose"></a>
@@ -987,7 +987,7 @@ a cloud function compatible `console.log()`
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | data | <code>string</code> \| <code>JSON</code> \| <code>object</code> |  | data to log |
-| message | <code>string</code> |  | accopanying message |
+| message | <code>string</code> |  | accompanying message |
 | [severity] | <code>string</code> | <code>&#x60;INFO&#x60;</code> | [ google sev label](https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity); default `INFO` |
 
 <a name="logging.log"></a>
