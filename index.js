@@ -1408,10 +1408,10 @@ exports.quickTime = function timeTaken(callback) {
  * @param  {string} [app='akTools'] - value of `$source` prop
  * @param  {string} [token="99a1209a992b3f9fba55a293e211186a"] - mixpanel token
  * @param  {string} [distinct_id=os.userInfo().username] - distinct_id
- * @returns {function} func with signature: `(event, props = {}, cb = ()=>{})`
+ * @returns {function} func with signature: `(event, props = {}, cb = (res)=>{})`
  */
 exports.tracker = function sendToMixpanel(app = 'akTools', token = "99a1209a992b3f9fba55a293e211186a", distinct_id = os.userInfo().username) {
-	return function (eventName = "ping", props = {}, callback = (res) => { return res; }) {
+	return function (eventName = "ping", props = {}, callback = () => {  }) {
 
 		const optionsEv = {
 			"method": "POST",

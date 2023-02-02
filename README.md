@@ -1052,7 +1052,7 @@ track stuff to mixpanel
 - ex: `var t = track(); t('foo', {bar: "baz"})`
 
 **Kind**: static method of [<code>logging</code>](#logging)  
-**Returns**: <code>function</code> - func with signature: `(event, props = {}, cb = ()=>{})`  
+**Returns**: <code>function</code> - func with signature: `(event, props = {}, cb = (res)=>{})`  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |

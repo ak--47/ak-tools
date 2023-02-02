@@ -157,12 +157,12 @@ describe('display', () => {
 		expect(u.toCSV(arr, headers)).toEqual(answer);
 	});
 
-	test('unbase64', () => { 
-		let data = `eyJmb28iOiAiYmFyIn0=`
-		let res = u.unBase64(data)
-		let answer = {foo: "bar"}
-		expect(res).toStrictEqual(answer)
-	})
+	test('unbase64', () => {
+		let data = `eyJmb28iOiAiYmFyIn0=`;
+		let res = u.unBase64(data);
+		let answer = { foo: "bar" };
+		expect(res).toStrictEqual(answer);
+	});
 
 });
 
@@ -286,7 +286,24 @@ describe('arrays', () => {
 	});
 });
 
+describe('loggers', () => {
+	test('tracker with cb', (done) => {
+		let track = u.tracker('akTools');
+		track('ping', { 'pong': 'dong' }, (res) => {
+			expect(res.length).toBe(2);
+			expect(res[0].error).toBe(null);
+			expect(res[1].error).toBe(null);
+			expect(res[0].status).toBe(1);
+			expect(res[1].status).toBe(1);
+			done()
+		});
+	});
 
+	test('tracker w/out cb', () => {
+		let track = u.tracker('akTools');
+		track('ping', { 'pong': 'mong' });
+	});
+})
 
 
 

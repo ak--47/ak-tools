@@ -1,12 +1,12 @@
 {
   "name": "ak-tools",
-  "version": "1.0.215",
+  "version": "1.0.216",
   "description": "AK's collections of useful things...",
   "main": "index.js",
   "scripts": {
     "test": "jest --watch",
     "post": "npm publish",
-    "dev": "nodemon scratch.js",
+    "dev": "nodemon --inspect scratch.js",
     "prune": "rm -rf ./tmp/*",
 	"docs": "node docgen.js"
   },
