@@ -295,7 +295,7 @@ describe('loggers', () => {
 			expect(res[1].error).toBe(null);
 			expect(res[0].status).toBe(1);
 			expect(res[1].status).toBe(1);
-			done()
+			done();
 		});
 	});
 

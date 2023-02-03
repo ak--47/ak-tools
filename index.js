@@ -1307,7 +1307,7 @@ class Timer {
 		this.delta = null;
 		this.running = false;
 		this.cycles = 0;
-		this.stop = this.end
+		this.stop = this.end;
 	}
 	start() {
 		this.startTime = Date.now();
@@ -1316,7 +1316,7 @@ class Timer {
 	end(consoleOutput = true) {
 		if (this.running) {
 			this.running = false;
-			this.cycles++
+			this.cycles++;
 			const endTime = Date.now();
 			this.endTime = endTime;
 
@@ -1334,10 +1334,10 @@ class Timer {
 			if (consoleOutput) {
 				console.log(`${this.label}: ${this.prettyTime(this.delta)}`);
 			}
-			
+
 		}
 		else {
-			console.log(`${this.label} has not been started...`)
+			console.log(`${this.label} has not been started...`);
 		}
 	}
 	report(consoleOutput = true) {
@@ -1411,8 +1411,8 @@ exports.quickTime = function timeTaken(callback) {
  * @returns {function} func with signature: `(event, props = {}, cb = (res)=>{})`
  */
 exports.tracker = function sendToMixpanel(app = 'akTools', token = "99a1209a992b3f9fba55a293e211186a", distinct_id = os.userInfo().username) {
-	return function (eventName = "ping", props = {}, callback = () => {  }) {
-
+	return function (eventName = "ping", props = {}, callback = (res) => { }) {
+		const responses = [];
 		const optionsEv = {
 			"method": "POST",
 			"hostname": "api.mixpanel.com",
@@ -1432,8 +1432,16 @@ exports.tracker = function sendToMixpanel(app = 'akTools', token = "99a1209a992b
 
 			res.on("end", function () {
 				const body = Buffer.concat(chunks);
-				prof(JSON.parse(body.toString()), callback);
+				const res = JSON.parse(body.toString('utf-8'));
+				responses.push(res);
+				if (responses.length === 2) {
+					callback(responses);
+				}
 			});
+		});
+
+		reqEv.on('error', (e) => {
+			// noop
 		});
 
 		const payloadEv = [
@@ -1450,43 +1458,50 @@ exports.tracker = function sendToMixpanel(app = 'akTools', token = "99a1209a992b
 		reqEv.write(JSON.stringify(payloadEv));
 		reqEv.end();
 
-		function prof(prior, callback) {
 
-			const optionsU = {
-				"method": "POST",
-				"hostname": "api.mixpanel.com",
-				"path": "/engage?verbose=1",
-				"headers": {
-					"Content-Type": "application/json",
-					"Accept": "text/plain",
-				}
-			};
 
-			const reqU = http.request(optionsU, function (res) {
-				const chunks = [];
+		const optionsU = {
+			"method": "POST",
+			"hostname": "api.mixpanel.com",
+			"path": "/engage?verbose=1",
+			"headers": {
+				"Content-Type": "application/json",
+				"Accept": "text/plain",
+			}
+		};
 
-				res.on("data", function (chunk) {
-					chunks.push(chunk);
-				});
+		const reqU = http.request(optionsU, function (res) {
+			const chunks = [];
 
-				res.on("end", function () {
-					const body = Buffer.concat(chunks);
-					const res = JSON.parse(body.toString('utf-8'));
-					callback([prior, res]);
-				});
+			res.on("data", function (chunk) {
+				chunks.push(chunk);
 			});
 
-			const payloadU = [{
-				$token: token,
-				$distinct_id: distinct_id,
-				$set: {
-					$name: distinct_id
+			res.on("end", function () {
+				const body = Buffer.concat(chunks);
+				const res = JSON.parse(body.toString('utf-8'));
+				responses.push(res);
+				if (responses.length === 2) {
+					callback(responses);
 				}
-			}];
-			reqU.write(JSON.stringify(payloadU));
-			reqU.end();
+			});
+		});
 
-		};
+		reqU.on('error', (e) => {
+			// noop
+		});
+
+		const payloadU = [{
+			$token: token,
+			$distinct_id: distinct_id,
+			$set: {
+				$name: distinct_id
+			}
+		}];
+		reqU.write(JSON.stringify(payloadU));
+		reqU.end();
+
+
 	};
 };
 
@@ -1522,7 +1537,7 @@ exports.cleanObj = exports.objClean;
 exports.clone = exports.objClone;
 exports.awaitObj = exports.objAwait;
 exports.typecastInt = exports.objTypecast;
-exports.timer = exports.time
+exports.timer = exports.time;
 
 exports.files = {
 	ls: exports.ls,
