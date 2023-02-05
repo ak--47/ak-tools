@@ -1294,9 +1294,9 @@ exports.log = function comprehensiveLog(item, depth = 0, maxDepth = 100) {
  * @returns {void}
  */
 exports.progress = function showProgress(thing, p, message = `processed ...`) {
-	//readline.clearLine(process.stdout);
 	readline.cursorTo(process.stdout, 0);
-	process.stdout.write(`${thing} ${message} ${exports.comma(p)}`);
+	process.stdout.write(`${thing} ${message} ${exports.comma(p)}\t`);
+
 };
 
 class Timer {
