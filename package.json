@@ -1,6 +1,6 @@
 {
   "name": "ak-tools",
-  "version": "1.0.219",
+  "version": "1.0.3",
   "description": "AK's collections of useful things...",
   "main": "index.js",
   "scripts": {

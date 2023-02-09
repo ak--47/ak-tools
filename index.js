@@ -100,7 +100,7 @@ exports.ls = async function listFiles(dir = "./", objectMode = false) {
  * @returns {Promise<(string|boolean|void)>} path or `false` if fail
  * @memberof files
  */
-exports.rm = async function removeFileOrFolder(fileNameOrPath) {
+exports.rm = async function removeFileOrFolder(fileNameOrPath, log = true, throws = true) {
 	let fileRemoved;
 	try {
 		fileRemoved = await fs.unlink(path.resolve(fileNameOrPath));
@@ -108,8 +108,13 @@ exports.rm = async function removeFileOrFolder(fileNameOrPath) {
 		try {
 			fileRemoved = await fs.rm(path.resolve(fileNameOrPath), { recursive: true, force: true });
 		} catch (e) {
-			console.error(`${fileNameOrPath} not removed!`);
-			console.error(e);
+			if (log) {
+				console.error(`${fileNameOrPath} not removed!`);
+				console.error(e);
+			}
+			if (throws) {
+				throw e;
+			}
 			return false;
 		}
 	}
@@ -128,7 +133,7 @@ exports.rm = async function removeFileOrFolder(fileNameOrPath) {
  * @returns {Promise<(string | false)>} the name of the file
  * @memberof files
  */
-exports.touch = async function addFile(fileNameOrPath, data = "", isJson = false) {
+exports.touch = async function addFile(fileNameOrPath, data = "", isJson = false, log = true, throws = true) {
 	let fileCreated;
 	let dataToWrite = isJson ? exports.json(data) : data;
 
@@ -136,8 +141,13 @@ exports.touch = async function addFile(fileNameOrPath, data = "", isJson = false
 		//@ts-ignore
 		fileCreated = await fs.writeFile(path.resolve(fileNameOrPath), dataToWrite, 'utf-8');
 	} catch (e) {
-		console.error(`${fileNameOrPath} not created!`);
-		console.error(e);
+		if (log) {
+			console.error(`${fileNameOrPath} not created!`);
+			console.error(e);
+		}
+		if (throws) {
+			throw e;
+		}
 		return false;
 	}
 
@@ -156,15 +166,20 @@ exports.touch = async function addFile(fileNameOrPath, data = "", isJson = false
  * @returns {Promise<(string | generalObject | arrayOfObjects)>} the file in memory
  * @memberof files
  */
-exports.load = async function loadFile(fileNameOrPath, isJson = false, encoding = 'utf-8') {
+exports.load = async function loadFile(fileNameOrPath, isJson = false, encoding = 'utf-8', log = true, throws = true) {
 	let fileLoaded;
 
 	try {
 		// @ts-ignore
 		fileLoaded = await fs.readFile(path.resolve(fileNameOrPath), encoding);
 	} catch (e) {
+		if (log) {
 		console.error(`${fileNameOrPath} not loaded!`);
 		console.error(e);
+		}
+		if (throws) {
+			throw e;
+		}
 	}
 
 	if (isJson) {
