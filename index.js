@@ -1236,7 +1236,8 @@ LOGGING
  * 
  */
 exports.cLog = function cloudFunctionLogger(data, message, severity = `INFO`) {
-	if (global?.isTest) {
+	// not GCP
+	if (!process.env["FUNCTION_NAME"]) {
 		if (exports.isJSON(data)) {
 			if (message) console.log(message);
 			if (data) console.log(JSON.stringify(data, null, 2));
