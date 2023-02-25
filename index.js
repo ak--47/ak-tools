@@ -174,8 +174,8 @@ exports.load = async function loadFile(fileNameOrPath, isJson = false, encoding 
 		fileLoaded = await fs.readFile(path.resolve(fileNameOrPath), encoding);
 	} catch (e) {
 		if (log) {
-		console.error(`${fileNameOrPath} not loaded!`);
-		console.error(e);
+			console.error(`${fileNameOrPath} not loaded!`);
+			console.error(e);
 		}
 		if (throws) {
 			throw e;
@@ -391,7 +391,7 @@ exports.truncate = function intelligentlyTruncate(text, chars = 500, useWordBoun
  * @returns {string} # of bytes
  * @memberof display
  */
-exports.bytesHuman = function (bytes, dp = 2, si = false) {
+exports.bytesHuman = function (bytes, dp = 2, si = true) {
 	//https://stackoverflow.com/a/14919494
 	const thresh = si ? 1000 : 1024;
 
@@ -979,6 +979,64 @@ function makeInteger(value) {
 	}
 }
 
+
+/**
+ * deeply flatten as nested object; use `.` notation for nested keys
+ * @example
+ * flatten({foo: {bar: "baz"}}) => {"foo.bar": "baz"}
+ * @param  {Object} obj object to flatten
+ * @param  {Array} roots=[] lineage for recursion
+ * @param  {string} sep='.' separator to use
+ * @memberof objects
+ */
+exports.flatten = function flattenObjectWithDotNotation(obj, roots = [], sep = '.') {
+	// ? https://stackoverflow.com/a/61602592
+	// find props of given object
+	return Object.keys(obj)
+		// return an object by iterating props
+		.reduce((memo, prop) => Object.assign(
+			// create a new object
+			{},
+			// include previously returned object
+			memo,
+			Object.prototype.toString.call(obj[prop]) === '[object Object]'
+				// keep working if value is an object
+				? exports.flatten(obj[prop], roots.concat([prop]), sep)
+				// include current prop and value and prefix prop with the roots
+				: { [roots.concat([prop]).join(sep)]: obj[prop] }
+		), {});
+};
+
+/**
+ * map over an object's values and return a new object
+ * @example
+ * objMap({foo: 2, bar: 4}, val => val * 2) => {foo: 4, bar: 8}
+ * @param  {Object} object object iterate
+ * @param  {function} mapFn function with signature `(val) => {}`
+ * @memberof objects
+ */
+exports.objMap = function mapOverObjectProps(object, mapFn) {
+	return Object.keys(object).reduce(function(result, key) {
+	  result[key] = mapFn(object[key])
+	  return result
+	}, {})
+  }
+
+
+
+/**
+ * find a key in an object that has a particular value
+ * @example
+ * getKey({foo: "bar"}, "bar") => "foo"
+ * @param  {Object} object object to search for
+ * @param  {Object} value value withing that object to search for
+ * @memberof objects
+ */
+exports.getKey = function getObjKeysByValue(object, value) {
+	// ? https://stackoverflow.com/a/28191966
+	return Object.keys(object).find(key => object[key] === value);
+};
+
 /*
 -------
 ARRAYS
@@ -1547,7 +1605,7 @@ exports.clip = function copyToClipboard(data) {
 ALIASES
 --------
 */
-exports.objMap = exports.objFilter;
+exports.objFilt = exports.objFilter;
 exports.copy = exports.clip;
 exports.cleanObj = exports.objClean;
 exports.clone = exports.objClone;
@@ -1598,6 +1656,9 @@ exports.objects = {
 	objTypecast: exports.objTypecast,
 	objAwait: exports.objAwait,
 	removeNulls: exports.removeNulls,
+	flatten: exports.flatten,
+	objMap : exports.objMap,
+	getKey : exports.getKey
 
 };
 exports.arrays = {};

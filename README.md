@@ -588,6 +588,9 @@ object utilities
     * [.objTypecast(obj, [isClone])](#objects.objTypecast) ⇒ <code>Object</code>
     * [.objAwait(obj)](#objects.objAwait) ⇒ [<code>Promise.&lt;generalObject&gt;</code>](#generalObject)
     * [.removeNulls(objWithNullOrUndef)](#objects.removeNulls) ⇒ <code>Object</code>
+    * [.flatten(obj, roots, sep)](#objects.flatten)
+    * [.objMap(object, mapFn)](#objects.objMap)
+    * [.getKey(object, value)](#objects.getKey)
 
 <a name="objects.rnKeys"></a>
 
@@ -762,6 +765,55 @@ explicitly remove keys with `null` or `undefined` values
 **Example**  
 ```js
 removeNulls({foo: "bar", baz: null}) // => {foo: "bar"}
+```
+<a name="objects.flatten"></a>
+
+### objects.flatten(obj, roots, sep)
+deeply flatten as nested object; use `.` notation for nested keys
+
+**Kind**: static method of [<code>objects</code>](#objects)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| obj | <code>Object</code> |  | object to flatten |
+| roots | <code>Array</code> | <code>[</code> | lineage for recursion |
+| sep | <code>string</code> | <code>&#x27;.&#x27;</code> | separator to use |
+
+**Example**  
+```js
+flatten({foo: {bar: "baz"}}) => {"foo.bar": "baz"}
+```
+<a name="objects.objMap"></a>
+
+### objects.objMap(object, mapFn)
+map over an object's values and return a new object
+
+**Kind**: static method of [<code>objects</code>](#objects)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| object | <code>Object</code> | object iterate |
+| mapFn | <code>function</code> | function with signature `(val) => {}` |
+
+**Example**  
+```js
+objMap({foo: 2, bar: 4}, val => val * 2) => {foo: 4, bar: 8}
+```
+<a name="objects.getKey"></a>
+
+### objects.getKey(object, value)
+find a key in an object that has a particular value
+
+**Kind**: static method of [<code>objects</code>](#objects)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| object | <code>Object</code> | object to search for |
+| value | <code>Object</code> | value withing that object to search for |
+
+**Example**  
+```js
+getKey({foo: "bar"}, "bar") => "foo"
 ```
 <a name="arrays"></a>
 

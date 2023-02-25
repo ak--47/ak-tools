@@ -275,6 +275,28 @@ describe('objects', () => {
 		expect(compareByReference).toBe(false);
 	});
 
+	test('flatten', () => {
+		const orig = { foo: { bar: "baz" } };
+		const target = { "foo.bar": "baz" };
+		expect(u.flatten(orig)).toEqual(target);
+	});
+
+	test('map', () => { 		
+		const orig = {foo: 2, bar: 4};
+		const target ={foo: 4, bar: 8};
+		const op = u.objMap(orig, function(v) {
+			return v*2
+		})
+		expect(op).toEqual(target);
+	})
+
+	test('getKey', () => { 
+		const orig = {foo: "bar"};
+		const target = "foo";
+		const op = u.getKey(orig, "bar")
+		expect(op).toBe(target);
+	})
+
 });
 
 // ARRAY UTILITES
