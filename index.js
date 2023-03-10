@@ -1288,14 +1288,16 @@ LOGGING
 /**
  * a cloud function compatible `console.log()`
  * @memberof logging
- * @param  {(string | JSON | object)} data - data to log
+ * @param  {(string | JSON | object)} data - data to log; preferably structured
  * @param  {string} message - accompanying message
- * @param  {string} [severity=`INFO`] - {@link https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity| google sev label}; default `INFO`
+ * @param  {string} [severity=`INFO`] - {@link https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#logseverity | google sev label}; default `INFO`
+ * @param  {boolean} [isCloud=false] - force cloud logging
  * 
  */
-exports.cLog = function cloudFunctionLogger(data, message, severity = `INFO`) {
+exports.cLog = function cloudFunctionLogger(data, message, severity = `INFO`, isCloud = false) {
 	// not GCP
-	if (!process.env["FUNCTION_NAME"]) {
+	// ? https://cloud.google.com/functions/docs/configuring/env-var#newer_runtimes
+	if (!process.env["FUNCTION_TARGET"] || !process.env["FUNCTION_SIGNATURE_TYPE"]  || !isCloud) {
 		if (exports.isJSON(data)) {
 			if (message) console.log(message);
 			if (data) console.log(JSON.stringify(data, null, 2));
@@ -1313,7 +1315,7 @@ exports.cLog = function cloudFunctionLogger(data, message, severity = `INFO`) {
 			// https://cloud.google.com/functions/docs/monitoring/logging#writing_structured_logs
 			const structuredLog = Object.assign({
 				severity: severity,
-				message: message || `${global.moduleName || 'CF'} log`,
+				message: message || `cloud log`,
 			},
 				data
 			);
@@ -1322,7 +1324,6 @@ exports.cLog = function cloudFunctionLogger(data, message, severity = `INFO`) {
 		}
 
 		else {
-			// https://cloud.google.com/functions/docs/monitoring/logging
 			if (message) console.log(message);
 			if (data) console.log(data);
 		}
