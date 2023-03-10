@@ -1020,7 +1020,7 @@ logging, timers and other diagnostic utilities
 
 
 * [logging](#logging)
-    * [.cLog(data, message, [severity])](#logging.cLog)
+    * [.cLog(data, message, [severity], [isCloud])](#logging.cLog)
     * [.log(item, [depth], [maxDepth])](#logging.log) ⇒ <code>void</code>
     * [.progress(thing, p, message)](#logging.progress) ⇒ <code>void</code>
     * [.time(label)](#logging.time) ⇒ <code>Timer</code>
@@ -1031,16 +1031,17 @@ logging, timers and other diagnostic utilities
 
 <a name="logging.cLog"></a>
 
-### logging.cLog(data, message, [severity])
+### logging.cLog(data, message, [severity], [isCloud])
 a cloud function compatible `console.log()`
 
 **Kind**: static method of [<code>logging</code>](#logging)  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| data | <code>string</code> \| <code>JSON</code> \| <code>object</code> |  | data to log |
+| data | <code>string</code> \| <code>JSON</code> \| <code>object</code> |  | data to log; preferably structured |
 | message | <code>string</code> |  | accompanying message |
-| [severity] | <code>string</code> | <code>&#x60;INFO&#x60;</code> | [ google sev label](https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity); default `INFO` |
+| [severity] | <code>string</code> | <code>&#x60;INFO&#x60;</code> | [ google sev label](https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#logseverity); default `INFO` |
+| [isCloud] | <code>boolean</code> | <code>true</code> | force cloud logging |
 
 <a name="logging.log"></a>
 
