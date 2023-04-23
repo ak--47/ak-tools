@@ -1289,7 +1289,7 @@ LOGGING
  * a cloud function compatible `console.log()`
  * @memberof logging
  * @param  {(string | JSON | object)} data - data to log; preferably structured
- * @param  {string} message - accompanying message
+ * @param  {string} [message] - accompanying message
  * @param  {string} [severity=`INFO`] - {@link https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#logseverity | google sev label}; default `INFO`
  * @param  {boolean} [isCloud=true] - force cloud logging
  * 

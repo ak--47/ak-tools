@@ -1,6 +1,6 @@
 {
   "name": "ak-tools",
-  "version": "1.0.322",
+  "version": "1.0.4",
   "description": "AK's collections of useful things...",
   "main": "index.js",
   "scripts": {
@@ -8,8 +8,10 @@
     "post": "npm publish",
     "dev": "nodemon --inspect scratch.js",
     "prune": "rm -rf ./tmp/*",
-	"docs": "node docgen.js"
+	"docs": "node docgen.js",
+	"types": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly --outDir ."
   },
+  "types": "./index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ak--47/ak-tools.git"
