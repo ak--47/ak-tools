@@ -1,0 +1,12 @@
+{
+	"compilerOptions": {
+		"removeComments": false,
+		"declaration": true,
+		"emitDeclarationOnly": true,
+		"allowJs": true,
+		"outDir": ".",
+		"sourceMap": true
+
+	},
+	"files": ["./index.js"]
+}
