@@ -339,6 +339,36 @@ exports.similar = function deepSameKeys(o1, o2) {
 	return true;
 };
 
+/** 
+ * @typedef {object} GCSUri
+ * @property {string} uri
+ * @property {string} bucket
+ * @property {string} file
+ */
+
+/**
+ * turn a gcs uri into a bucket and file
+ * @example
+ * parceGCSUri(`gsc://foo/bar.txt`) // => {uri: "gsc://foo/bar.txt", bucket: "foo", file: "bar.txt"}
+ * @param  {string} uri
+ * @returns {GCSUri}
+ * @memberof validate
+ */
+exports.parseGCSUri = function(uri) {
+	// ? https://www.npmjs.com/package/google-cloud-storage-uri-parser
+	const REG_EXP = new RegExp("^gs://([^/]+)/(.+)$");
+	const bucket = uri.replace(REG_EXP, "$1");
+	const file = uri.replace(REG_EXP, "$2");
+	return {
+		uri,
+		bucket,
+		file
+	};
+}
+
+
+
+
 /*
 -------
 DISPLAY
