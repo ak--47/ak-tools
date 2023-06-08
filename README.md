@@ -74,7 +74,6 @@ u.log(diag)
 </dl>
 
 
-
 <a name="files"></a>
 
 ## files
@@ -190,6 +189,7 @@ data validation utilities
     * [.is(type, val)](#validate.is) ⇒ <code>boolean</code>
     * [.isNil(val)](#validate.isNil) ⇒ <code>boolean</code>
     * [.similar(o1, o2)](#validate.similar) ⇒ <code>boolean</code>
+    * [.parseGCSUri(uri)](#validate.parseGCSUri) ⇒ [<code>GCSUri</code>](#GCSUri)
 
 <a name="validate.isJSONStr"></a>
 
@@ -268,6 +268,21 @@ check if `a` and `b` have similar shape (keys), recursively
 **Example**  
 ```js
 similar({a: "foo"}, {a: "bar"}) // => true
+```
+<a name="validate.parseGCSUri"></a>
+
+### validate.parseGCSUri(uri) ⇒ [<code>GCSUri</code>](#GCSUri)
+turn a gcs uri into a bucket and file
+
+**Kind**: static method of [<code>validate</code>](#validate)  
+
+| Param | Type |
+| --- | --- |
+| uri | <code>string</code> | 
+
+**Example**  
+```js
+parceGCSUri(`gcs://foo/bar.txt`) // => {uri: "gcs://foo/bar.txt", bucket: "foo", file: "bar.txt"}
 ```
 <a name="display"></a>
 
@@ -1020,7 +1035,7 @@ logging, timers and other diagnostic utilities
 
 
 * [logging](#logging)
-    * [.cLog(data, message, [severity], [isCloud])](#logging.cLog)
+    * [.cLog(data, [message], [severity], [isCloud])](#logging.cLog)
     * [.log(item, [depth], [maxDepth])](#logging.log) ⇒ <code>void</code>
     * [.progress(thing, p, message)](#logging.progress) ⇒ <code>void</code>
     * [.time(label)](#logging.time) ⇒ <code>Timer</code>
@@ -1031,7 +1046,7 @@ logging, timers and other diagnostic utilities
 
 <a name="logging.cLog"></a>
 
-### logging.cLog(data, message, [severity], [isCloud])
+### logging.cLog(data, [message], [severity], [isCloud])
 a cloud function compatible `console.log()`
 
 **Kind**: static method of [<code>logging</code>](#logging)  
@@ -1039,7 +1054,7 @@ a cloud function compatible `console.log()`
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | data | <code>string</code> \| <code>JSON</code> \| <code>object</code> |  | data to log; preferably structured |
-| message | <code>string</code> |  | accompanying message |
+| [message] | <code>string</code> |  | accompanying message |
 | [severity] | <code>string</code> | <code>&#x60;INFO&#x60;</code> | [ google sev label](https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#logseverity); default `INFO` |
 | [isCloud] | <code>boolean</code> | <code>true</code> | force cloud logging |
 
@@ -1135,3 +1150,36 @@ copy arbitrary data to your clipboard
 | Param | Type | Description |
 | --- | --- | --- |
 | data | <code>any</code> | data to put on your clipboard |
+
+<a name="generalObject"></a>
+
+## generalObject : <code>Object.&lt;string, any&gt;</code>
+generic for `{}` w/string keys
+
+**Kind**: global typedef  
+<a name="arrayOfObjects"></a>
+
+## arrayOfObjects : [<code>Array.&lt;generalObject&gt;</code>](#generalObject)
+generic for `[{},{},{}]`
+
+**Kind**: global typedef  
+<a name="GCSUri"></a>
+
+## GCSUri
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type |
+| --- | --- |
+| uri | <code>string</code> | 
+| bucket | <code>string</code> | 
+| file | <code>string</code> | 
+
+<a name="filterCallback"></a>
+
+## filterCallback : <code>function</code>
+**Kind**: global typedef  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| keyOrValue | <code>string</code> | object's value or key to test |

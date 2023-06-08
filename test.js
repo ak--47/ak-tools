@@ -88,6 +88,20 @@ describe('validation', () => {
 		expect(u.similar(a, c)).toBe(false);
 	});
 
+	test('gcs uri parsing', () => {
+		let uri = `gs://bucket-name/path/to/file.txt`;
+		let uriAlso = `gcs://bucket-name/path/to/file.txt`;
+		let expected = { uri: `gs://bucket-name/path/to/file.txt`, bucket: `bucket-name`, file: `path/to/file.txt` };
+		let alsoExpected = { uri: `gcs://bucket-name/path/to/file.txt`, bucket: `bucket-name`, file: `path/to/file.txt` };
+		expect(u.parseGCSUri(uri)).toStrictEqual(expected);
+		expect(u.parseGCSUri(uriAlso)).toStrictEqual(alsoExpected);
+
+		function badUri() {
+			u.parseGCSUri(`https://google.com`);
+		}
+		expect(badUri).toThrow(`invalid gcs uri: https://google.com`);
+})
+
 });
 
 // DISPLAY
@@ -281,21 +295,21 @@ describe('objects', () => {
 		expect(u.flatten(orig)).toEqual(target);
 	});
 
-	test('map', () => { 		
-		const orig = {foo: 2, bar: 4};
-		const target ={foo: 4, bar: 8};
-		const op = u.objMap(orig, function(v) {
-			return v*2
-		})
+	test('map', () => {
+		const orig = { foo: 2, bar: 4 };
+		const target = { foo: 4, bar: 8 };
+		const op = u.objMap(orig, function (v) {
+			return v * 2;
+		});
 		expect(op).toEqual(target);
-	})
+	});
 
-	test('getKey', () => { 
-		const orig = {foo: "bar"};
+	test('getKey', () => {
+		const orig = { foo: "bar" };
 		const target = "foo";
-		const op = u.getKey(orig, "bar")
+		const op = u.getKey(orig, "bar");
 		expect(op).toBe(target);
-	})
+	});
 
 });
 
