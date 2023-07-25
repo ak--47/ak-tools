@@ -73,6 +73,20 @@ u.log(diag)
 </dd>
 </dl>
 
+## Typedefs
+
+<dl>
+<dt><a href="#generalObject">generalObject</a> : <code>Object.&lt;string, any&gt;</code></dt>
+<dd><p>generic for <code>{}</code> w/string keys</p>
+</dd>
+<dt><a href="#arrayOfObjects">arrayOfObjects</a> : <code><a href="#generalObject">Array.&lt;generalObject&gt;</a></code></dt>
+<dd><p>generic for <code>[{},{},{}]</code></p>
+</dd>
+<dt><a href="#GCSUri">GCSUri</a></dt>
+<dd></dd>
+<dt><a href="#filterCallback">filterCallback</a> : <code>function</code></dt>
+<dd></dd>
+</dl>
 
 <a name="files"></a>
 
@@ -282,7 +296,7 @@ turn a gcs uri into a bucket and file
 
 **Example**  
 ```js
-parceGCSUri(`gcs://foo/bar.txt`) // => {uri: "gcs://foo/bar.txt", bucket: "foo", file: "bar.txt"}
+parseGCSUri(`gcs://foo/bar.txt`) // => {uri: "gcs://foo/bar.txt", bucket: "foo", file: "bar.txt"}
 ```
 <a name="display"></a>
 

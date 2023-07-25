@@ -349,12 +349,12 @@ exports.similar = function deepSameKeys(o1, o2) {
 /**
  * turn a gcs uri into a bucket and file
  * @example
- * parceGCSUri(`gcs://foo/bar.txt`) // => {uri: "gcs://foo/bar.txt", bucket: "foo", file: "bar.txt"}
+ * parseGCSUri(`gcs://foo/bar.txt`) // => {uri: "gcs://foo/bar.txt", bucket: "foo", file: "bar.txt"}
  * @param  {string} uri
  * @returns {GCSUri}
  * @memberof validate
  */
-exports.parseGCSUri = function(uri) {
+exports.parseGCSUri = function (uri) {
 	// ? https://www.npmjs.com/package/google-cloud-storage-uri-parser
 	let prefix;
 	if (uri.startsWith("gs://")) prefix = "gs://";
@@ -368,7 +368,7 @@ exports.parseGCSUri = function(uri) {
 		bucket,
 		file
 	};
-}
+};
 
 
 
@@ -1050,11 +1050,11 @@ exports.flatten = function flattenObjectWithDotNotation(obj, roots = [], sep = '
  * @memberof objects
  */
 exports.objMap = function mapOverObjectProps(object, mapFn) {
-	return Object.keys(object).reduce(function(result, key) {
-	  result[key] = mapFn(object[key])
-	  return result
-	}, {})
-  }
+	return Object.keys(object).reduce(function (result, key) {
+		result[key] = mapFn(object[key]);
+		return result;
+	}, {});
+};
 
 
 
@@ -1331,7 +1331,7 @@ LOGGING
 exports.cLog = function cloudFunctionLogger(data, message, severity = `INFO`, isCloud = true) {
 	// not GCP
 	// ? https://cloud.google.com/functions/docs/configuring/env-var#newer_runtimes
-	if (!process.env["FUNCTION_TARGET"] || !process.env["FUNCTION_SIGNATURE_TYPE"]  || !isCloud) {
+	if (!process.env["FUNCTION_TARGET"] || !process.env["FUNCTION_SIGNATURE_TYPE"] || !isCloud) {
 		if (exports.isJSON(data)) {
 			if (message) console.log(message);
 			if (data) console.log(JSON.stringify(data, null, 2));
@@ -1541,7 +1541,13 @@ exports.tracker = function sendToMixpanel(app = 'akTools', token = "99a1209a992b
 
 			res.on("end", function () {
 				const body = Buffer.concat(chunks);
-				const res = JSON.parse(body.toString('utf-8'));
+				let res;
+				try {
+					res = JSON.parse(body.toString('utf-8'));
+				}
+				catch (e) {
+					res = body.toString('utf-8');
+				}
 				responses.push(res);
 				if (responses.length === 2) {
 					callback(responses);
@@ -1588,7 +1594,13 @@ exports.tracker = function sendToMixpanel(app = 'akTools', token = "99a1209a992b
 
 			res.on("end", function () {
 				const body = Buffer.concat(chunks);
-				const res = JSON.parse(body.toString('utf-8'));
+				let res;
+				try {
+					res = JSON.parse(body.toString('utf-8'));
+				}
+				catch (e) {
+					res = body.toString('utf-8');
+				}
 				responses.push(res);
 				if (responses.length === 2) {
 					callback(responses);
@@ -1692,8 +1704,8 @@ exports.objects = {
 	objAwait: exports.objAwait,
 	removeNulls: exports.removeNulls,
 	flatten: exports.flatten,
-	objMap : exports.objMap,
-	getKey : exports.getKey
+	objMap: exports.objMap,
+	getKey: exports.getKey
 
 };
 exports.arrays = {};
