@@ -91,10 +91,20 @@ describe('validation', () => {
 	test('gcs uri parsing', () => {
 		let uri = `gs://bucket-name/path/to/file.txt`;
 		let uriAlso = `gcs://bucket-name/path/to/file.txt`;
+		let uriMoar = `gcs://bucket-name/file.txt`
+		let uriNoFile = `gs://bucket-name/`;
+		let uriNoTrailingSlash = `gs://bucket-name`;
 		let expected = { uri: `gs://bucket-name/path/to/file.txt`, bucket: `bucket-name`, file: `path/to/file.txt` };
 		let alsoExpected = { uri: `gcs://bucket-name/path/to/file.txt`, bucket: `bucket-name`, file: `path/to/file.txt` };
+		let moarExpected = { uri: `gcs://bucket-name/file.txt`, bucket: `bucket-name`, file: `file.txt` };
+		let noFileExpected = { uri: `gs://bucket-name/`, bucket: `bucket-name`, file: `` };
+		let noTrailingSlashExpected = { uri: `gs://bucket-name`, bucket: `bucket-name`, file: `` };
+
 		expect(u.parseGCSUri(uri)).toStrictEqual(expected);
 		expect(u.parseGCSUri(uriAlso)).toStrictEqual(alsoExpected);
+		expect(u.parseGCSUri(uriMoar)).toStrictEqual(moarExpected);
+		expect(u.parseGCSUri(uriNoFile)).toStrictEqual(noFileExpected);
+		expect(u.parseGCSUri(uriNoTrailingSlash)).toStrictEqual(noTrailingSlashExpected);
 
 		function badUri() {
 			u.parseGCSUri(`https://google.com`);

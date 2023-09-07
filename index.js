@@ -163,7 +163,7 @@ exports.touch = async function addFile(fileNameOrPath, data = "", isJson = false
  * @param  {string} fileNameOrPath - file to create
  * @param  {boolean} [isJson=false] - is `data` JSON; default `false`
  * @param {string} [encoding=utf-8] - file encoring; default `utf-8`
- * @returns {Promise<(string | generalObject | arrayOfObjects)>} the file in memory
+ * @returns {Promise<(string | generalObject | arrayOfObjects | any)>} the file in memory
  * @memberof files
  */
 exports.load = async function loadFile(fileNameOrPath, isJson = false, encoding = 'utf-8', log = true, throws = true) {
@@ -361,8 +361,13 @@ exports.parseGCSUri = function (uri) {
 	if (uri.startsWith("gcs://")) prefix = "gcs://";
 	if (!prefix) throw `invalid gcs uri: ${uri}`;
 	const REG_EXP = new RegExp(`^${prefix}([^/]+)/(.+)$`);
-	const bucket = uri.replace(REG_EXP, "$1");
-	const file = uri.replace(REG_EXP, "$2");
+	let bucket = uri.replace(REG_EXP, "$1");
+	let file = uri.replace(REG_EXP, "$2");
+	if (!file) file = "";
+	if (!bucket) bucket = uri.split(prefix)[0];
+	if (bucket.endsWith("/")) bucket = bucket.slice(0, -1);
+	if (bucket.startsWith(prefix)) bucket = bucket.slice(prefix.length);
+	if (file === uri) file = "";
 	return {
 		uri,
 		bucket,
