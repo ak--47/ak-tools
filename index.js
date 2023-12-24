@@ -1291,6 +1291,10 @@ exports.throttle = function throttle(func, wait, options = { leading: true, trai
 	return throttled;
 };
 
+
+
+
+
 /**
  * compose functions, left-to-right
  * - ex: `c(a,b,c)` => `a(b(c()))`
@@ -1323,6 +1327,29 @@ exports.id = function identity(any) {
 LOGGING
 -------
 */
+
+
+/**
+ * a cloud function compatible `console.log()`
+ * @memberof logging
+ * @param  {string} [message] - accompanying message
+ * @param  {(string | JSON | object)} data - data to log; preferably structured
+ * @param  {string} [severity=`INFO`] - {@link https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#logseverity | google sev label}; default `INFO`
+ * 
+ */
+exports.sLog = function structuredLogger(message = "LOG:", data = {}, severity = 'INFO') {
+	// Create a structured log with a severity level and message
+	let structuredLog = {
+		severity: severity,
+		message: message,
+		// Include additional properties from data at the same level as severity and message
+		data: data
+	};
+
+	// Stringify the structured log and print it to the console
+	console.log(JSON.stringify(structuredLog));
+	return;
+};
 
 /**
  * a cloud function compatible `console.log()`
@@ -1427,7 +1454,7 @@ class Timer {
 		this.startTime = Date.now();
 		this.running = true;
 	}
-	end(consoleOutput = true) {
+	end(consoleOutput = false) {
 		if (this.running) {
 			this.running = false;
 			this.cycles++;
@@ -1453,6 +1480,8 @@ class Timer {
 		else {
 			console.log(`${this.label} has not been started...`);
 		}
+
+		return this.prettyTime(this.delta);
 	}
 	report(consoleOutput = true) {
 		if (consoleOutput) {
@@ -1470,23 +1499,25 @@ class Timer {
 	}
 	prettyTime(milliseconds) {
 		let seconds = milliseconds / 1000;
+		seconds = Math.round(seconds * 100) / 100;  // Round to two decimal places
+
 		const levels = [
 			[Math.floor(seconds / 31536000), 'years'],
 			[Math.floor((seconds % 31536000) / 86400), 'days'],
 			[Math.floor(((seconds % 31536000) % 86400) / 3600), 'hours'],
 			[Math.floor((((seconds % 31536000) % 86400) % 3600) / 60), 'minutes'],
-			[(((seconds % 31536000) % 86400) % 3600) % 60, 'seconds'],
+			[seconds % 60, 'seconds'],  // Use the rounded seconds here
 		];
 		let result = '';
 
-		for (var i = 0, max = levels.length; i < max; i++) {
+		for (let i = 0, max = levels.length; i < max; i++) {
 			if (levels[i][0] === 0) continue;
-			// @ts-ignore
-			result += ' ' + levels[i][0] + ' ' + (levels[i][0] === 1 ? levels[i][1].substr(0, levels[i][1].length - 1) : levels[i][1]);
-		};
+			result += ` ${levels[i][0]} ${levels[i][0] === 1 ? levels[i][1].slice(0, -1) : levels[i][1]}`;
+		}
 		return result.trim();
 	}
 }
+
 
 /**
  * returns a timer with the following API
