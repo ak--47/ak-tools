@@ -1498,24 +1498,27 @@ class Timer {
 		};
 	}
 	prettyTime(milliseconds) {
-		let seconds = milliseconds / 1000;
-		seconds = Math.round(seconds * 100) / 100;  // Round to two decimal places
+		let totalSeconds = milliseconds / 1000;
 
 		const levels = [
-			[Math.floor(seconds / 31536000), 'years'],
-			[Math.floor((seconds % 31536000) / 86400), 'days'],
-			[Math.floor(((seconds % 31536000) % 86400) / 3600), 'hours'],
-			[Math.floor((((seconds % 31536000) % 86400) % 3600) / 60), 'minutes'],
-			[seconds % 60, 'seconds'],  // Use the rounded seconds here
+			[Math.floor(totalSeconds / 31536000), 'years'],
+			[Math.floor((totalSeconds % 31536000) / 86400), 'days'],
+			[Math.floor(((totalSeconds % 31536000) % 86400) / 3600), 'hours'],
+			[Math.floor((((totalSeconds % 31536000) % 86400) % 3600) / 60), 'minutes']
 		];
+
+		let seconds = (totalSeconds % 60).toFixed(2);  // Round seconds to two decimal places
+		levels.push([seconds, 'seconds']);  // Add seconds to levels array
+
 		let result = '';
 
 		for (let i = 0, max = levels.length; i < max; i++) {
-			if (levels[i][0] === 0) continue;
+			if (levels[i][0] == 0 || (i === max - 1 && levels[i][0] == "0.00")) continue;
 			result += ` ${levels[i][0]} ${levels[i][0] === 1 ? levels[i][1].slice(0, -1) : levels[i][1]}`;
 		}
 		return result.trim();
 	}
+
 }
 
 

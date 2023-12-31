@@ -354,3 +354,62 @@ describe('loggers', () => {
 
 
 
+// TIMER
+describe('timer', () => {
+    // Mock Date.now()
+    let now;
+    beforeAll(() => {
+        now = Date.now;
+        Date.now = jest.fn();
+    });
+
+    afterAll(() => {
+        Date.now = now;
+    });
+
+    test('accuracy', () => {
+        Date.now.mockReturnValueOnce(1000).mockReturnValueOnce(5000); // Mock start and end times (e.g., 4 seconds apart)
+        const timer = u.time('Test Timer');
+        timer.start();
+        timer.end();
+
+        expect(timer.report().delta).toBe(4000); // Check if the delta is 4 seconds in milliseconds
+        expect(timer.report().human).toBe('4.00 seconds');
+    });
+
+    test('multiple cycles', () => {
+        Date.now
+            .mockReturnValueOnce(1000).mockReturnValueOnce(3000) // First cycle: 2 seconds
+            .mockReturnValueOnce(5000).mockReturnValueOnce(11000); // Second cycle: 6 seconds
+
+        const timer = u.time('Test Timer');
+        timer.start();
+        timer.end();
+        timer.start();
+        timer.end();
+
+        expect(timer.report().cycles).toBe(2);
+        expect(timer.report().delta).toBe(8000); // Total of 8 seconds
+        expect(timer.report().human).toBe('8.00 seconds');
+    });
+
+    test('pretty time', () => {
+        Date.now.mockReturnValueOnce(1000).mockReturnValueOnce(3605000); // 1 hour, 1 second apart
+        const timer = u.time('Test Timer');
+        timer.start();
+        timer.end();
+
+        expect(timer.report().human).toBe('1 hour 4.00 seconds');
+    });
+
+    test('not started', () => {
+        const timer = u.time('Test Timer');
+        const consoleSpy = jest.spyOn(console, 'log');
+        timer.end();
+
+        expect(consoleSpy).toHaveBeenCalledWith('Test Timer has not been started...');
+        consoleSpy.mockRestore();
+    });
+
+    // Additional tests as needed...
+});
