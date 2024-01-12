@@ -375,7 +375,34 @@ exports.parseGCSUri = function (uri) {
 	};
 };
 
+/** turns a string into a boolean
+ * @param  {string} string
+ * @memberof validate
+ */
+exports.toBool = function stringToBoolean(string) {
+	if (typeof string !== "string") {
+		return Boolean(string);
+	}
 
+	switch (string.toLowerCase().trim()) {
+		case "true":
+			return true;
+		case "yes":
+			return true;
+		case "1":
+			return true;
+		case "false":
+			return false;
+		case "no":
+			return false;
+		case "0":
+			return false;
+		case "":
+			return false;
+		default:
+			return Boolean(string);
+	}
+}
 
 
 /*
@@ -1351,6 +1378,54 @@ exports.sLog = function structuredLogger(message = "LOG:", data = {}, severity =
 	return;
 };
 
+
+/**
+ * create a structured logger with initial properties
+ * @memberof logging
+ * @example
+* // Creating a new structured logger with initial properties
+ * const logger = createStructuredLogger({ app: "MyApp", module: "Main" });
+ * 
+ * // Logging a message with the structured logger
+ * logger.log("Application started", { user: "JohnDoe" });
+ * 
+ * // Creating a child logger inheriting initial properties and adding new ones
+ * const childLogger = logger.createChild({ subModule: "Auth" });
+ * 
+ * // Logging a message with the child logger
+ * childLogger.log("User logged in", { user: "JohnDoe" }, "INFO");
+ * 
+ * @param  {JSON} initialProps
+ */
+exports.logger = function createStructuredLogger(initialProps = {}) {
+	return new StructuredLogger(initialProps);
+};
+
+
+class StructuredLogger {
+	// The constructor of the class, where we initialize the properties
+	constructor(initialProps = {}) {
+		this.initialProps = initialProps;
+	}
+
+	// A method to create a child logger with inherited and additional properties
+	createChild(additionalProps = {}) {
+		return new StructuredLogger({ ...this.initialProps, ...additionalProps });
+	}
+
+	// The sLog method, adapted to include both initial and custom properties
+	log(message = "LOG:", data = {}, severity = 'INFO') {
+		let structuredLog = {
+			severity: severity,
+			message: message,
+			data: { ...this.initialProps, ...data }
+		};
+		console.log(JSON.stringify(structuredLog));
+		return;
+	}
+}
+
+
 /**
  * a cloud function compatible `console.log()`
  * @memberof logging
@@ -1358,6 +1433,7 @@ exports.sLog = function structuredLogger(message = "LOG:", data = {}, severity =
  * @param  {string} [message] - accompanying message
  * @param  {string} [severity=`INFO`] - {@link https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#logseverity | google sev label}; default `INFO`
  * @param  {boolean} [isCloud=true] - force cloud logging
+ * @deprecated use logger instead
  * 
  */
 exports.cLog = function cloudFunctionLogger(data, message, severity = `INFO`, isCloud = true) {

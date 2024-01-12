@@ -332,7 +332,7 @@ describe('arrays', () => {
 	});
 });
 
-describe('loggers', () => {
+describe('trackers', () => {
 	test('tracker with cb', (done) => {
 		let track = u.tracker('akTools');
 		track('ping', { 'pong': 'dong' }, (res) => {
@@ -349,9 +349,66 @@ describe('loggers', () => {
 		let track = u.tracker('akTools');
 		track('ping', { 'pong': 'mong' });
 	});
+
+
+
 })
 
 
+describe('structured logger', () => {
+    let consoleSpy;
+
+    beforeEach(() => {
+        consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    });
+
+    afterEach(() => {
+        consoleSpy.mockRestore();
+    });
+
+    test('logs', () => {
+        const initialProps = { app: 'TestApp', module: 'TestModule' };
+        const testLogger = u.logger(initialProps);
+
+        testLogger.log('Test message', { user: 'testUser' });
+
+        expect(consoleSpy).toHaveBeenCalledWith(JSON.stringify({
+            severity: 'INFO',
+            message: 'Test message',
+            data: { ...initialProps, user: 'testUser' }
+        }));
+    });
+
+    test('child logs', () => {
+        const initialProps = { app: 'TestApp', module: 'TestModule' };
+        const additionalProps = { subModule: 'TestSubModule' };
+        const parentLogger =u.logger(initialProps);
+        const childLogger = parentLogger.createChild(additionalProps);
+
+        childLogger.log('Child message', { user: 'testUser' });
+
+        expect(consoleSpy).toHaveBeenCalledWith(JSON.stringify({
+            severity: 'INFO',
+            message: 'Child message',
+            data: { ...initialProps, ...additionalProps, user: 'testUser' }
+        }));
+    });
+
+    test('severity', () => {
+        const testLogger = u.logger({});
+        const message = 'Severity test message';
+        const severities = ['INFO', 'ERROR', 'WARN'];
+
+        severities.forEach(severity => {
+            testLogger.log(message, {}, severity);
+            expect(consoleSpy).toHaveBeenCalledWith(JSON.stringify({
+                severity,
+                message,
+                data: {}
+            }));
+        });
+    });
+});
 
 
 // TIMER
