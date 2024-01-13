@@ -1512,8 +1512,8 @@ exports.log = function comprehensiveLog(item, depth = 0, maxDepth = 100) {
  */
 exports.progress = function showProgress(thing = "", p = "", message = "") {
 	readline.cursorTo(process.stdout, 0);
-	const message = `${thing} ${message} ${exports.comma(p)}`.trim()
-	process.stdout.write(`${message}\t`);
+	const msg = `${thing} ${message} ${exports.comma(p)}`.trim()
+	process.stdout.write(`${msg}\t`);
 
 };
 
