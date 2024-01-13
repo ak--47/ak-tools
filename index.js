@@ -1395,7 +1395,7 @@ exports.sLog = function structuredLogger(message = "LOG:", data = {}, severity =
  * // Logging a message with the child logger
  * childLogger.log("User logged in", { user: "JohnDoe" }, "INFO");
  * 
- * @param  {JSON} initialProps
+ * @param  {any} initialProps
  */
 exports.logger = function createStructuredLogger(initialProps = {}) {
 	return new StructuredLogger(initialProps);
@@ -1503,16 +1503,17 @@ exports.log = function comprehensiveLog(item, depth = 0, maxDepth = 100) {
 
 /**
  * dumb progress bar; incrementing console message
- * - ex: `thing message #`
+ * - ex: `thing message #p`
  * @memberof logging
  * @param {string} thing - what is being 
  * @param {number} p - the number to show
  * @param {string} message - 
  * @returns {void}
  */
-exports.progress = function showProgress(thing, p, message = `processed ...`) {
+exports.progress = function showProgress(thing = "", p = "", message = "") {
 	readline.cursorTo(process.stdout, 0);
-	process.stdout.write(`${thing} ${message} ${exports.comma(p)}\t`);
+	const message = `${thing} ${message} ${exports.comma(p)}`.trim()
+	process.stdout.write(`${message}\t`);
 
 };
 
