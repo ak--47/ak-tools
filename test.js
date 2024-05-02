@@ -257,6 +257,18 @@ describe('maths', () => {
 		expect(u.dedupe(uuids).length).toBe(1000);
 	});
 
+	test('nameMaker', ()=>{
+		const uuids = [];
+
+		u.times(1000, () => {
+			uuids.push(u.makeName());
+		});
+
+
+
+		expect(u.dedupe(uuids).length).toBe(1000);
+	})
+
 });
 
 
