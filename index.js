@@ -751,8 +751,8 @@ exports.md5 = function calcMd5Hash(data) {
  * generate a random name (adjective + noun + verb + adverb)
  * @return {string} a random name
  */
-exports.makeName = function generateName(separator = "-") {
-	var adjs = [
+exports.makeName = function generateName(words = 3, separator = "-") {
+	const adjs = [
 		"autumn", "hidden", "bitter", "misty", "silent", "empty", "dry", "dark",
 		"summer", "icy", "delicate", "quiet", "white", "cool", "spring", "winter",
 		"patient", "twilight", "dawn", "crimson", "wispy", "weathered", "blue",
@@ -769,7 +769,7 @@ exports.makeName = function generateName(separator = "-") {
 		"sapphire", "turbulent", "whirling", "sleepy", "ethereal", "tender", "unseen", "wistful"
 	];
 
-	var nouns = [
+	const nouns = [
 		"waterfall", "river", "breeze", "moon", "rain", "wind", "sea", "morning",
 		"snow", "lake", "sunset", "pine", "shadow", "leaf", "dawn", "glitter",
 		"forest", "hill", "cloud", "meadow", "sun", "glade", "bird", "brook",
@@ -786,7 +786,7 @@ exports.makeName = function generateName(separator = "-") {
 		"drift", "echo", "nebula", "horizon", "crest", "wreath", "twilight", "balm", "glimmer"
 	];
 
-	var verbs = [
+	const verbs = [
 		"dancing", "whispering", "flowing", "shimmering", "swirling", "echoing", "sparkling", "glistening",
 		"cascading", "drifting", "glowing", "rippling", "quivering", "singing", "twinkling", "radiating",
 		"enveloping", "enchanting", "captivating", "embracing", "embracing", "illuminating", "pulsating", "gliding",
@@ -796,7 +796,7 @@ exports.makeName = function generateName(separator = "-") {
 		"emerging", "unfolding", "unveiling", "emerging", "surrounding", "unveiling", "materializing", "revealing"
 	];
 	
-	var adverbs = [
+	const adverbs = [
 		"gracefully", "softly", "smoothly", "gently", "tenderly", "quietly", "serenely", "peacefully",
 		"delicately", "effortlessly", "subtly", "tranquilly", "majestically", "silently", "calmly", "harmoniously",
 		"elegantly", "luminously", "ethereally", "mysteriously", "sublimely", "radiantly", "dreamily", "ethereally",
@@ -805,16 +805,21 @@ exports.makeName = function generateName(separator = "-") {
 		"seductively", "envelopingly", "ensnaringly", "entrancingly", "intoxicatingly", "irresistibly", "transcendentally",
 		"envelopingly", "rapturously", "intimately", "intensely", "tangibly", "vividly", "intensely", "deeply"
 	];
-	
 
-	// ? http://stackoverflow.com/a/17516862/103058
-	var adj = adjs[Math.floor(Math.random() * adjs.length)]; 
-	var noun = nouns[Math.floor(Math.random() * nouns.length)];
-	var verb = verbs[Math.floor(Math.random() * verbs.length)];
-	var adverb = adverbs[Math.floor(Math.random() * adverbs.length)];
+	let string;
+	const cycle = [adjs, nouns, verbs, adverbs];
+	for (let i = 0; i < words; i++) {
+		const index = i % cycle.length;
+		// ? http://stackoverflow.com/a/17516862/103058
+		const word = cycle[index][Math.floor(Math.random() * cycle[index].length)];
+		if (!string) {
+			string = word;
+		} else {
+			string += separator + word;
+		}
+	}
 	
-	
-	return adj + separator + noun + separator + verb + separator + adverb
+	return string;	
 
 }
 

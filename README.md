@@ -73,6 +73,14 @@ u.log(diag)
 </dd>
 </dl>
 
+## Functions
+
+<dl>
+<dt><a href="#makeName">makeName()</a> ⇒ <code>string</code></dt>
+<dd><p>generate a random name (adjective + noun + verb + adverb)</p>
+</dd>
+</dl>
+
 ## Typedefs
 
 <dl>
@@ -99,7 +107,7 @@ file management utilities
     * [.ls([dir], [objectMode])](#files.ls) ⇒ <code>Promise.&lt;(Array.&lt;string&gt;\|generalObject)&gt;</code>
     * [.rm(fileNameOrPath)](#files.rm) ⇒ <code>Promise.&lt;(string\|boolean\|void)&gt;</code>
     * [.touch(fileNameOrPath, [data], [isJson])](#files.touch) ⇒ <code>Promise.&lt;(string\|false)&gt;</code>
-    * [.load(fileNameOrPath, [isJson], [encoding])](#files.load) ⇒ <code>Promise.&lt;(string\|generalObject\|arrayOfObjects)&gt;</code>
+    * [.load(fileNameOrPath, [isJson], [encoding])](#files.load) ⇒ <code>Promise.&lt;(string\|generalObject\|arrayOfObjects\|any)&gt;</code>
     * [.mkdir([dirPath])](#files.mkdir) ⇒ <code>string</code>
 
 <a name="files.ls"></a>
@@ -157,11 +165,11 @@ await touch('newfile.json', data, true)  // => '/path/to/newfile.json' || false
 ```
 <a name="files.load"></a>
 
-### files.load(fileNameOrPath, [isJson], [encoding]) ⇒ <code>Promise.&lt;(string\|generalObject\|arrayOfObjects)&gt;</code>
+### files.load(fileNameOrPath, [isJson], [encoding]) ⇒ <code>Promise.&lt;(string\|generalObject\|arrayOfObjects\|any)&gt;</code>
 load a file into memory
 
 **Kind**: static method of [<code>files</code>](#files)  
-**Returns**: <code>Promise.&lt;(string\|generalObject\|arrayOfObjects)&gt;</code> - the file in memory  
+**Returns**: <code>Promise.&lt;(string\|generalObject\|arrayOfObjects\|any)&gt;</code> - the file in memory  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -204,6 +212,7 @@ data validation utilities
     * [.isNil(val)](#validate.isNil) ⇒ <code>boolean</code>
     * [.similar(o1, o2)](#validate.similar) ⇒ <code>boolean</code>
     * [.parseGCSUri(uri)](#validate.parseGCSUri) ⇒ [<code>GCSUri</code>](#GCSUri)
+    * [.toBool(string)](#validate.toBool)
 
 <a name="validate.isJSONStr"></a>
 
@@ -298,6 +307,17 @@ turn a gcs uri into a bucket and file
 ```js
 parseGCSUri(`gcs://foo/bar.txt`) // => {uri: "gcs://foo/bar.txt", bucket: "foo", file: "bar.txt"}
 ```
+<a name="validate.toBool"></a>
+
+### validate.toBool(string)
+turns a string into a boolean
+
+**Kind**: static method of [<code>validate</code>](#validate)  
+
+| Param | Type |
+| --- | --- |
+| string | <code>string</code> | 
+
 <a name="display"></a>
 
 ## display
@@ -1049,7 +1069,9 @@ logging, timers and other diagnostic utilities
 
 
 * [logging](#logging)
-    * [.cLog(data, [message], [severity], [isCloud])](#logging.cLog)
+    * [.sLog([message], data, [severity])](#logging.sLog)
+    * [.logger(initialProps)](#logging.logger)
+    * ~~[.cLog(data, [message], [severity], [isCloud])](#logging.cLog)~~
     * [.log(item, [depth], [maxDepth])](#logging.log) ⇒ <code>void</code>
     * [.progress(thing, p, message)](#logging.progress) ⇒ <code>void</code>
     * [.time(label)](#logging.time) ⇒ <code>Timer</code>
@@ -1058,9 +1080,49 @@ logging, timers and other diagnostic utilities
     * [.sleep(ms)](#logging.sleep)
     * [.clip(data)](#logging.clip) ⇒ <code>void</code>
 
+<a name="logging.sLog"></a>
+
+### logging.sLog([message], data, [severity])
+a cloud function compatible `console.log()`
+
+**Kind**: static method of [<code>logging</code>](#logging)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [message] | <code>string</code> |  | accompanying message |
+| data | <code>string</code> \| <code>JSON</code> \| <code>object</code> |  | data to log; preferably structured |
+| [severity] | <code>string</code> | <code>&#x60;INFO&#x60;</code> | [ google sev label](https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#logseverity); default `INFO` |
+
+<a name="logging.logger"></a>
+
+### logging.logger(initialProps)
+create a structured logger with initial properties
+
+**Kind**: static method of [<code>logging</code>](#logging)  
+
+| Param | Type |
+| --- | --- |
+| initialProps | <code>any</code> | 
+
+**Example**  
+```js
+// Creating a new structured logger with initial properties
+const logger = createStructuredLogger({ app: "MyApp", module: "Main" });
+
+// Logging a message with the structured logger
+logger.log("Application started", { user: "JohnDoe" });
+
+// Creating a child logger inheriting initial properties and adding new ones
+const childLogger = logger.createChild({ subModule: "Auth" });
+
+// Logging a message with the child logger
+childLogger.log("User logged in", { user: "JohnDoe" }, "INFO");
+```
 <a name="logging.cLog"></a>
 
-### logging.cLog(data, [message], [severity], [isCloud])
+### ~~logging.cLog(data, [message], [severity], [isCloud])~~
+***Deprecated***
+
 a cloud function compatible `console.log()`
 
 **Kind**: static method of [<code>logging</code>](#logging)  
@@ -1089,7 +1151,7 @@ a comprehensive logging utility in all terminal environments
 
 ### logging.progress(thing, p, message) ⇒ <code>void</code>
 dumb progress bar; incrementing console message
-- ex: `thing message #`
+- ex: `thing message #p`
 
 **Kind**: static method of [<code>logging</code>](#logging)  
 
@@ -1165,6 +1227,13 @@ copy arbitrary data to your clipboard
 | --- | --- | --- |
 | data | <code>any</code> | data to put on your clipboard |
 
+<a name="makeName"></a>
+
+## makeName() ⇒ <code>string</code>
+generate a random name (adjective + noun + verb + adverb)
+
+**Kind**: global function  
+**Returns**: <code>string</code> - a random name  
 <a name="generalObject"></a>
 
 ## generalObject : <code>Object.&lt;string, any&gt;</code>

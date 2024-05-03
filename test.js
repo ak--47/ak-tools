@@ -261,12 +261,20 @@ describe('maths', () => {
 		const uuids = [];
 
 		u.times(1000, () => {
-			uuids.push(u.makeName());
+			uuids.push(u.makeName(10));
 		});
 
-
-
 		expect(u.dedupe(uuids).length).toBe(1000);
+
+		const threeName = u.makeName(3);
+		const fourName = u.makeName(4);
+		const fiveName = u.makeName(5);
+
+		expect(threeName.split('-').length).toBe(3);
+		expect(fourName.split('-').length).toBe(4);
+		expect(fiveName.split('-').length).toBe(5);
+
+		
 	})
 
 });
