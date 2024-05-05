@@ -191,18 +191,30 @@ exports.load = async function loadFile(fileNameOrPath, isJson = false, encoding 
 };
 
 /**
- * make a directory
+ * make a directory with error handling and confirmation.
  * @example
  * const myTmpDir = mkdir('./tmp')
  * @param  {string} [dirPath="./tmp"] - path to create; default `./tmp`
  * @returns {string} the absolute path of the directory
  * @memberof files
  */
-exports.mkdir = function (dirPath = `./tmp`) {
-	let fullPath = path.resolve(dirPath);
-	!existsSync(fullPath) ? mkdirSync(fullPath) : undefined;
-	return fullPath;
+exports.mkdir = function (dirPath = "./tmp") {
+    let fullPath = path.resolve(dirPath);
+    if (!existsSync(fullPath)) {
+        try {
+            mkdirSync(fullPath, { recursive: true });
+            // Check if the directory was created
+            if (!existsSync(fullPath)) {
+                throw new Error(`Failed to create directory at ${fullPath}`);
+            }
+        } catch (error) {
+            console.error(`Error creating directory at ${fullPath}: ${error.message}`);
+            throw error; // Rethrow or handle as necessary for your application's error handling strategy
+        }
+    }
+    return fullPath;
 };
+
 
 /*
 -----------
