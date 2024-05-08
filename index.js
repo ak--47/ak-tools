@@ -1141,6 +1141,7 @@ function makeInteger(value) {
  * @param  {Array} roots=[] lineage for recursion
  * @param  {string} sep='.' separator to use
  * @memberof objects
+ * @return {Object}
  */
 exports.flatten = function flattenObjectWithDotNotation(obj, roots = [], sep = '.') {
 	// ? https://stackoverflow.com/a/61602592
@@ -1166,6 +1167,7 @@ exports.flatten = function flattenObjectWithDotNotation(obj, roots = [], sep = '
  * objMap({foo: 2, bar: 4}, val => val * 2) => {foo: 4, bar: 8}
  * @param  {Object} object object iterate
  * @param  {function} mapFn function with signature `(val) => {}`
+ * @return {Object}
  * @memberof objects
  */
 exports.objMap = function mapOverObjectProps(object, mapFn) {
@@ -1183,6 +1185,7 @@ exports.objMap = function mapOverObjectProps(object, mapFn) {
  * getKey({foo: "bar"}, "bar") => "foo"
  * @param  {Object} object object to search for
  * @param  {Object} value value withing that object to search for
+ * @return {string}
  * @memberof objects
  */
 exports.getKey = function getObjKeysByValue(object, value) {
