@@ -91,7 +91,7 @@ describe('validation', () => {
 	test('gcs uri parsing', () => {
 		let uri = `gs://bucket-name/path/to/file.txt`;
 		let uriAlso = `gcs://bucket-name/path/to/file.txt`;
-		let uriMoar = `gcs://bucket-name/file.txt`
+		let uriMoar = `gcs://bucket-name/file.txt`;
 		let uriNoFile = `gs://bucket-name/`;
 		let uriNoTrailingSlash = `gs://bucket-name`;
 		let expected = { uri: `gs://bucket-name/path/to/file.txt`, bucket: `bucket-name`, file: `path/to/file.txt` };
@@ -110,7 +110,7 @@ describe('validation', () => {
 			u.parseGCSUri(`https://google.com`);
 		}
 		expect(badUri).toThrow(`invalid gcs uri: https://google.com`);
-})
+	});
 
 });
 
@@ -257,7 +257,7 @@ describe('maths', () => {
 		expect(u.dedupe(uuids).length).toBe(1000);
 	});
 
-	test('nameMaker', ()=>{
+	test('nameMaker', () => {
 		const uuids = [];
 
 		u.times(1000, () => {
@@ -274,8 +274,8 @@ describe('maths', () => {
 		expect(fourName.split('-').length).toBe(4);
 		expect(fiveName.split('-').length).toBe(5);
 
-		
-	})
+
+	});
 
 });
 
@@ -372,121 +372,136 @@ describe('trackers', () => {
 
 
 
-})
+});
 
 
 describe('structured logger', () => {
-    let consoleSpy;
+	let consoleSpy;
 
-    beforeEach(() => {
-        consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-    });
+	beforeEach(() => {
+		consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+	});
 
-    afterEach(() => {
-        consoleSpy.mockRestore();
-    });
+	afterEach(() => {
+		consoleSpy.mockRestore();
+	});
 
-    test('logs', () => {
-        const initialProps = { app: 'TestApp', module: 'TestModule' };
-        const testLogger = u.logger(initialProps);
+	test('logs', () => {
+		const initialProps = { app: 'TestApp', module: 'TestModule' };
+		const testLogger = u.logger(initialProps);
 
-        testLogger.log('Test message', { user: 'testUser' });
+		testLogger.log('Test message', { user: 'testUser' });
 
-        expect(consoleSpy).toHaveBeenCalledWith(JSON.stringify({
-            severity: 'INFO',
-            message: 'Test message',
-            data: { ...initialProps, user: 'testUser' }
-        }));
-    });
+		expect(consoleSpy).toHaveBeenCalledWith(JSON.stringify({
+			severity: 'INFO',
+			message: 'Test message',
+			data: { ...initialProps, user: 'testUser' }
+		}));
+	});
 
-    test('child logs', () => {
-        const initialProps = { app: 'TestApp', module: 'TestModule' };
-        const additionalProps = { subModule: 'TestSubModule' };
-        const parentLogger =u.logger(initialProps);
-        const childLogger = parentLogger.createChild(additionalProps);
+	test('child logs', () => {
+		const initialProps = { app: 'TestApp', module: 'TestModule' };
+		const additionalProps = { subModule: 'TestSubModule' };
+		const parentLogger = u.logger(initialProps);
+		const childLogger = parentLogger.createChild(additionalProps);
 
-        childLogger.log('Child message', { user: 'testUser' });
+		childLogger.log('Child message', { user: 'testUser' });
 
-        expect(consoleSpy).toHaveBeenCalledWith(JSON.stringify({
-            severity: 'INFO',
-            message: 'Child message',
-            data: { ...initialProps, ...additionalProps, user: 'testUser' }
-        }));
-    });
+		expect(consoleSpy).toHaveBeenCalledWith(JSON.stringify({
+			severity: 'INFO',
+			message: 'Child message',
+			data: { ...initialProps, ...additionalProps, user: 'testUser' }
+		}));
+	});
 
-    test('severity', () => {
-        const testLogger = u.logger({});
-        const message = 'Severity test message';
-        const severities = ['INFO', 'ERROR', 'WARN'];
+	test('severity', () => {
+		const testLogger = u.logger({});
+		const message = 'Severity test message';
+		const severities = ['INFO', 'ERROR', 'WARN'];
 
-        severities.forEach(severity => {
-            testLogger.log(message, {}, severity);
-            expect(consoleSpy).toHaveBeenCalledWith(JSON.stringify({
-                severity,
-                message,
-                data: {}
-            }));
-        });
-    });
+		severities.forEach(severity => {
+			testLogger.log(message, {}, severity);
+			expect(consoleSpy).toHaveBeenCalledWith(JSON.stringify({
+				severity,
+				message,
+				data: {}
+			}));
+		});
+	});
 });
 
 
 // TIMER
 describe('timer', () => {
-    // Mock Date.now()
-    let now;
-    beforeAll(() => {
-        now = Date.now;
-        Date.now = jest.fn();
-    });
+	// Mock Date.now()
+	let now;
+	beforeAll(() => {
+		now = Date.now;
+		Date.now = jest.fn();
+	});
 
-    afterAll(() => {
-        Date.now = now;
-    });
+	afterAll(() => {
+		Date.now = now;
+	});
 
-    test('accuracy', () => {
-        Date.now.mockReturnValueOnce(1000).mockReturnValueOnce(5000); // Mock start and end times (e.g., 4 seconds apart)
-        const timer = u.time('Test Timer');
-        timer.start();
-        timer.end();
+	test('accuracy', () => {
+		Date.now.mockReturnValueOnce(1000).mockReturnValueOnce(5000); // Mock start and end times (e.g., 4 seconds apart)
+		const timer = u.time('Test Timer');
+		timer.start();
+		timer.end();
 
-        expect(timer.report().delta).toBe(4000); // Check if the delta is 4 seconds in milliseconds
-        expect(timer.report().human).toBe('4.00 seconds');
-    });
+		expect(timer.report().delta).toBe(4000); // Check if the delta is 4 seconds in milliseconds
+		expect(timer.report().human).toBe('4.00 seconds');
+	});
 
-    test('multiple cycles', () => {
-        Date.now
-            .mockReturnValueOnce(1000).mockReturnValueOnce(3000) // First cycle: 2 seconds
-            .mockReturnValueOnce(5000).mockReturnValueOnce(11000); // Second cycle: 6 seconds
+	test('multiple cycles', () => {
+		Date.now
+			.mockReturnValueOnce(1000).mockReturnValueOnce(3000) // First cycle: 2 seconds
+			.mockReturnValueOnce(5000).mockReturnValueOnce(11000); // Second cycle: 6 seconds
 
-        const timer = u.time('Test Timer');
-        timer.start();
-        timer.end();
-        timer.start();
-        timer.end();
+		const timer = u.time('Test Timer');
+		timer.start();
+		timer.end();
+		timer.start();
+		timer.end();
 
-        expect(timer.report().cycles).toBe(2);
-        expect(timer.report().delta).toBe(8000); // Total of 8 seconds
-        expect(timer.report().human).toBe('8.00 seconds');
-    });
+		expect(timer.report().cycles).toBe(2);
+		expect(timer.report().delta).toBe(8000); // Total of 8 seconds
+		expect(timer.report().human).toBe('8.00 seconds');
+	});
 
-    test('pretty time', () => {
-        Date.now.mockReturnValueOnce(1000).mockReturnValueOnce(3605000); // 1 hour, 1 second apart
-        const timer = u.time('Test Timer');
-        timer.start();
-        timer.end();
+	test('pretty time', () => {
+		Date.now.mockReturnValueOnce(1000).mockReturnValueOnce(3605000); // 1 hour, 1 second apart
+		const timer = u.time('Test Timer');
+		timer.start();
+		timer.end();
 
-        expect(timer.report().human).toBe('1 hour 4.00 seconds');
-    });
+		expect(timer.report().human).toBe('1 hour 4.00 seconds');
+	});
 
-    test('not started', () => {
-        const timer = u.time('Test Timer');
-        const consoleSpy = jest.spyOn(console, 'log');
-        timer.end();
+	test('not started', () => {
+		const timer = u.time('Test Timer');
+		const consoleSpy = jest.spyOn(console, 'log');
+		timer.end();
 
-        expect(consoleSpy).toHaveBeenCalledWith('Test Timer has not been started...');
-        consoleSpy.mockRestore();
-    });
+		expect(consoleSpy).toHaveBeenCalledWith('Test Timer has not been started...');
+		consoleSpy.mockRestore();
+	});
 
-    // Additional tests as needed...
+	// Additional tests as needed...
+
+	test('pretty time (standalone)', () => {
+		const timeFoo = u.prettyTime(3605000);
+		expect(timeFoo).toBe('1 hour 5.00 seconds');
+
+		const timeBar = u.prettyTime(3605230);
+		expect(timeBar).toBe('1 hour 5.23 seconds');
+
+		const timeBaz = u.prettyTime(3600000);
+		expect(timeBaz).toBe('1 hour');
+
+		const timeQux = u.prettyTime(3605236);
+		expect(timeQux).toBe('1 hour 5.24 seconds');
+		
+	});
 });

@@ -199,20 +199,20 @@ exports.load = async function loadFile(fileNameOrPath, isJson = false, encoding 
  * @memberof files
  */
 exports.mkdir = function (dirPath = "./tmp") {
-    let fullPath = path.resolve(dirPath);
-    if (!existsSync(fullPath)) {
-        try {
-            mkdirSync(fullPath, { recursive: true });
-            // Check if the directory was created
-            if (!existsSync(fullPath)) {
-                throw new Error(`Failed to create directory at ${fullPath}`);
-            }
-        } catch (error) {
-            console.error(`Error creating directory at ${fullPath}: ${error.message}`);
-            throw error; // Rethrow or handle as necessary for your application's error handling strategy
-        }
-    }
-    return fullPath;
+	let fullPath = path.resolve(dirPath);
+	if (!existsSync(fullPath)) {
+		try {
+			mkdirSync(fullPath, { recursive: true });
+			// Check if the directory was created
+			if (!existsSync(fullPath)) {
+				throw new Error(`Failed to create directory at ${fullPath}`);
+			}
+		} catch (error) {
+			console.error(`Error creating directory at ${fullPath}: ${error.message}`);
+			throw error; // Rethrow or handle as necessary for your application's error handling strategy
+		}
+	}
+	return fullPath;
 };
 
 
@@ -414,7 +414,7 @@ exports.toBool = function stringToBoolean(string) {
 		default:
 			return Boolean(string);
 	}
-}
+};
 
 
 /*
@@ -807,7 +807,7 @@ exports.makeName = function generateName(words = 3, separator = "-") {
 		"splintering", "crescendoing", "whirling", "bursting", "shining", "gushing", "emerging", "revealing",
 		"emerging", "unfolding", "unveiling", "emerging", "surrounding", "unveiling", "materializing", "revealing"
 	];
-	
+
 	const adverbs = [
 		"gracefully", "softly", "smoothly", "gently", "tenderly", "quietly", "serenely", "peacefully",
 		"delicately", "effortlessly", "subtly", "tranquilly", "majestically", "silently", "calmly", "harmoniously",
@@ -830,10 +830,10 @@ exports.makeName = function generateName(words = 3, separator = "-") {
 			string += separator + word;
 		}
 	}
-	
-	return string;	
 
-}
+	return string;
+
+};
 
 /*
 -------
@@ -1602,7 +1602,7 @@ exports.log = function comprehensiveLog(item, depth = 0, maxDepth = 100) {
  */
 exports.progress = function showProgress(thing = "", p = "", message = "") {
 	readline.cursorTo(process.stdout, 0);
-	const msg = `${thing} ${message} ${exports.comma(p)}`.trim()
+	const msg = `${thing} ${message} ${exports.comma(p)}`.trim();
 	process.stdout.write(`${msg}\t`);
 
 };
@@ -1852,6 +1852,40 @@ exports.clip = function copyToClipboard(data) {
 	proc.stdin.write(data); proc.stdin.end();
 };
 
+/**
+ * create human readable time from milliseconds
+ * @memberof logging
+ * @param  {number} milliseconds - time to format
+ * @returns {string} human readable time
+ */
+exports.prettyTime = function prettyTime(milliseconds) {
+	try {
+		const totalSeconds = milliseconds / 1000;
+
+		const levels = [
+			[Math.floor(totalSeconds / 31536000), 'years'],
+			[Math.floor((totalSeconds % 31536000) / 86400), 'days'],
+			[Math.floor(((totalSeconds % 31536000) % 86400) / 3600), 'hours'],
+			[Math.floor((((totalSeconds % 31536000) % 86400) % 3600) / 60), 'minutes']
+		];
+
+		const seconds = (totalSeconds % 60).toFixed(2);  // Round seconds to two decimal places
+		levels.push([seconds, 'seconds']);  // Add seconds to levels array
+
+		let result = '';
+
+		for (let i = 0, max = levels.length; i < max; i++) {
+			if (levels[i][0] == 0 || (i === max - 1 && levels[i][0] == "0.00")) continue;
+			// @ts-ignore
+			result += ` ${levels[i][0]} ${levels[i][0] === 1 ? levels[i][1]?.slice(0, -1) : levels[i][1]}`;
+		}
+		return result.trim();
+	}
+	catch (e) {
+		return `unknown; got ${milliseconds} + ${e?.message}`;
+
+	}
+};
 
 /*
 --------

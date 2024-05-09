@@ -185,7 +185,7 @@ await load('myfile.json', true)  // => {my: "data"} || false
 <a name="files.mkdir"></a>
 
 ### files.mkdir([dirPath]) ⇒ <code>string</code>
-make a directory
+make a directory with error handling and confirmation.
 
 **Kind**: static method of [<code>files</code>](#files)  
 **Returns**: <code>string</code> - the absolute path of the directory  
@@ -637,9 +637,9 @@ object utilities
     * [.objTypecast(obj, [isClone])](#objects.objTypecast) ⇒ <code>Object</code>
     * [.objAwait(obj)](#objects.objAwait) ⇒ [<code>Promise.&lt;generalObject&gt;</code>](#generalObject)
     * [.removeNulls(objWithNullOrUndef)](#objects.removeNulls) ⇒ <code>Object</code>
-    * [.flatten(obj, roots, sep)](#objects.flatten)
-    * [.objMap(object, mapFn)](#objects.objMap)
-    * [.getKey(object, value)](#objects.getKey)
+    * [.flatten(obj, roots, sep)](#objects.flatten) ⇒ <code>Object</code>
+    * [.objMap(object, mapFn)](#objects.objMap) ⇒ <code>Object</code>
+    * [.getKey(object, value)](#objects.getKey) ⇒ <code>string</code>
 
 <a name="objects.rnKeys"></a>
 
@@ -817,7 +817,7 @@ removeNulls({foo: "bar", baz: null}) // => {foo: "bar"}
 ```
 <a name="objects.flatten"></a>
 
-### objects.flatten(obj, roots, sep)
+### objects.flatten(obj, roots, sep) ⇒ <code>Object</code>
 deeply flatten as nested object; use `.` notation for nested keys
 
 **Kind**: static method of [<code>objects</code>](#objects)  
@@ -834,7 +834,7 @@ flatten({foo: {bar: "baz"}}) => {"foo.bar": "baz"}
 ```
 <a name="objects.objMap"></a>
 
-### objects.objMap(object, mapFn)
+### objects.objMap(object, mapFn) ⇒ <code>Object</code>
 map over an object's values and return a new object
 
 **Kind**: static method of [<code>objects</code>](#objects)  
@@ -850,7 +850,7 @@ objMap({foo: 2, bar: 4}, val => val * 2) => {foo: 4, bar: 8}
 ```
 <a name="objects.getKey"></a>
 
-### objects.getKey(object, value)
+### objects.getKey(object, value) ⇒ <code>string</code>
 find a key in an object that has a particular value
 
 **Kind**: static method of [<code>objects</code>](#objects)  
@@ -1079,6 +1079,7 @@ logging, timers and other diagnostic utilities
     * [.tracker([app], [token], [distinct_id])](#logging.tracker) ⇒ <code>function</code>
     * [.sleep(ms)](#logging.sleep)
     * [.clip(data)](#logging.clip) ⇒ <code>void</code>
+    * [.prettyTime(milliseconds)](#logging.prettyTime) ⇒ <code>string</code>
 
 <a name="logging.sLog"></a>
 
@@ -1226,6 +1227,18 @@ copy arbitrary data to your clipboard
 | Param | Type | Description |
 | --- | --- | --- |
 | data | <code>any</code> | data to put on your clipboard |
+
+<a name="logging.prettyTime"></a>
+
+### logging.prettyTime(milliseconds) ⇒ <code>string</code>
+create human readable time from milliseconds
+
+**Kind**: static method of [<code>logging</code>](#logging)  
+**Returns**: <code>string</code> - human readable time  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| milliseconds | <code>number</code> | time to format |
 
 <a name="makeName"></a>
 
