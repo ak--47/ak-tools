@@ -765,61 +765,49 @@ exports.md5 = function calcMd5Hash(data) {
  */
 exports.makeName = function generateName(words = 3, separator = "-") {
 	const adjs = [
-		"autumn", "hidden", "bitter", "misty", "silent", "empty", "dry", "dark",
-		"summer", "icy", "delicate", "quiet", "white", "cool", "spring", "winter",
-		"patient", "twilight", "dawn", "crimson", "wispy", "weathered", "blue",
-		"billowing", "broken", "cold", "damp", "falling", "frosty", "green",
-		"long", "late", "lingering", "bold", "little", "morning", "muddy", "old",
-		"red", "rough", "still", "small", "sparkling", "throbbing", "shy",
-		"wandering", "withered", "wild", "black", "young", "holy", "solitary",
-		"fragrant", "aged", "snowy", "proud", "floral", "restless", "divine",
-		"polished", "ancient", "purple", "lively", "nameless", "gentle", "gleaming", "furious", "luminous", "obscure", "poised", "shimmering", "swirling",
-		"sombre", "steamy", "whispering", "jagged", "melodic", "moonlit", "starry", "forgotten",
-		"peaceful", "restive", "rustling", "sacred", "ancient", "haunting", "solitary", "mysterious",
-		"silver", "dusky", "earthy", "golden", "hallowed", "misty", "roaring", "serene", "vibrant",
-		"stalwart", "whimsical", "timid", "tranquil", "vast", "youthful", "zephyr", "raging",
-		"sapphire", "turbulent", "whirling", "sleepy", "ethereal", "tender", "unseen", "wistful"
+		"shadowy", "forgotten", "mystic", "ominous", "stalwart", "fiery", "twinkling", "arcane",
+		"rugged", "whispering", "brave", "dusty", "mighty", "shifty", "sneaky", "ancient",
+		"ghostly", "cryptic", "frosty", "runic", "gilded", "murky", "glorious", "sly",
+		"brawny", "brutal", "craven", "wily", "meek", "luminous", "bewitched", "drunken",
+		"slippery", "crooked", "boisterous", "vicious", "ornery", "snarling", "fumbling", "grumbling",
+		"flickering", "shimmering", "singing", "howling", "prowling", "lurking", "prancing", "leaping",
+		"tumbling", "gamboling", "galloping", "stalking", "raging", "fuming", "sparkling", "creeping",
+		"stout", "nimble", "bitter", "sweet", "tart", "robust", "tender", "ragged"
 	];
 
 	const nouns = [
-		"waterfall", "river", "breeze", "moon", "rain", "wind", "sea", "morning",
-		"snow", "lake", "sunset", "pine", "shadow", "leaf", "dawn", "glitter",
-		"forest", "hill", "cloud", "meadow", "sun", "glade", "bird", "brook",
-		"butterfly", "bush", "dew", "dust", "field", "fire", "flower", "firefly",
-		"feather", "grass", "haze", "mountain", "night", "pond", "darkness",
-		"snowflake", "silence", "sound", "sky", "shape", "surf", "thunder",
-		"violet", "water", "wildflower", "wave", "water", "resonance", "sun",
-		"wood", "dream", "cherry", "tree", "fog", "frost", "voice", "paper",
-		"frog", "smoke", "star", "glow", "wave", "riverbed", "cliff", "deluge", "prairie", "creek", "ocean",
-		"peak", "valley", "starlight", "quartz", "woodland", "marsh", "earth", "canopy",
-		"petal", "stone", "orb", "gale", "bay", "canyon", "watercourse", "vista", "raindrop",
-		"boulder", "grove", "plateau", "sand", "mist", "tide", "blossom", "leaf", "flame",
-		"shade", "coil", "grotto", "pinnacle", "scallop", "serenity", "abyss", "skyline",
-		"drift", "echo", "nebula", "horizon", "crest", "wreath", "twilight", "balm", "glimmer"
+		"wizard", "tavern", "goblin", "minstrel", "sorceress", "dragon", "knight", "potion",
+		"castle", "dagger", "griffin", "enchanted forest", "tome", "crown", "ale", "bard",
+		"jester", "maiden", "beast", "halfling", "orc", "dwarf", "elf", "specter",
+		"throne", "warlock", "quest", "chalice", "scroll", "amulet", "fairy", "phantom",
+		"pixie", "troll", "giant", "vampire", "necromancer", "witch", "ogre", "mirage",
+		"mystic river", "battleaxe", "cloak", "spellbook", "crystal", "glaive", "mace", "armor",
+		"labyrinth", "fortress", "quiver", "crossbow", "lance", "wizard's tower", "moat", "dungeon"
 	];
 
 	const verbs = [
-		"dancing", "whispering", "flowing", "shimmering", "swirling", "echoing", "sparkling", "glistening",
-		"cascading", "drifting", "glowing", "rippling", "quivering", "singing", "twinkling", "radiating",
-		"enveloping", "enchanting", "captivating", "embracing", "embracing", "illuminating", "pulsating", "gliding",
-		"soaring", "wandering", "meandering", "dazzling", "cuddling", "embracing", "caressing", "twisting",
-		"twirling", "tumbling", "surging", "glimmering", "gushing", "splashing", "rolling", "splintering",
-		"splintering", "crescendoing", "whirling", "bursting", "shining", "gushing", "emerging", "revealing",
-		"emerging", "unfolding", "unveiling", "emerging", "surrounding", "unveiling", "materializing", "revealing"
+		"conjuring", "enchanting", "brawling", "brewing", "haunting", "sailing", "storming", "questing",
+		"charming", "jousting", "feasting", "marching", "scheming", "ravaging", "plundering", "defending",
+		"dueling", "tricking", "fleeing", "prowling", "carousing", "forging", "deciphering", "exploring",
+		"vanquishing", "reviving", "summoning", "banishing", "transmuting", "bewitching", "enthralling",
+		"disguising", "sneaking", "chasing", "riding", "flying", "divining", "dreaming", "dancing"
 	];
 
 	const adverbs = [
-		"gracefully", "softly", "smoothly", "gently", "tenderly", "quietly", "serenely", "peacefully",
-		"delicately", "effortlessly", "subtly", "tranquilly", "majestically", "silently", "calmly", "harmoniously",
-		"elegantly", "luminously", "ethereally", "mysteriously", "sublimely", "radiantly", "dreamily", "ethereally",
-		"mesmerizingly", "hypnotically", "mystically", "enigmatically", "spellbindingly", "enchantingly", "fascinatingly",
-		"bewitchingly", "captivatingly", "entrancingly", "alluringly", "rapturously", "seductively", "charismatically",
-		"seductively", "envelopingly", "ensnaringly", "entrancingly", "intoxicatingly", "irresistibly", "transcendentally",
-		"envelopingly", "rapturously", "intimately", "intensely", "tangibly", "vividly", "intensely", "deeply"
+		"boldly", "bravely", "slyly", "wisely", "fiercely", "timidly", "stealthily", "suddenly",
+		"mysteriously", "quietly", "loudly", "proudly", "eagerly", "reluctantly", "greedily", "valiantly",
+		"heroically", "cowardly", "viciously", "magically", "mirthfully", "sorrowfully", "craftily", "defiantly",
+		"gallantly", "honorably", "infamously", "notoriously", "cunningly", "archly", "cleverly", "dastardly"
+	];
+
+	const continuations = [
+		"and", "of", "from", "in", "on", "under", "over", "beyond", "within", 'while', 'during', 'after', 'before', 
+		'beneath', 'beside', 'betwixt', 'betwain', 'betwixen', "because", "despite", "although", "however", "nevertheless",
+		"nonetheless", "whereas", "wherefore", "whereupon", "wherefrom", "wherein", "whereby", "whereafter", "wherewith",
 	];
 
 	let string;
-	const cycle = [adjs, nouns, verbs, adverbs];
+	const cycle = [adjs, nouns, verbs, adverbs, continuations];
 	for (let i = 0; i < words; i++) {
 		const index = i % cycle.length;
 		// ? http://stackoverflow.com/a/17516862/103058
