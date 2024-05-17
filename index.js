@@ -765,52 +765,42 @@ exports.md5 = function calcMd5Hash(data) {
  */
 exports.makeName = function generateName(words = 3, separator = "-") {
 	const adjs = [
-		"shadowy", "forgotten", "mystic", "ominous", "stalwart", "fiery", "twinkling", "arcane",
-		"rugged", "whispering", "brave", "dusty", "mighty", "shifty", "sneaky", "ancient",
-		"ghostly", "cryptic", "frosty", "runic", "gilded", "murky", "glorious", "sly",
-		"brawny", "brutal", "craven", "wily", "meek", "luminous", "bewitched", "drunken",
-		"slippery", "crooked", "boisterous", "vicious", "ornery", "snarling", "fumbling", "grumbling",
-		"flickering", "shimmering", "singing", "howling", "prowling", "lurking", "prancing", "leaping",
-		"tumbling", "gamboling", "galloping", "stalking", "raging", "fuming", "sparkling", "creeping",
-		"stout", "nimble", "bitter", "sweet", "tart", "robust", "tender", "ragged"
+		"dark", "grim", "swift", "brave", "bold", "fiery", "arcane",
+		"rugged", "calm", "wild", "brisk", "dusty", "mighty", "sly",
+		"old", "ghostly", "frosty", "gilded", "murky", "grand", "sly",
+		"quick", "cruel", "meek", "glum", "drunk", "slick", "bitter",
+		"nimble", "sweet", "tart", "tough"
 	];
 
 	const nouns = [
-		"wizard", "tavern", "goblin", "minstrel", "sorceress", "dragon", "knight", "potion",
-		"castle", "dagger", "griffin", "enchanted forest", "tome", "crown", "ale", "bard",
-		"jester", "maiden", "beast", "halfling", "orc", "dwarf", "elf", "specter",
-		"throne", "warlock", "quest", "chalice", "scroll", "amulet", "fairy", "phantom",
-		"pixie", "troll", "giant", "vampire", "necromancer", "witch", "ogre", "mirage",
-		"mystic river", "battleaxe", "cloak", "spellbook", "crystal", "glaive", "mace", "armor",
-		"labyrinth", "fortress", "quiver", "crossbow", "lance", "wizard's tower", "moat", "dungeon"
+		"mage", "inn", "imp", "bard", "witch", "drake", "knight", "brew",
+		"keep", "blade", "beast", "spell", "tome", "crown", "ale", "bard",
+		"joke", "maid", "elf", "orc", "throne", "quest", "scroll", "fey",
+		"pixie", "troll", "giant", "vamp", "ogre", "cloak", "gem", "axe",
+		"armor", "fort", "bow", "lance", "moat", "den"
 	];
 
 	const verbs = [
-		"conjuring", "enchanting", "brawling", "brewing", "haunting", "sailing", "storming", "questing",
-		"charming", "jousting", "feasting", "marching", "scheming", "ravaging", "plundering", "defending",
-		"dueling", "tricking", "fleeing", "prowling", "carousing", "forging", "deciphering", "exploring",
-		"vanquishing", "reviving", "summoning", "banishing", "transmuting", "bewitching", "enthralling",
-		"disguising", "sneaking", "chasing", "riding", "flying", "divining", "dreaming", "dancing"
+		"cast", "charm", "brawl", "brew", "haunt", "sail", "storm", "quest",
+		"joust", "feast", "march", "scheme", "raid", "guard", "duel",
+		"trick", "flee", "prowl", "forge", "explore", "vanish", "summon",
+		"banish", "bewitch", "sneak", "chase", "ride", "fly", "dream", "dance"
 	];
 
 	const adverbs = [
-		"boldly", "bravely", "slyly", "wisely", "fiercely", "timidly", "stealthily", "suddenly",
-		"mysteriously", "quietly", "loudly", "proudly", "eagerly", "reluctantly", "greedily", "valiantly",
-		"heroically", "cowardly", "viciously", "magically", "mirthfully", "sorrowfully", "craftily", "defiantly",
-		"gallantly", "honorably", "infamously", "notoriously", "cunningly", "archly", "cleverly", "dastardly"
+		"boldly", "bravely", "slyly", "wisely", "fiercely", "stealthily", "proudly", "eagerly",
+		"quietly", "loudly", "heroically", "craftily", "defiantly", "infamously", "cleverly", "dastardly"
 	];
 
 	const continuations = [
-		"and", "of", "from", "in", "on", "under", "over", "beyond", "within", 'while', 'during', 'after', 'before', 
-		'beneath', 'beside', 'betwixt', 'betwain', 'betwixen', "because", "despite", "although", "however", "nevertheless",
-		"nonetheless", "whereas", "wherefore", "whereupon", "wherefrom", "wherein", "whereby", "whereafter", "wherewith",
+		"and", "of", "in", "on", "under", "over", "beyond", "within", "while", "during", "after", "before", 
+		"beneath", "beside", "betwixt", "betwain", "because", "despite", "although", "however", "nevertheless"
 	];
 
 	let string;
 	const cycle = [adjs, nouns, verbs, adverbs, continuations];
 	for (let i = 0; i < words; i++) {
 		const index = i % cycle.length;
-		// ? http://stackoverflow.com/a/17516862/103058
 		const word = cycle[index][Math.floor(Math.random() * cycle[index].length)];
 		if (!string) {
 			string = word;
@@ -820,8 +810,8 @@ exports.makeName = function generateName(words = 3, separator = "-") {
 	}
 
 	return string;
-
 };
+
 
 /*
 -------
