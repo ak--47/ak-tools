@@ -1581,7 +1581,7 @@ exports.progress = function showProgress(arrayOfArrays) {
 	let message = "";
 	for (const status of arrayOfArrays) {
 		const [thing, p] = status;
-		message += `${thing}: ${comma(p)}\t\t`;
+		message += `${thing}: ${exports.comma(p)}\t\t`;
 	}
 
 	process.stdout.write(message);
