@@ -1570,20 +1570,23 @@ exports.log = function comprehensiveLog(item, depth = 0, maxDepth = 100) {
 };
 
 /**
- * dumb progress bar; incrementing console message
- * - ex: `thing message #p`
+ * dumb progress bar; incrementing console message, format is [string, number]
+ * - ex `users: 1,000`
+ * @param  {[string, number][]} arrayOfArrays
  * @memberof logging
- * @param {string} thing - what is being 
- * @param {number} p - the number to show
- * @param {string} message - 
  * @returns {void}
  */
-exports.progress = function showProgress(thing = "", p = "", message = "") {
+exports.progress = function showProgress(arrayOfArrays) {
 	readline.cursorTo(process.stdout, 0);
-	const msg = `${thing} ${message} ${exports.comma(p)}`.trim();
-	process.stdout.write(`${msg}\t`);
+	let message = "";
+	for (const status of arrayOfArrays) {
+		const [thing, p] = status;
+		message += `${thing}: ${comma(p)}\t\t`;
+	}
 
+	process.stdout.write(message);
 };
+
 
 class Timer {
 	constructor(label) {
