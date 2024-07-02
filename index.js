@@ -1577,14 +1577,20 @@ exports.log = function comprehensiveLog(item, depth = 0, maxDepth = 100) {
  * @returns {void}
  */
 exports.progress = function showProgress(arrayOfArrays) {
-	readline.cursorTo(process.stdout, 0);
-	let message = "";
-	for (const status of arrayOfArrays) {
-		const [thing, p] = status;
-		message += `${thing}: ${exports.comma(p)}\t\t`;
-	}
+    // Move the cursor to the beginning of the line
+    readline.cursorTo(process.stdout, 0);
+    // Clear the line
+    readline.clearLine(process.stdout, 0);
 
-	process.stdout.write(message);
+    let message = "";
+    for (const status of arrayOfArrays) {
+        const [thing, p] = status;
+        // Ensure that 'thing' takes up at least 10 characters, adjust as needed
+        // Ensure that the number is formatted as a string and takes up at least 8 characters
+        message += `${thing.padEnd(10)}: ${exports.comma(p).padStart(8)}    `;
+    }
+
+    process.stdout.write(message);
 };
 
 
