@@ -1587,7 +1587,7 @@ exports.progress = function showProgress(arrayOfArrays) {
         const [thing, p] = status;
         // Ensure that 'thing' takes up at least 10 characters, adjust as needed
         // Ensure that the number is formatted as a string and takes up at least 8 characters
-        message += `${thing.padEnd(10)}: ${exports.comma(p).padStart(8)}    `;
+        message += `${thing.padEnd(5)}: ${exports.comma(p).padStart(4)}    `;
     }
 
     process.stdout.write(message);
