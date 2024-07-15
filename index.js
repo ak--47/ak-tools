@@ -793,7 +793,7 @@ exports.makeName = function generateName(words = 3, separator = "-") {
 	];
 
 	const continuations = [
-		"and", "of", "in", "on", "under", "over", "beyond", "within", "while", "during", "after", "before", 
+		"and", "of", "in", "on", "under", "over", "beyond", "within", "while", "during", "after", "before",
 		"beneath", "beside", "betwixt", "betwain", "because", "despite", "although", "however", "nevertheless"
 	];
 
@@ -1424,12 +1424,14 @@ LOGGING
 */
 
 
+
+
 /**
  * a cloud function compatible `console.log()`
  * @memberof logging
  * @param  {string} [message] - accompanying message
  * @param  {(string | JSON | object)} data - data to log; preferably structured
- * @param  {string} [severity=`INFO`] - {@link https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#logseverity | google sev label}; default `INFO`
+ * @param  {string | "DEFAULT" | "DEBUG" | "INFO" | "NOTICE" | "WARNING" | "ERROR" | "CRITICAL" | "ALERT" | "EMERGENCY"} [severity=`INFO`] - {@link https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#logseverity | google sev label}; default `INFO`
  * 
  */
 exports.sLog = function structuredLogger(message = "LOG:", data = {}, severity = 'INFO') {
@@ -1437,9 +1439,13 @@ exports.sLog = function structuredLogger(message = "LOG:", data = {}, severity =
 	let structuredLog = {
 		severity: severity,
 		message: message,
-		// Include additional properties from data at the same level as severity and message
-		data: data
 	};
+
+	let hasData = false;
+	if (Array.isArray(data) && data.length > 0) hasData = true;
+	if (typeof data === 'object' && Object.keys(data).length > 0) hasData = true;
+	if (typeof data === 'string' && data.length > 0) hasData = true;
+	if (hasData) structuredLog.data = data;
 
 	// Stringify the structured log and print it to the console
 	console.log(JSON.stringify(structuredLog));
@@ -1577,20 +1583,20 @@ exports.log = function comprehensiveLog(item, depth = 0, maxDepth = 100) {
  * @returns {void}
  */
 exports.progress = function showProgress(arrayOfArrays) {
-    // Move the cursor to the beginning of the line
-    readline.cursorTo(process.stdout, 0);
-    // Clear the line
-    readline.clearLine(process.stdout, 0);
+	// Move the cursor to the beginning of the line
+	readline.cursorTo(process.stdout, 0);
+	// Clear the line
+	readline.clearLine(process.stdout, 0);
 
-    let message = "";
-    for (const status of arrayOfArrays) {
-        const [thing, p] = status;
-        // Ensure that 'thing' takes up at least 10 characters, adjust as needed
-        // Ensure that the number is formatted as a string and takes up at least 8 characters
-        message += `${thing.padEnd(5)}: ${exports.comma(p).padStart(4)}    `;
-    }
+	let message = "";
+	for (const status of arrayOfArrays) {
+		const [thing, p] = status;
+		// Ensure that 'thing' takes up at least 10 characters, adjust as needed
+		// Ensure that the number is formatted as a string and takes up at least 8 characters
+		message += `${thing.padEnd(5)}: ${exports.comma(p).padStart(4)}    `;
+	}
 
-    process.stdout.write(message);
+	process.stdout.write(message);
 };
 
 
