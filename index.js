@@ -1599,6 +1599,55 @@ exports.progress = function showProgress(arrayOfArrays) {
 	process.stdout.write(message);
 };
 
+/**
+ * obfuscate text; keep first and last characters, replace the rest with `*`
+ * @memberof logging
+ * @param  {string} str - string to obfuscate
+ * @returns {string} obfuscated string
+ */
+exports.obfuscate = function obfuscateText(str) {
+    // Convert to string if not already
+    if (typeof str !== 'string') {
+        str = str.toString();
+    }
+
+    if (str.length === 0) {
+        return "";
+    }
+
+	if (str.length === 1) {
+		return "*";
+	}
+
+	if (str.length === 2) {
+		return str[0] + "*";
+	}
+
+
+    // Initialize result as an array for easier manipulation
+    let result = [];
+	let lastSpaceIndex = null;
+    for (let i = 0; i < str.length; i++) {
+        if (str[i] === ' ') {
+            // Preserve spaces
+            result.push(' ');
+			lastSpaceIndex = i;
+        } 
+		
+		else {
+            // Apply obfuscation based on string length and position
+            if (i === 0 || i === str.length - 1 || lastSpaceIndex) {
+                result.push(str[i]); // Keep first and last characters or characters after spaces
+				lastSpaceIndex = null;
+            } else {
+                result.push('*'); // Obfuscate middle characters
+            }
+        }
+    }
+
+    return result.join(''); // Convert array back to string
+}
+
 
 class Timer {
 	constructor(label) {

@@ -428,6 +428,34 @@ describe('structured logger', () => {
 			}));
 		});
 	});
+
+
+	test("obfuscate", () => {
+		// Empty string
+		expect(u.obfuscate("")).toBe("");
+
+		// Single character
+		expect(u.obfuscate("A")).toBe("*");
+
+		// Two characters
+		expect(u.obfuscate("AB")).toBe("A*");
+
+		// Three characters
+		expect(u.obfuscate("ABC")).toBe("A*C");
+
+		// Four characters
+		expect(u.obfuscate("ABCD")).toBe("A**D");
+
+		// Longer strings
+		expect(u.obfuscate("ABCDE")).toBe("A***E");
+		expect(u.obfuscate("Hello")).toBe("H***o");
+
+		// Preserve spaces
+		expect(u.obfuscate("Test String")).toBe("T*** S****g");
+
+		// Non-string input (e.g. number)
+		expect(u.obfuscate(12345)).toBe("1***5");
+	});
 });
 
 
@@ -502,6 +530,6 @@ describe('timer', () => {
 
 		const timeQux = u.prettyTime(3605236);
 		expect(timeQux).toBe('1 hour 5.24 seconds');
-		
+
 	});
 });
