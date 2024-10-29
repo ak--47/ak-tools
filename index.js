@@ -1501,19 +1501,34 @@ class StructuredLogger {
 
 
 /**
- * a cloud function compatible `console.log()`
+ * a cloud function compatible `console.log()` that writes its own structured logs
  * @memberof logging
  * @param  {(string | JSON | object)} data - data to log; preferably structured
  * @param  {string} [message] - accompanying message
  * @param  {string} [severity=`INFO`] - {@link https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#logseverity | google sev label}; default `INFO`
  * @param  {boolean} [isCloud=true] - force cloud logging
- * @deprecated use logger instead
+ * note: you may also pass in `message` as the first argument and `data` as the second
  * 
  */
 exports.cLog = function cloudFunctionLogger(data, message, severity = `INFO`, isCloud = true) {
+	//allow data or message to come in either order
+	let actualData;
+	let actualMessage = "";
+	if (typeof data === 'string') actualMessage += data;
+	if (typeof message === 'string') actualMessage += message;
+	if (typeof message === 'object') {
+		if (message !== null && message !== undefined) actualData = message;
+	}
+	if (typeof data === 'object') {
+		if (data !== null && data !== undefined) actualData = data;
+	}
+
+	data = actualData;
+	message = actualMessage;
+	
 	// not GCP
 	// ? https://cloud.google.com/functions/docs/configuring/env-var#newer_runtimes
-	if (!process.env["FUNCTION_TARGET"] || !process.env["FUNCTION_SIGNATURE_TYPE"] || !isCloud) {
+	if (!process.env["FUNCTION_TARGET"] || !process.env["FUNCTION_SIGNATURE_TYPE"] || process.env?.["NODE_ENV"] === 'dev' || !isCloud) {
 		if (exports.isJSON(data)) {
 			if (message) console.log(message);
 			if (data) console.log(JSON.stringify(data, null, 2));
@@ -1606,14 +1621,14 @@ exports.progress = function showProgress(arrayOfArrays) {
  * @returns {string} obfuscated string
  */
 exports.obfuscate = function obfuscateText(str) {
-    // Convert to string if not already
-    if (typeof str !== 'string') {
-        str = str.toString();
-    }
+	// Convert to string if not already
+	if (typeof str !== 'string') {
+		str = str.toString();
+	}
 
-    if (str.length === 0) {
-        return "";
-    }
+	if (str.length === 0) {
+		return "";
+	}
 
 	if (str.length === 1) {
 		return "*";
@@ -1624,29 +1639,29 @@ exports.obfuscate = function obfuscateText(str) {
 	}
 
 
-    // Initialize result as an array for easier manipulation
-    let result = [];
+	// Initialize result as an array for easier manipulation
+	let result = [];
 	let lastSpaceIndex = null;
-    for (let i = 0; i < str.length; i++) {
-        if (str[i] === ' ') {
-            // Preserve spaces
-            result.push(' ');
+	for (let i = 0; i < str.length; i++) {
+		if (str[i] === ' ') {
+			// Preserve spaces
+			result.push(' ');
 			lastSpaceIndex = i;
-        } 
-		
-		else {
-            // Apply obfuscation based on string length and position
-            if (i === 0 || i === str.length - 1 || lastSpaceIndex) {
-                result.push(str[i]); // Keep first and last characters or characters after spaces
-				lastSpaceIndex = null;
-            } else {
-                result.push('*'); // Obfuscate middle characters
-            }
-        }
-    }
+		}
 
-    return result.join(''); // Convert array back to string
-}
+		else {
+			// Apply obfuscation based on string length and position
+			if (i === 0 || i === str.length - 1 || lastSpaceIndex) {
+				result.push(str[i]); // Keep first and last characters or characters after spaces
+				lastSpaceIndex = null;
+			} else {
+				result.push('*'); // Obfuscate middle characters
+			}
+		}
+	}
+
+	return result.join(''); // Convert array back to string
+};
 
 
 class Timer {
