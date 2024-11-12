@@ -215,6 +215,10 @@ exports.mkdir = function (dirPath = "./tmp") {
 	return fullPath;
 };
 
+exports.makeExist = async function (filePath) {	// Ensure all directories in the path exist
+	await fs.promises.mkdir(path.dirname(filePath), { recursive: true });
+	return true;
+};
 
 /*
 -----------
@@ -1525,7 +1529,7 @@ exports.cLog = function cloudFunctionLogger(data, message, severity = `INFO`, is
 
 	data = actualData;
 	message = actualMessage;
-	
+
 	// not GCP
 	// ? https://cloud.google.com/functions/docs/configuring/env-var#newer_runtimes
 	if (!process.env["FUNCTION_TARGET"] || !process.env["FUNCTION_SIGNATURE_TYPE"] || process.env?.["NODE_ENV"] === 'dev' || !isCloud) {
