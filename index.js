@@ -3,6 +3,7 @@
 const path = require('path');
 const fs = require('fs').promises;
 const { existsSync, mkdirSync } = require('fs');
+const { mkdir } = require('fs').promises;
 const readline = require('readline');
 const http = require("https");
 const os = require("os");
@@ -216,7 +217,7 @@ exports.mkdir = function (dirPath = "./tmp") {
 };
 
 exports.makeExist = async function (filePath) {	// Ensure all directories in the path exist
-	await fs.promises.mkdir(path.dirname(filePath), { recursive: true });
+	await mkdir(path.dirname(filePath), { recursive: true });
 	return true;
 };
 
