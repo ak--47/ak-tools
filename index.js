@@ -228,19 +228,19 @@ exports.makeExist = async function (filePath) {	// Ensure all directories in the
 
 
 exports.isDirOrFile = function isStringADirOrFile(filePath) {
-    const resolvedPath = path.resolve(filePath);
-    try {
-        const stats = statSync(resolvedPath);
-        if (stats.isDirectory()) {
-            return 'directory';
-        } else if (stats.isFile()) {
-            return 'file';
-        } else {
-            return false;
-        }
-    } catch (error) {
-        return false;
-    }
+	const resolvedPath = path.resolve(filePath);
+	try {
+		const stats = statSync(resolvedPath);
+		if (stats.isDirectory()) {
+			return 'directory';
+		} else if (stats.isFile()) {
+			return 'file';
+		} else {
+			return false;
+		}
+	} catch (error) {
+		return false;
+	}
 };
 
 /**
@@ -252,82 +252,84 @@ exports.isDirOrFile = function isStringADirOrFile(filePath) {
  * @returns {Object|false} detailed information about the path
  */
 exports.details = function getFileDetails(filePath, options = {}) {
-    const {
-        maxDepth = Infinity,
-        exclude = [],
-        currentDepth = 0
-    } = options;
+	const {
+		maxDepth = Infinity,
+		exclude = [],
+		currentDepth = 0
+	} = options;
 
-    const resolvedPath = path.resolve(filePath);
-    const type = exports.isDirOrFile(resolvedPath);
-    
-    if (!type) {
-        return false;
-    }
+	const resolvedPath = path.resolve(filePath);
+	const type = exports.isDirOrFile(resolvedPath);
 
-    // Base case for files
-    if (type === 'file') {
-        return {
-            type: 'file',
-            path: resolvedPath,
-            name: path.basename(resolvedPath),
-            infos: statSync(resolvedPath)
-        };
-    }
+	if (!type) {
+		return false;
+	}
 
-    // Handle directories
-    if (type === 'directory') {
-        // Stop recursion if we've reached maxDepth
-        if (currentDepth >= maxDepth) {
-            return {
-                type: 'directory',
-                path: resolvedPath,
-                name: path.basename(resolvedPath),
-                infos: statSync(resolvedPath),
-                folders: {},
-                files: []
-            };
-        }
+	// Base case for files
+	if (type === 'file') {
+		const details = statSync(resolvedPath);
+		return {
+			type: 'file',
+			path: resolvedPath,
+			name: path.basename(resolvedPath),
+			infos: { human: exports.bytesHuman(details?.size || 0), ...details }
+		};
+	}
 
-        const contents = readdirSync(resolvedPath);
-        const structure = {
-            type: 'directory',
-            path: resolvedPath,
-            name: path.basename(resolvedPath),
-            infos: statSync(resolvedPath),
-            folders: {},
-            files: []
-        };
+	// Handle directories
+	if (type === 'directory') {
+		// Stop recursion if we've reached maxDepth
+		if (currentDepth >= maxDepth) {
+			return {
+				type: 'directory',
+				path: resolvedPath,
+				name: path.basename(resolvedPath),
+				infos: statSync(resolvedPath),
+				folders: {},
+				files: []
+			};
+		}
 
-        // Process each item in the directory
-        contents.forEach(item => {
-            const fullPath = path.join(resolvedPath, item);
-            
-            // Skip excluded patterns
-            if (exclude.some(pattern => item.includes(pattern))) {
-                return;
-            }
+		const contents = readdirSync(resolvedPath);
+		const structure = {
+			type: 'directory',
+			path: resolvedPath,
+			name: path.basename(resolvedPath),
+			infos: statSync(resolvedPath),
+			folders: {},
+			files: []
+		};
 
-            const itemType = exports.isDirOrFile(fullPath);
-            
-            if (itemType === 'directory') {
-                // Recursively process subdirectories
-                structure.folders[item] = getFileDetails(fullPath, {
-                    ...options,
-                    currentDepth: currentDepth + 1
-                });
-            } else if (itemType === 'file') {
-                // Add files to the files array
-                structure.files.push({
-                    name: item,
-                    path: fullPath,
-                    infos: statSync(fullPath)
-                });
-            }
-        });
+		// Process each item in the directory
+		contents.forEach(item => {
+			const fullPath = path.join(resolvedPath, item);
 
-        return structure;
-    }
+			// Skip excluded patterns
+			if (exclude.some(pattern => item.includes(pattern))) {
+				return;
+			}
+
+			const itemType = exports.isDirOrFile(fullPath);
+
+			if (itemType === 'directory') {
+				// Recursively process subdirectories
+				structure.folders[item] = getFileDetails(fullPath, {
+					...options,
+					currentDepth: currentDepth + 1
+				});
+			} else if (itemType === 'file') {
+				// Add files to the files array
+				const details = statSync(fullPath);
+				structure.files.push({
+					name: item,
+					path: fullPath,
+					infos: { human: exports.bytesHuman(details?.size || 0), ...details }
+				});
+			}
+		});
+
+		return structure;
+	}
 };
 
 /*
