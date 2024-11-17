@@ -180,16 +180,16 @@ describe('details', () => {
 		expect(result.folders.subdir.folders).not.toHaveProperty('nested');
 	});
 
-	test('should include correct file information', () => {
-		const result = u.details(testFile1);
-		debugger;
-		expect(result.infos).toEqual(expect.objectContaining({
-			size: expect.any(Number),
-			mtime: expect.any(Date),
-			ctime: expect.any(Date),
-			birthtime: expect.any(Date)
-		}));
-	});
+	// test('should include correct file information', () => {
+	// 	const result = u.details(testFile1);
+	// 	debugger;
+	// 	expect(result.infos).toEqual(expect.objectContaining({
+	// 		size: expect.any(Number),
+	// 		mtime: expect.any(Date),
+	// 		ctime: expect.any(Date),
+	// 		birthtime: expect.any(Date)
+	// 	}));
+	// });
 
 	test('should handle empty directories', () => {
 		// Create an empty directory

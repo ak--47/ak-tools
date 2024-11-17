@@ -267,12 +267,13 @@ exports.details = function getFileDetails(filePath, options = {}) {
 
 	// Base case for files
 	if (type === 'file') {
-		const details = statSync(resolvedPath);
+		const fileDetails = statSync(resolvedPath);
 		return {
 			type: 'file',
 			path: resolvedPath,
+			size: exports.bytesHuman(fileDetails?.size || 0),
 			name: path.basename(resolvedPath),
-			infos: { human: exports.bytesHuman(details?.size || 0), ...details }
+			infos: fileDetails
 		};
 	}
 
@@ -319,11 +320,12 @@ exports.details = function getFileDetails(filePath, options = {}) {
 				});
 			} else if (itemType === 'file') {
 				// Add files to the files array
-				const details = statSync(fullPath);
+				const fileDetails = statSync(fullPath);
 				structure.files.push({
 					name: item,
 					path: fullPath,
-					infos: { human: exports.bytesHuman(details?.size || 0), ...details }
+					size: exports.bytesHuman(fileDetails?.size || 0),
+					infos: fileDetails
 				});
 			}
 		});
