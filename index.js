@@ -2,7 +2,7 @@
 // things to make things ... easier
 const path = require('path');
 const fs = require('fs').promises;
-const { existsSync, mkdirSync } = require('fs');
+const { existsSync, mkdirSync, statSync, readdirSync } = require('fs');
 const { mkdir } = require('fs').promises;
 const readline = require('readline');
 const http = require("https");
@@ -219,6 +219,115 @@ exports.mkdir = function (dirPath = "./tmp") {
 exports.makeExist = async function (filePath) {	// Ensure all directories in the path exist
 	await mkdir(path.dirname(filePath), { recursive: true });
 	return true;
+};
+/**
+ * check if a file or directory exists
+ * @param  {string} filePath - path to check
+ * @returns {'directory' | 'file' | false} what is it? and does it exist?
+ */
+
+
+exports.isDirOrFile = function isStringADirOrFile(filePath) {
+    const resolvedPath = path.resolve(filePath);
+    try {
+        const stats = statSync(resolvedPath);
+        if (stats.isDirectory()) {
+            return 'directory';
+        } else if (stats.isFile()) {
+            return 'file';
+        } else {
+            return false;
+        }
+    } catch (error) {
+        return false;
+    }
+};
+
+/**
+ * Get detailed information about a file or directory, including recursive folder structure
+ * @param {string} filePath - path to analyze
+ * @param {Object} options - optional settings
+ * @param {number} options.maxDepth - maximum recursion depth (default: Infinity)
+ * @param {Array<string>} options.exclude - patterns to exclude (default: [])
+ * @returns {Object|false} detailed information about the path
+ */
+exports.details = function getFileDetails(filePath, options = {}) {
+    const {
+        maxDepth = Infinity,
+        exclude = [],
+        currentDepth = 0
+    } = options;
+
+    const resolvedPath = path.resolve(filePath);
+    const type = exports.isDirOrFile(resolvedPath);
+    
+    if (!type) {
+        return false;
+    }
+
+    // Base case for files
+    if (type === 'file') {
+        return {
+            type: 'file',
+            path: resolvedPath,
+            name: path.basename(resolvedPath),
+            infos: statSync(resolvedPath)
+        };
+    }
+
+    // Handle directories
+    if (type === 'directory') {
+        // Stop recursion if we've reached maxDepth
+        if (currentDepth >= maxDepth) {
+            return {
+                type: 'directory',
+                path: resolvedPath,
+                name: path.basename(resolvedPath),
+                infos: statSync(resolvedPath),
+                folders: {},
+                files: []
+            };
+        }
+
+        const contents = readdirSync(resolvedPath);
+        const structure = {
+            type: 'directory',
+            path: resolvedPath,
+            name: path.basename(resolvedPath),
+            infos: statSync(resolvedPath),
+            folders: {},
+            files: []
+        };
+
+        // Process each item in the directory
+        contents.forEach(item => {
+            const fullPath = path.join(resolvedPath, item);
+            
+            // Skip excluded patterns
+            if (exclude.some(pattern => item.includes(pattern))) {
+                return;
+            }
+
+            const itemType = exports.isDirOrFile(fullPath);
+            
+            if (itemType === 'directory') {
+                // Recursively process subdirectories
+                structure.folders[item] = getFileDetails(fullPath, {
+                    ...options,
+                    currentDepth: currentDepth + 1
+                });
+            } else if (itemType === 'file') {
+                // Add files to the files array
+                structure.files.push({
+                    name: item,
+                    path: fullPath,
+                    infos: statSync(fullPath)
+                });
+            }
+        });
+
+        return structure;
+    }
 };
 
 /*

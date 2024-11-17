@@ -1,6 +1,8 @@
 /* cSpell:disable */
 // @ts-nocheck
 const u = require('./index');
+const fs = require('fs');
+const path = require('path');
 
 test('do tests work?', () => {
 	expect(true).toBe(true);
@@ -29,6 +31,186 @@ describe('files', () => {
 		expect(true).toBe(true);
 
 	});
+});
+
+
+
+
+describe('isDirectoryOrFile', () => {
+	const testDir = './tmp';
+	const testFile = './tmp/testFile.txt';
+
+	beforeAll(() => {
+		// Setup: create a test directory and file
+		if (!fs.existsSync(testDir)) {
+			fs.mkdirSync(testDir);
+		}
+		fs.writeFileSync(testFile, 'Hello, world!');
+	});
+
+	afterAll(() => {
+		// Cleanup: remove the test directory and file
+		if (fs.existsSync(testFile)) {
+			fs.unlinkSync(testFile);
+		}
+		if (fs.existsSync(testDir)) {
+			fs.rmdirSync(testDir);
+		}
+	});
+
+	test('should return "directory" for a directory', () => {
+		const result = u.isDirOrFile(testDir);
+		expect(result).toBe('directory');
+	});
+
+	test('should return "file" for a file', () => {
+		const result = u.isDirOrFile(testFile);
+		expect(result).toBe('file');
+	});
+
+	test('should return false for a non-existent path', () => {
+		const result = u.isDirOrFile('./nonExistentPath');
+		expect(result).toBe(false);
+	});
+});
+
+describe('details', () => {
+	const testRoot = './tmp/test_details';
+	const subDir = path.join(testRoot, 'subdir');
+	const nestedDir = path.join(subDir, 'nested');
+	const testFile1 = path.join(testRoot, 'test1.txt');
+	const testFile2 = path.join(subDir, 'test2.txt');
+	const testFile3 = path.join(nestedDir, 'test3.txt');
+
+	beforeAll(() => {
+		try {
+			// Create test directory structure
+			fs.mkdirSync(testRoot);
+			fs.mkdirSync(subDir);
+			fs.mkdirSync(nestedDir);
+			fs.writeFileSync(testFile1, 'Test file 1');
+			fs.writeFileSync(testFile2, 'Test file 2');
+			fs.writeFileSync(testFile3, 'Test file 3');
+		}
+		catch (err) { }
+
+	});
+
+	afterAll(() => {
+		try {
+			// Cleanup test directory structure
+			fs.unlinkSync(testFile3);
+			fs.unlinkSync(testFile2);
+			fs.unlinkSync(testFile1);
+			fs.rmdirSync(nestedDir);
+			fs.rmdirSync(subDir);
+			fs.rmdirSync(testRoot);
+		} catch (err) { }
+	});
+
+	test('should return false for non-existent path', () => {
+		const result = u.details('./nonexistent/path');
+		expect(result).toBe(false);
+	});
+
+	test('should correctly identify and describe a file', () => {
+		const result = u.details(testFile1);
+
+		expect(result).toEqual(expect.objectContaining({
+			type: 'file',
+			path: path.resolve(testFile1),
+			name: 'test1.txt',
+			infos: expect.any(Object)
+		}));
+	});
+
+	test('should correctly describe a directory with its contents', () => {
+		const result = u.details(testRoot);
+
+		expect(result).toEqual(expect.objectContaining({
+			type: 'directory',
+			path: path.resolve(testRoot),
+			name: 'test_details',
+			infos: expect.any(Object),
+			folders: expect.any(Object),
+			files: expect.any(Array)
+		}));
+
+		// Check root level file
+		expect(result.files).toHaveLength(1);
+		expect(result.files[0].name).toBe('test1.txt');
+
+		// Check subdirectory
+		expect(result.folders).toHaveProperty('subdir');
+		expect(result.folders.subdir.type).toBe('directory');
+	});
+
+	test('should handle nested directory structures recursively', () => {
+		const result = u.details(testRoot);
+
+		// Check first level
+		expect(result.folders.subdir.files).toHaveLength(1);
+		expect(result.folders.subdir.files[0].name).toBe('test2.txt');
+
+		// Check second level
+		expect(result.folders.subdir.folders.nested.files).toHaveLength(1);
+		expect(result.folders.subdir.folders.nested.files[0].name).toBe('test3.txt');
+	});
+
+	test('should respect maxDepth option', () => {
+		const result = u.details(testRoot, { maxDepth: 1 });
+
+		// Should have first level
+		expect(result.folders.subdir).toBeDefined();
+		expect(result.folders.subdir.files).toHaveLength(0);
+
+		// Should not have second level
+		expect(result.folders.subdir.folders).toEqual({});
+	});
+
+	test('should respect exclude option', () => {
+		const result = u.details(testRoot, {
+			exclude: ['test2.txt', 'nested']
+		});
+
+		// Should not have excluded file
+		expect(result.folders.subdir.files).toHaveLength(0);
+
+		// Should not have excluded directory
+		expect(result.folders.subdir.folders).not.toHaveProperty('nested');
+	});
+
+	test('should include correct file information', () => {
+		const result = u.details(testFile1);
+		debugger;
+		expect(result.infos).toEqual(expect.objectContaining({
+			size: expect.any(Number),
+			mtime: expect.any(Date),
+			ctime: expect.any(Date),
+			birthtime: expect.any(Date)
+		}));
+	});
+
+	test('should handle empty directories', () => {
+		// Create an empty directory
+		const emptyDir = path.join(testRoot, 'empty');
+		fs.mkdirSync(emptyDir);
+
+		const result = u.details(emptyDir);
+
+		expect(result).toEqual(expect.objectContaining({
+			type: 'directory',
+			path: path.resolve(emptyDir),
+			name: 'empty',
+			folders: {},
+			files: []
+		}));
+
+		// Cleanup
+		fs.rmdirSync(emptyDir);
+	});
+
+
 });
 
 //VALIDATION
