@@ -1274,7 +1274,6 @@ exports.objMap = function mapOverObjectProps(object, mapFn) {
 };
 
 
-
 /**
  * find a key in an object that has a particular value
  * @example
@@ -1287,6 +1286,66 @@ exports.objMap = function mapOverObjectProps(object, mapFn) {
 exports.getKey = function getObjKeysByValue(object, value) {
 	// ? https://stackoverflow.com/a/28191966
 	return Object.keys(object).find(key => object[key] === value);
+};
+
+/**
+ * turn an array of objects into a CSV string
+ * @example
+ * makeCSV([{foo: "bar"}]) => "foo\nbar\n"
+ * @param  {Array<Object>} data
+ * @param  {number} [charLimit=50_000]
+ */
+exports.makeCSV = function makeCSVFromData(data, charLimit = 50_000) {
+	// Handle empty data case
+	if (!data || data.length === 0) return '';
+
+	// Get all unique keys across all objects
+	const columns = getUniqueKeys(data);
+
+	// Create header row
+	let csvString = columns.join(',') + '\n';
+
+	// Process each data item
+	data.forEach(item => {
+		const row = columns.map(col => {
+			// Handle undefined or null values
+			if (item[col] === undefined || item[col] === null) return '';
+
+			// Convert complex types to safe string representations
+			const value = convertToSafeValue(item[col])
+				?.toString()
+				?.trim()
+				?.slice(0, charLimit);
+			// Escape CSV-special characters
+			return `"${value.toString().replace(/"/g, '""')}"`;
+		}).join(',');
+
+		csvString += row + '\n';
+	});
+
+	return csvString;
+};
+
+function convertToSafeValue(value) {
+	// Handle different types of values
+	if (value === null || value === undefined) return '';
+
+	if (typeof value === 'object') {
+		// For arrays or objects, use JSON.stringify with single quotes
+		return JSON.stringify(value, null, 0)
+			.replace(/"/g, "'");
+	}
+
+	// For primitive types, return as is
+	return value;
+}
+
+function getUniqueKeys(data) {
+	const keysSet = new Set();
+	data.forEach(item => {
+		Object.keys(item).forEach(key => keysSet.add(key));
+	});
+	return Array.from(keysSet);
 };
 
 /*
@@ -1552,7 +1611,9 @@ LOGGING
  * @param  {string | "DEFAULT" | "DEBUG" | "INFO" | "NOTICE" | "WARNING" | "ERROR" | "CRITICAL" | "ALERT" | "EMERGENCY"} [severity=`INFO`] - {@link https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#logseverity | google sev label}; default `INFO`
  * 
  */
-exports.sLog = function structuredLogger(message = "LOG:", data = {}, severity = 'INFO') {
+exports.sLog = function structuredLogger(message = "LOG:", data = {}, severity) {
+	if (!data && !severity) severity = "DEBUG";
+	if (!severity) severity = "INFO";
 	// Create a structured log with a severity level and message
 	let structuredLog = {
 		severity: severity,
