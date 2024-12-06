@@ -1611,7 +1611,7 @@ LOGGING
  * @param  {string | "DEFAULT" | "DEBUG" | "INFO" | "NOTICE" | "WARNING" | "ERROR" | "CRITICAL" | "ALERT" | "EMERGENCY"} [severity=`INFO`] - {@link https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#logseverity | google sev label}; default `INFO`
  * 
  */
-exports.sLog = function structuredLogger(message = "LOG:", data = {}, severity) {
+exports.sLog = function structuredLogger(message = "LOG:", data, severity) {
 	if (!data && !severity) severity = "DEBUG";
 	if (!severity) severity = "INFO";
 	// Create a structured log with a severity level and message
