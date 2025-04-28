@@ -1,12 +1,30 @@
 // AK's utils
 // things to make things ... easier
-const path = require('path');
-const fs = require('fs').promises;
-const { existsSync, mkdirSync, statSync, readdirSync } = require('fs');
-const { mkdir } = require('fs').promises;
-const readline = require('readline');
-const http = require("https");
-const os = require("os");
+const IS_NODE = typeof window === 'undefined';
+
+let path, fs, existsSync, mkdirSync, statSync, readdirSync, mkdir, readline, http, os;
+
+if (IS_NODE) {
+	path = require('path');
+	fs = require('fs').promises;
+	({ existsSync, mkdirSync, statSync, readdirSync } = require('fs'));
+	({ mkdir } = require('fs').promises);
+	readline = require('readline');
+	http = require('https');
+	os = require('os');
+} else {
+	// Provide safe browser fallbacks or empty implementations
+	path = {};
+	fs = {};
+	existsSync = () => false;
+	mkdirSync = () => undefined;
+	statSync = () => undefined;
+	readdirSync = () => [];
+	mkdir = async () => undefined;
+	readline = {};
+	http = {};
+	os = { platform: () => 'browser' };
+}
 
 /*
 -------------------
