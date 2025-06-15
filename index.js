@@ -73,13 +73,26 @@ NAMESPACES + TYPES
 */
 
 /**
- * generic for `{}` w/string keys
- * @typedef {Object.<string, any>} generalObject
+ * Generic object with string keys
+ * @template T
+ * @typedef {Record<string, T>} Dictionary
  */
 
 /**
- * generic for `[{},{},{}]`
- * @typedef {generalObject[]} arrayOfObjects
+ * Generic object with any value types
+ * @typedef {Record<string, unknown>} AnyObject
+ */
+
+/**
+ * Array of objects
+ * @template T
+ * @typedef {T[]} ArrayOf
+ */
+
+/**
+ * Constructor function type
+ * @template T
+ * @typedef {new (...args: any[]) => T} Constructor
  */
 
 /*
@@ -91,11 +104,11 @@ FILES
 /** 
  * list directory contents
  * @example
- * await ls('./tmp') // => []
- * await ls('./tmp', true) // => {}
- * @param  {string} [dir='./'] - directory to enumerate; default `./`
- * @param  {boolean} [objectMode=false] - return `{name: path}` instead of `[path]`; default `false`
- * @returns {Promise<(string[] | generalObject)>} `[]` or `{}` of files in folder
+ * await ls('./tmp') // => ['/absolute/path/file1.txt', '/absolute/path/file2.txt']
+ * await ls('./tmp', true) // => {'file1.txt': '/absolute/path/file1.txt', 'file2.txt': '/absolute/path/file2.txt'}
+ * @param {string} [dir='./'] - directory to enumerate; default `./`
+ * @param {boolean} [objectMode=false] - return `{name: path}` instead of `[path]`; default `false`
+ * @returns {Promise<string[] | Dictionary<string>>} array of paths or object mapping names to paths
  * @memberof files
  */
 exports.ls = async function listFiles(dir = "./", objectMode = false) {
@@ -114,9 +127,11 @@ exports.ls = async function listFiles(dir = "./", objectMode = false) {
 /**
  * remove a file or directory
  * @example
- * await rm('./myfile.txt') // => '/path/to/myfile.txt' || false
- * @param  {string} fileNameOrPath - file or path to be removed
- * @returns {Promise<(string|boolean|void)>} path or `false` if fail
+ * await rm('./myfile.txt') // => undefined (success) or throws error
+ * @param {string} fileNameOrPath - file or path to be removed
+ * @param {boolean} [log=true] - whether to log errors
+ * @param {boolean} [throws=true] - whether to throw errors or return false
+ * @returns {Promise<void | false>} undefined on success, false on failure (if throws=false)
  * @memberof files
  */
 exports.rm = async function removeFileOrFolder(fileNameOrPath, log = true, throws = true) {
@@ -144,12 +159,14 @@ exports.rm = async function removeFileOrFolder(fileNameOrPath, log = true, throw
 /**
  * create a file
  * @example
- * await touch('newfile.txt', data)  // => '/path/to/newfile.txt' || false
- * await touch('newfile.json', data, true)  // => '/path/to/newfile.json' || false
- * @param  {string} fileNameOrPath - file to create
- * @param  {string | generalObject | arrayOfObjects} [data=""] - data to write; default `""`
- * @param  {boolean} [isJson=false] - is `data` JSON; default `false`
- * @returns {Promise<(string | false)>} the name of the file
+ * await touch('newfile.txt', 'hello world')  // => '/absolute/path/to/newfile.txt'
+ * await touch('newfile.json', {foo: 'bar'}, true)  // => '/absolute/path/to/newfile.json'
+ * @param {string} fileNameOrPath - file to create
+ * @param {string | AnyObject | unknown[]} [data=""] - data to write; default `""`
+ * @param {boolean} [isJson=false] - whether to JSON.stringify the data; default `false`
+ * @param {boolean} [log=true] - whether to log errors
+ * @param {boolean} [throws=true] - whether to throw errors or return false
+ * @returns {Promise<string | false>} absolute path of created file, or false on failure
  * @memberof files
  */
 exports.touch = async function addFile(fileNameOrPath, data = "", isJson = false, log = true, throws = true) {
@@ -177,12 +194,15 @@ exports.touch = async function addFile(fileNameOrPath, data = "", isJson = false
 /**
  * load a file into memory
  * @example
- * await load('myfile.txt')  // => 'my file contents' || false
- * await load('myfile.json', true)  // => {my: "data"} || false
- * @param  {string} fileNameOrPath - file to create
- * @param  {boolean} [isJson=false] - is `data` JSON; default `false`
- * @param {string} [encoding=utf-8] - file encoring; default `utf-8`
- * @returns {Promise<(string | generalObject | arrayOfObjects | any)>} the file in memory
+ * await load('myfile.txt')  // => 'my file contents'
+ * await load('myfile.json', true)  // => {my: "data"}
+ * @template T
+ * @param {string} fileNameOrPath - file to load
+ * @param {boolean} [isJson=false] - whether to parse as JSON; default `false`
+ * @param {BufferEncoding} [encoding='utf-8'] - file encoding; default `utf-8`
+ * @param {boolean} [log=true] - whether to log errors
+ * @param {boolean} [throws=true] - whether to throw errors or return undefined
+ * @returns {Promise<string | T | undefined>} file contents as string or parsed JSON
  * @memberof files
  */
 exports.load = async function loadFile(fileNameOrPath, isJson = false, encoding = 'utf-8', log = true, throws = true) {
@@ -359,11 +379,12 @@ VALIDATION
 */
 
 /**
- * test if `string` has JSON structure
+ * test if string has valid JSON structure
  * @example
  * isJSONStr('{"foo": "bar"}') // => true
- * @param  {string} string
- * @returns {boolean}
+ * isJSONStr('not json') // => false
+ * @param {string} string - string to test
+ * @returns {boolean} true if string is valid JSON
  * @memberof validate
  */
 exports.isJSONStr = function hasJsonStructure(string) {
@@ -379,11 +400,12 @@ exports.isJSONStr = function hasJsonStructure(string) {
 };
 
 /**
- * test if `data` can be stringified as JSON
+ * test if data can be stringified as JSON
  * @example
  * isJSON({foo: "bar"}) // => true
- * @param  {string | JSON} data
- * @returns {boolean}
+ * isJSON(function() {}) // => false
+ * @param {unknown} data - data to test
+ * @returns {boolean} true if data can be JSON.stringify'd
  * @memberof validate
  */
 exports.isJSON = function canBeStringified(data) {
@@ -410,12 +432,15 @@ exports.isJSON = function canBeStringified(data) {
 };
 
 /**
- * check if a `type` matches a `value`
+ * check if a value matches a specific type
  * @example
  * is(Number, 42) // => true
- * @param  {'string' | any} type - a native type like `Number` or `Boolean`
- * @param  {any} val - any value to check
- * @returns {boolean}
+ * is('string', 'hello') // => true
+ * is(Array, [1,2,3]) // => true
+ * @template T
+ * @param {string | Constructor<T>} type - primitive type string or constructor function
+ * @param {unknown} val - value to check
+ * @returns {val is T} true if value matches the type
  * @memberof validate
  */
 exports.is = function isPrimitiveType(type, val) {
@@ -426,11 +451,13 @@ exports.is = function isPrimitiveType(type, val) {
 };
 
 /**
- * check if a `val` is `null` or `undefined`
+ * check if a value is null or undefined
  * @example
  * isNil(null) // => true
- * @param  {any} val - value to check
- * @returns {boolean}
+ * isNil(undefined) // => true
+ * isNil(0) // => false
+ * @param {unknown} val - value to check
+ * @returns {val is null | undefined} true if value is null or undefined
  * @memberof validate
  */
 exports.isNil = function isNullOrUndefined(val) {
@@ -438,12 +465,13 @@ exports.isNil = function isNullOrUndefined(val) {
 };
 
 /**
- * check if `a` and `b` have similar shape (keys), recursively
+ * check if two objects have similar shape (same keys), recursively
  * @example
- * similar({a: "foo"}, {a: "bar"}) // => true
- * @param {generalObject} o1 - first obj
- * @param {generalObject} o2 - second obj
- * @returns {boolean} do they have the same shape?
+ * similar({a: "foo", b: 1}, {a: "bar", b: 2}) // => true
+ * similar({a: "foo"}, {a: "bar", b: 2}) // => false
+ * @param {AnyObject | null} o1 - first object
+ * @param {AnyObject | null} o2 - second object
+ * @returns {boolean} true if objects have the same key structure
  * @memberof validate
  */
 exports.similar = function deepSameKeys(o1, o2) {
@@ -523,8 +551,16 @@ exports.parseGCSUri = function (uri) {
 	};
 };
 
-/** turns a string into a boolean
- * @param  {string} string
+/**
+ * converts various inputs to boolean values
+ * @example
+ * toBool('true') // => true
+ * toBool('yes') // => true  
+ * toBool('1') // => true
+ * toBool('false') // => false
+ * toBool(0) // => false
+ * @param {unknown} input - value to convert to boolean
+ * @returns {boolean} boolean representation of input
  * @memberof validate
  */
 exports.toBool = function stringToBoolean(string) {
@@ -956,12 +992,13 @@ OBJECTS
 */
 
 /**
- * rename object keys with a mapping object
+ * rename object keys using a mapping object
  * @example
- * rnKeys({foo: 'bar'}, {foo: 'baz'}) // => {baz: "bar"}
- * @param  {generalObject} obj - object to rename
- * @param  {generalObject} newKeys - map of form `{oldKey: newKey}`
- * @returns {generalObject} new object with renamed keys
+ * rnKeys({foo: 'bar', baz: 'qux'}, {foo: 'newFoo'}) // => {newFoo: 'bar', baz: 'qux'}
+ * @template T
+ * @param {Record<string, T>} obj - object to rename keys for
+ * @param {Dictionary<string>} newKeys - mapping of old key to new key
+ * @returns {Record<string, T>} new object with renamed keys
  * @memberof objects
  */
 exports.rnKeys = function renameObjectKeys(obj, newKeys) {
@@ -1498,6 +1535,164 @@ exports.deepFlat = function deepFlatten(arr) {
  */
 exports.strToArr = function extractWords(str, pattern = /[^a-zA-Z-]+/) {
 	return str.split(pattern).filter(Boolean);
+};
+
+/**
+ * group array of objects by a key or function
+ * @example
+ * groupBy([{name: 'John', age: 25}, {name: 'Jane', age: 25}], 'age')
+ * // => {'25': [{name: 'John', age: 25}, {name: 'Jane', age: 25}]}
+ * @template T
+ * @param {T[]} array - array to group
+ * @param {string | ((item: T) => string | number)} keyOrFn - key name or function to group by
+ * @returns {Dictionary<T[]>} object with grouped arrays
+ * @memberof arrays
+ */
+exports.groupBy = function groupArrayByKey(array, keyOrFn) {
+	const getKey = typeof keyOrFn === 'function' ? keyOrFn : (item) => item[keyOrFn];
+	
+	return array.reduce((groups, item) => {
+		const key = String(getKey(item));
+		groups[key] = groups[key] || [];
+		groups[key].push(item);
+		return groups;
+	}, {});
+};
+
+/**
+ * convert grouped object back to flat array
+ * @example
+ * ungroupBy({'25': [{name: 'John'}, {name: 'Jane'}]}) 
+ * // => [{name: 'John'}, {name: 'Jane'}]
+ * @template T
+ * @param {Dictionary<T[]>} groupedObj - grouped object to flatten
+ * @returns {T[]} flattened array
+ * @memberof arrays
+ */
+exports.ungroupBy = function flattenGroupedObject(groupedObj) {
+	return Object.values(groupedObj).flat();
+};
+
+/**
+ * create an index of array items by a key
+ * @example
+ * keyBy([{id: 1, name: 'John'}, {id: 2, name: 'Jane'}], 'id')
+ * // => {'1': {id: 1, name: 'John'}, '2': {id: 2, name: 'Jane'}}
+ * @template T
+ * @param {T[]} array - array to index
+ * @param {string | ((item: T) => string | number)} keyOrFn - key name or function to index by
+ * @returns {Dictionary<T>} object with items indexed by key
+ * @memberof arrays
+ */
+exports.keyBy = function indexArrayByKey(array, keyOrFn) {
+	const getKey = typeof keyOrFn === 'function' ? keyOrFn : (item) => item[keyOrFn];
+	
+	return array.reduce((index, item) => {
+		const key = String(getKey(item));
+		index[key] = item;
+		return index;
+	}, {});
+};
+
+/**
+ * partition array into two arrays based on predicate
+ * @example
+ * partition([1,2,3,4,5], x => x % 2 === 0) // => [[2,4], [1,3,5]]
+ * @template T
+ * @param {T[]} array - array to partition
+ * @param {(item: T, index: number) => boolean} predicate - function to test each item
+ * @returns {[T[], T[]]} tuple of [matching, nonMatching] arrays
+ * @memberof arrays
+ */
+exports.partition = function partitionArray(array, predicate) {
+	const matching = [];
+	const nonMatching = [];
+	
+	array.forEach((item, index) => {
+		if (predicate(item, index)) {
+			matching.push(item);
+		} else {
+			nonMatching.push(item);
+		}
+	});
+	
+	return [matching, nonMatching];
+};
+
+/**
+ * pick specified properties from an object
+ * @example
+ * pick({a: 1, b: 2, c: 3}, ['a', 'c']) // => {a: 1, c: 3}
+ * @template T, K
+ * @param {T} obj - object to pick from
+ * @param {K[]} keys - array of keys to pick
+ * @returns {Pick<T, K>} new object with only specified keys
+ * @memberof objects
+ */
+exports.pick = function pickObjectProperties(obj, keys) {
+	const result = {};
+	keys.forEach(key => {
+		if (key in obj) {
+			result[key] = obj[key];
+		}
+	});
+	return result;
+};
+
+/**
+ * omit specified properties from an object
+ * @example
+ * omit({a: 1, b: 2, c: 3}, ['b']) // => {a: 1, c: 3}
+ * @template T, K
+ * @param {T} obj - object to omit from
+ * @param {K[]} keys - array of keys to omit
+ * @returns {Omit<T, K>} new object without specified keys
+ * @memberof objects
+ */
+exports.omit = function omitObjectProperties(obj, keys) {
+	const result = { ...obj };
+	keys.forEach(key => {
+		delete result[key];
+	});
+	return result;
+};
+
+/**
+ * debounce function execution
+ * @example
+ * const debouncedSave = debounce(saveData, 500);
+ * @param {Function} func - function to debounce
+ * @param {number} wait - milliseconds to wait
+ * @param {boolean} [immediate=false] - trigger on leading edge instead of trailing
+ * @returns {Function} debounced function
+ * @memberof functions
+ */
+exports.debounce = function debounceFunction(func, wait, immediate = false) {
+	let timeout;
+	return function executedFunction(...args) {
+		const later = () => {
+			timeout = null;
+			if (!immediate) func.apply(this, args);
+		};
+		const callNow = immediate && !timeout;
+		clearTimeout(timeout);
+		timeout = setTimeout(later, wait);
+		if (callNow) func.apply(this, args);
+	};
+};
+
+/**
+ * pipe functions left-to-right (opposite of compose)
+ * @example
+ * pipe(add1, multiply2, subtract3)(5) // => 9 (((5+1)*2)-3)
+ * @param {...Function} functions - functions to pipe
+ * @returns {Function} piped function
+ * @memberof functions
+ */
+exports.pipe = function pipeFunctions(...functions) {
+	return function piped(value) {
+		return functions.reduce((acc, fn) => fn(acc), value);
+	};
 };
 
 /*
@@ -2200,12 +2395,47 @@ exports.objects = {
 	removeNulls: exports.removeNulls,
 	flatten: exports.flatten,
 	objMap: exports.objMap,
-	getKey: exports.getKey
-
+	getKey: exports.getKey,
+	pick: exports.pick,
+	omit: exports.omit
 };
-exports.arrays = {};
-exports.functions = {};
-exports.logging = {};
+exports.arrays = {
+	dupeVals: exports.dupeVals,
+	dedupe: exports.dedupe,
+	dedupeVal: exports.dedupeVal,
+	chunk: exports.chunk,
+	shuffle: exports.shuffle,
+	range: exports.range,
+	deepFlat: exports.deepFlat,
+	strToArr: exports.strToArr,
+	groupBy: exports.groupBy,
+	ungroupBy: exports.ungroupBy,
+	keyBy: exports.keyBy,
+	partition: exports.partition
+};
+exports.functions = {
+	attempt: exports.attempt,
+	times: exports.times,
+	throttle: exports.throttle,
+	debounce: exports.debounce,
+	compose: exports.compose,
+	pipe: exports.pipe,
+	id: exports.id
+};
+exports.logging = {
+	sLog: exports.sLog,
+	cLog: exports.cLog,
+	log: exports.log,
+	progress: exports.progress,
+	time: exports.time,
+	quickTime: exports.quickTime,
+	sleep: exports.sleep,
+	clip: exports.clip,
+	prettyTime: exports.prettyTime,
+	obfuscate: exports.obfuscate,
+	tracker: exports.tracker,
+	logger: exports.logger
+};
 
 
 // ripped out of underscore; should not be called directly
