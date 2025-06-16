@@ -25,7 +25,7 @@
     "prune": "rm -rf ./tmp/*",
     "docs": "node generate-docs.js",
     "types": "npx -p typescript tsc",
-    "build": "npm run build:esm && npm run build:types",
+    "build": "npm run build:esm && npm run types",
     "build:esm": "node scripts/build-esm.js"
   },
   "repository": {
