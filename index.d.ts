@@ -1,4 +1,3 @@
-// TypeScript declarations for ak-tools
 export function ls(dir?: string, objectMode?: boolean): Promise<string[] | Dictionary<string>>;
 export function rm(fileNameOrPath: string, log?: boolean, throws?: boolean): Promise<void | false>;
 export function touch(fileNameOrPath: string, data?: string | AnyObject | unknown[], isJson?: boolean, log?: boolean, throws?: boolean): Promise<string | false>;
@@ -62,8 +61,8 @@ export function groupBy<T>(array: T[], keyOrFn: string | ((item: T) => string | 
 export function ungroupBy<T>(groupedObj: Dictionary<T[]>): T[];
 export function keyBy<T>(array: T[], keyOrFn: string | ((item: T) => string | number)): Dictionary<T>;
 export function partition<T>(array: T[], predicate: (item: T, index: number) => boolean): [T[], T[]];
-export function pick<T, K extends keyof T>(obj: T, keys: K[]): Pick<T, K>;
-export function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K>;
+export function pick<T, K>(obj: T, keys: K[]): Pick<T, K>;
+export function omit<T, K>(obj: T, keys: K[]): Omit<T, K>;
 export function debounce(func: Function, wait: number, immediate?: boolean): Function;
 export function pipe(...functions: Function[]): Function;
 export function attempt(fn: Function, ...args: any[]): Promise<any>;
@@ -86,37 +85,179 @@ export function tracker(app?: string, token?: string, distinct_id?: string): Fun
 export function sleep(ms: number): Promise<any>;
 export function clip(data: any): void;
 export function prettyTime(milliseconds: number): string;
-
-// Namespace exports
 export namespace files {
-    export { ls, rm, touch, load, mkdir };
+    import ls = ls;
+    export { ls };
+    import rm = rm;
+    export { rm };
+    import touch = touch;
+    export { touch };
+    import load = load;
+    export { load };
+    import mkdir = mkdir;
+    export { mkdir };
 }
 export namespace validate {
-    export { isJSONStr, isJSON, is, isNil, similar };
+    import isJSONStr = isJSONStr;
+    export { isJSONStr };
+    import isJSON = isJSON;
+    export { isJSON };
+    import is = is;
+    export { is };
+    import isNil = isNil;
+    export { isNil };
+    import similar = similar;
+    export { similar };
 }
 export namespace display {
-    export { comma, truncate, bytesHuman, json, stripHTML, multiReplace, replaceAll, toCSV };
+    import comma = comma;
+    export { comma };
+    import truncate = truncate;
+    export { truncate };
+    import bytesHuman = bytesHuman;
+    export { bytesHuman };
+    import json = json;
+    export { json };
+    import stripHTML = stripHTML;
+    export { stripHTML };
+    import multiReplace = multiReplace;
+    export { multiReplace };
+    import replaceAll = replaceAll;
+    export { replaceAll };
+    import toCSV = toCSV;
+    export { toCSV };
 }
 export namespace maths {
-    export { rand, avg, calcSize, round, uid, uuid, md5, makeName as randName };
+    import rand = rand;
+    export { rand };
+    import avg = avg;
+    export { avg };
+    import calcSize = calcSize;
+    export { calcSize };
+    import round = round;
+    export { round };
+    import uid = uid;
+    export { uid };
+    import uuid = uuid;
+    export { uuid };
+    import md5 = md5;
+    export { md5 };
+    import randName = makeName;
+    export { randName };
 }
 export namespace objects {
-    export { rnKeys, rnVals, objClean as cleanObj, objDefault, objMatch, objClone as clone, objTypecast as typecastInt, objAwait as awaitObj, removeNulls, flatten, objMap, getKey, pick, omit };
+    import rnKeys = rnKeys;
+    export { rnKeys };
+    import rnVals = rnVals;
+    export { rnVals };
+    import objClean = cleanObj;
+    export { objClean };
+    import objDefault = objDefault;
+    export { objDefault };
+    import objMatch = objMatch;
+    export { objMatch };
+    import objClone = clone;
+    export { objClone };
+    import objTypecast = typecastInt;
+    export { objTypecast };
+    import objAwait = awaitObj;
+    export { objAwait };
+    import removeNulls = removeNulls;
+    export { removeNulls };
+    import flatten = flatten;
+    export { flatten };
+    import objMap = objMap;
+    export { objMap };
+    import getKey = getKey;
+    export { getKey };
+    import pick = pick;
+    export { pick };
+    import omit = omit;
+    export { omit };
 }
 export namespace arrays {
-    export { dupeVals, dedupe, dedupeVal, chunk, shuffle, range, deepFlat, strToArr, groupBy, ungroupBy, keyBy, partition };
+    import dupeVals = dupeVals;
+    export { dupeVals };
+    import dedupe = dedupe;
+    export { dedupe };
+    import dedupeVal = dedupeVal;
+    export { dedupeVal };
+    import chunk = chunk;
+    export { chunk };
+    import shuffle = shuffle;
+    export { shuffle };
+    import range = range;
+    export { range };
+    import deepFlat = deepFlat;
+    export { deepFlat };
+    import strToArr = strToArr;
+    export { strToArr };
+    import groupBy = groupBy;
+    export { groupBy };
+    import ungroupBy = ungroupBy;
+    export { ungroupBy };
+    import keyBy = keyBy;
+    export { keyBy };
+    import partition = partition;
+    export { partition };
 }
 export namespace functions {
-    export { attempt, times, throttle, debounce, compose, pipe, id };
+    import attempt = attempt;
+    export { attempt };
+    import times = times;
+    export { times };
+    import throttle = throttle;
+    export { throttle };
+    import debounce = debounce;
+    export { debounce };
+    import compose = compose;
+    export { compose };
+    import pipe = pipe;
+    export { pipe };
+    import id = id;
+    export { id };
 }
 export namespace logging {
-    export { sLog, cLog, log, progress, time as timer, quickTime, sleep, clip as copy, prettyTime, obfuscate, tracker, logger };
+    import sLog = sLog;
+    export { sLog };
+    import cLog = cLog;
+    export { cLog };
+    import log = log;
+    export { log };
+    import progress = progress;
+    export { progress };
+    import time = timer;
+    export { time };
+    import quickTime = quickTime;
+    export { quickTime };
+    import sleep = sleep;
+    export { sleep };
+    import clip = copy;
+    export { clip };
+    import prettyTime = prettyTime;
+    export { prettyTime };
+    import obfuscate = obfuscate;
+    export { obfuscate };
+    import tracker = tracker;
+    export { tracker };
+    import logger = logger;
+    export { logger };
 }
-
-// Type definitions
+/**
+ * Generic object with string keys
+ */
 export type Dictionary<T> = Record<string, T>;
+/**
+ * Generic object with any value types
+ */
 export type AnyObject = Record<string, unknown>;
+/**
+ * Array of objects
+ */
 export type ArrayOf<T> = T[];
+/**
+ * Constructor function type
+ */
 export type Constructor<T> = new (...args: any[]) => T;
 export type GCSUri = {
     uri: string;
@@ -124,15 +265,12 @@ export type GCSUri = {
     file: string;
 };
 export type filterCallback = (keyOrValue: string) => any;
-export type generalObject = Record<string, any>;
-
 declare class StructuredLogger {
     constructor(initialProps?: {});
     initialProps: {};
     createChild(additionalProps?: {}): StructuredLogger;
     log(message?: string, data?: {}, severity?: string): void;
 }
-
 declare class Timer {
     constructor(label: any);
     label: any;
@@ -154,6 +292,5 @@ declare class Timer {
     };
     prettyTime(milliseconds: any): string;
 }
-
-// Aliases
+declare namespace ___Users_ak_code_ak_tools_index_ { }
 export { objFilter as objFilt, clip as copy, objClean as cleanObj, objClone as clone, objAwait as awaitObj, objTypecast as typecastInt, time as timer };

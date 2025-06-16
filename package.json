@@ -23,7 +23,7 @@
     "post": "npm publish",
     "dev": "nodemon --inspect scratch.js",
     "prune": "rm -rf ./tmp/*",
-    "docs": "node docgen.js",
+    "docs": "node generate-docs.js",
     "types": "npx -p typescript tsc",
     "build": "npm run build:esm && npm run build:types",
     "build:esm": "node scripts/build-esm.js",
