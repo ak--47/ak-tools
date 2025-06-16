@@ -1,23 +1,54 @@
 {
   "name": "ak-tools",
-  "version": "1.0.7",
-  "description": "AK's collections of useful things...",
+  "version": "1.0.8",
+  "description": "AK's collections of useful things... a comprehensive utility toolbelt for JavaScript/TypeScript projects",
   "main": "index.js",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./esm/index.mjs",
+      "require": "./index.js"
+    }
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "esm/",
+    "README.md"
+  ],
   "scripts": {
     "test": "jest --watch",
+    "test:ci": "jest --no-watch",
     "post": "npm publish",
     "dev": "nodemon --inspect scratch.js",
     "prune": "rm -rf ./tmp/*",
-	"docs": "node docgen.js",
-	"types": "npx -p typescript tsc"
+    "docs": "node generate-docs.js",
+    "types": "npx -p typescript tsc",
+    "build": "npm run build:esm && npm run build:types",
+    "build:esm": "node scripts/build-esm.js",
+    "build:types": "echo 'TypeScript declarations already exist at index.d.ts'"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ak--47/ak-tools.git"
   },
   "type": "commonjs",
-  "keywords": ["node.js", "toolbelt", "utilities", "ak"],
-  "author": "",
+  "keywords": [
+    "utilities", 
+    "toolbelt", 
+    "functional", 
+    "typescript", 
+    "node.js", 
+    "browser",
+    "arrays",
+    "objects", 
+    "validation",
+    "files",
+    "logging",
+    "maths"
+  ],
+  "author": "AK <ak@mixpanel.com>",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/ak--47/ak-tools/issues"
