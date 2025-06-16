@@ -1,6 +1,6 @@
 {
   "name": "ak-tools",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "description": "AK's collections of useful things... a comprehensive utility toolbelt for JavaScript/TypeScript projects",
   "main": "index.js",
   "types": "index.d.ts",
