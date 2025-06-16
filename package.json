@@ -1,6 +1,6 @@
 {
   "name": "ak-tools",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "AK's collections of useful things... a comprehensive utility toolbelt for JavaScript/TypeScript projects",
   "main": "index.js",
   "types": "index.d.ts",
@@ -26,8 +26,7 @@
     "docs": "node generate-docs.js",
     "types": "npx -p typescript tsc",
     "build": "npm run build:esm && npm run build:types",
-    "build:esm": "node scripts/build-esm.js",
-    "build:types": "echo 'TypeScript declarations already exist at index.d.ts'"
+    "build:esm": "node scripts/build-esm.js"
   },
   "repository": {
     "type": "git",

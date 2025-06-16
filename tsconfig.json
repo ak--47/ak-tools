@@ -5,8 +5,9 @@
 		"emitDeclarationOnly": true,
 		"allowJs": true,
 		"outDir": ".",
-		"sourceMap": true
-
+		"sourceMap": true,
+		"skipLibCheck": true,
+		"noEmitOnError": false
 	},
 	"files": ["./index.js"]
 }
