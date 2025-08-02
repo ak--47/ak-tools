@@ -27,7 +27,8 @@
     "typecheck": "tsc --noEmit",
     "types": "tsc",
     "build": "npm run clean && npm run build:esm && npm run types",
-    "build:esm": "node scripts/build-esm.js"
+    "build:esm": "node scripts/build-esm.js",
+	"post": "npm publish --access public"
   },
   "repository": {
     "type": "git",
