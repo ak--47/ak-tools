@@ -88,14 +88,6 @@ export const clone = utils.clone;
 export const awaitObj = utils.awaitObj;
 export const typecastInt = utils.typecastInt;
 export const timer = utils.timer;
-export const files = utils.files;
-export const validate = utils.validate;
-export const display = utils.display;
-export const maths = utils.maths;
-export const objects = utils.objects;
-export const arrays = utils.arrays;
-export const functions = utils.functions;
-export const logging = utils.logging;
 
 // Export namespaces
 export const files = utils.files;
